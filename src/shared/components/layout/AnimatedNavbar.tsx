@@ -36,7 +36,7 @@ export function AnimatedNavbar() {
               className={({ isActive }) =>
                 cn(
                   'rounded-full border border-transparent px-3 py-1.5 transition',
-                  isActive ? 'border-cyan/50 bg-cyan/10 text-cyan' : 'text-mist hover:border-white/25 hover:text-pearl',
+                  isActive ? 'border-cyan/50 bg-rose-50 text-cyan' : 'text-mist hover:border-rose-200 hover:text-pearl',
                 )
               }
             >
@@ -53,7 +53,7 @@ export function AnimatedNavbar() {
               className={({ isActive }) =>
                 cn(
                   'rounded-full border border-transparent px-3 py-1.5 transition',
-                  isActive ? 'border-cyan/50 bg-cyan/10 text-cyan' : 'text-mist hover:border-white/25 hover:text-pearl',
+                  isActive ? 'border-cyan/50 bg-rose-50 text-cyan' : 'text-mist hover:border-rose-200 hover:text-pearl',
                 )
               }
             >

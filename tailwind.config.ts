@@ -5,24 +5,24 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        night: '#06070B',
-        velvet: '#0D111A',
-        mist: '#95A7C3',
-        pearl: '#F3EEE7',
-        cyan: '#6ED9FF',
-        amber: '#F6B76A',
+        night: '#3F2A33',
+        velvet: '#FFF8FA',
+        mist: '#8C6E78',
+        pearl: '#432C36',
+        cyan: '#E8A7B8',
+        amber: '#D8B07A',
       },
       fontFamily: {
         display: ['"Plus Jakarta Sans"', '"Avenir Next"', 'sans-serif'],
         body: ['"DM Sans"', '"SF Pro Display"', 'sans-serif'],
       },
       boxShadow: {
-        glow: '0 0 0 1px rgba(110, 217, 255, 0.18), 0 24px 120px rgba(12, 24, 56, 0.55)',
-        card: '0 18px 60px rgba(0, 0, 0, 0.4)',
+        glow: '0 0 0 1px rgba(232, 167, 184, 0.22), 0 24px 90px rgba(124, 70, 89, 0.14)',
+        card: '0 20px 60px rgba(132, 82, 101, 0.12)',
       },
       backgroundImage: {
-        'hero-gradient': 'radial-gradient(circle at 20% 20%, rgba(110, 217, 255, 0.18), transparent 38%), radial-gradient(circle at 80% 15%, rgba(246, 183, 106, 0.2), transparent 32%), linear-gradient(180deg, #080B13 0%, #06070B 100%)',
-        glass: 'linear-gradient(145deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.03))',
+        'hero-gradient': 'radial-gradient(circle at 18% 12%, rgba(232, 167, 184, 0.22), transparent 34%), radial-gradient(circle at 82% 16%, rgba(216, 176, 122, 0.18), transparent 28%), radial-gradient(circle at 50% 108%, rgba(255, 214, 225, 0.42), transparent 30%), linear-gradient(180deg, #FFFDFE 0%, #FFF7FA 52%, #FFFFFF 100%)',
+        glass: 'linear-gradient(145deg, rgba(255, 255, 255, 0.78), rgba(255, 244, 247, 0.5))',
       },
       keyframes: {
         float: {

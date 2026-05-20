@@ -22,7 +22,7 @@ export function ProductCard({ product }: ProductCardProps) {
         <p className="text-xs uppercase tracking-[0.2em] text-cyan">{product.category}</p>
         <h3 className="font-display text-xl font-semibold text-pearl">{product.name}</h3>
         <p className="text-sm text-mist">{product.description}</p>
-        <p className="rounded-2xl border border-white/15 bg-white/5 p-3 text-xs text-pearl/90">{product.reason}</p>
+        <p className="rounded-2xl border border-rose-200/70 bg-rose-50/80 p-3 text-xs text-pearl/90">{product.reason}</p>
         <a href={product.externalLink} target="_blank" rel="noreferrer" className="mt-auto">
           <Button variant="ghost" className="w-full justify-between">
             View Product

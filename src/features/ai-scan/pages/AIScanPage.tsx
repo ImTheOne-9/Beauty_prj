@@ -117,7 +117,7 @@ export default function AIScanPage() {
           <h1 className="font-display text-4xl text-pearl">Skin Intelligence Capture</h1>
           <p className="text-sm text-mist">{statusText}</p>
 
-          <label className="block cursor-pointer rounded-2xl border border-dashed border-white/20 bg-white/5 p-5 text-sm text-mist transition hover:border-cyan/60">
+          <label className="block cursor-pointer rounded-2xl border border-dashed border-rose-200/80 bg-white/80 p-5 text-sm text-mist transition hover:border-cyan/60">
             Upload Selfie
             <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
           </label>
@@ -172,7 +172,7 @@ export default function AIScanPage() {
         </Card>
 
         <Card className="p-6">
-          <div className="mb-4 h-80 overflow-hidden rounded-3xl border border-white/15 bg-velvet">
+          <div className="mb-4 h-80 overflow-hidden rounded-3xl border border-rose-200/70 bg-velvet">
             {webcamOpen ? (
               <video ref={videoRef} autoPlay playsInline className="h-full w-full object-cover" />
             ) : imagePreview ? (

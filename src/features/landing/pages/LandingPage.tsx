@@ -93,7 +93,7 @@ export default function LandingPage() {
         <div className="grid gap-4 md:grid-cols-3">
           {['Upload Selfie', 'AI Skin Scan', 'Personalized Products'].map((step, index) => (
             <Card key={step} className="relative overflow-hidden p-6">
-              <p className="font-display text-4xl text-white/20">0{index + 1}</p>
+              <p className="font-display text-4xl text-rose-200/80">0{index + 1}</p>
               <h3 className="mt-4 font-display text-xl text-pearl">{step}</h3>
               <p className="mt-2 text-sm text-mist">Engineered with motion-forward interactions and startup-grade clarity.</p>
             </Card>
