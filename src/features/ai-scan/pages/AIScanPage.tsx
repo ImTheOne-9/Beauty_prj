@@ -13,7 +13,6 @@ import { persistScan } from '@/features/ai-scan/services/scan-persistence-servic
 import { useUIStore } from '@/store/ui-store'
 import { useRecommendations } from '@/features/recommendations/hooks/useRecommendations'
 import { ScanProductGrid } from '@/shared/components/ui/ScanProductGrid'
-import { mockProducts } from '@/shared/data/mock-products'
 import { type ProductRecommendation, type ScanResult } from '@/shared/lib/types'
 
 const scanMessages = [
@@ -117,7 +116,7 @@ export default function AIScanPage() {
   const mediaStreamRef = useRef<MediaStream | null>(null)
 
   const { data: recommendedProducts, isLoading: loadingProducts } = useRecommendations()
-  const displayProducts = recommendedProducts && recommendedProducts.length > 0 ? recommendedProducts : mockProducts
+  const displayProducts = recommendedProducts ?? []
   const rankedProducts = useMemo(() => rankRecommendations(displayProducts, scanResult), [displayProducts, scanResult])
   const recommendationSummary = useMemo(() => buildRecommendationSummary(scanResult), [scanResult])
 
@@ -410,6 +409,10 @@ export default function AIScanPage() {
               {loadingProducts ? (
                 <div className="flex h-32 items-center justify-center text-sm font-semibold text-mist">
                   Preparing matching products...
+                </div>
+              ) : rankedProducts.length === 0 ? (
+                <div className="flex h-32 items-center justify-center text-sm font-semibold text-mist">
+                  No matching products are available yet. Add products in the admin dashboard.
                 </div>
               ) : (
                 <ScanProductGrid products={rankedProducts.slice(0, 6)} />

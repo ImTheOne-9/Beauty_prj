@@ -4,7 +4,6 @@ import { Card } from '@/shared/components/ui/Card'
 import { Loader } from '@/shared/components/ui/Loader'
 import { RecommendationGrid } from '@/shared/components/ui/RecommendationGrid'
 import { mockScanResult } from '@/shared/data/mock-scan'
-import { mockProducts } from '@/shared/data/mock-products'
 import { useRecommendations } from '@/features/recommendations/hooks/useRecommendations'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useScanHistory } from '@/features/recommendations/hooks/useScanHistory'
@@ -30,7 +29,7 @@ export default function RecommendationsPage() {
     [],
   )
   const productsList = useMemo(() => {
-    const products: ProductRecommendation[] = (data && data.length ? data : mockProducts).map((p) => ({ ...p }))
+    const products: ProductRecommendation[] = (data ?? []).map((p) => ({ ...p }))
     products.forEach((p) => {
       if (p.matchScore == null) {
         const ratingScore = (p.rating ?? 4) * 10
@@ -99,7 +98,13 @@ export default function RecommendationsPage() {
         </div>
 
         <div className="mt-6">
-          <RecommendationGrid products={productsList} ctaVariant={ctaVariant} />
+          {productsList.length === 0 ? (
+            <div className="rounded-[1.5rem] border border-rose-100/50 bg-[linear-gradient(180deg,rgba(255,250,250,0.94),rgba(255,245,246,0.86))] p-8 text-center text-sm text-mist">
+              Không có sản phẩm phù hợp để hiển thị. Vui lòng thêm sản phẩm từ trang quản trị.
+            </div>
+          ) : (
+            <RecommendationGrid products={productsList} ctaVariant={ctaVariant} />
+          )}
         </div>
         {techView ? (
           <div className="mt-4 rounded-lg border border-dashed border-rose-100 p-3 text-xs font-mono text-mist/80">
