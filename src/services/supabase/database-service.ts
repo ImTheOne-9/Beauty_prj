@@ -16,6 +16,7 @@ export type AdminProductRecord = {
   brand: string | null
   category_id: string
   created_at: string
+  price: number | null
 }
 
 export type AdminScanRecord = {

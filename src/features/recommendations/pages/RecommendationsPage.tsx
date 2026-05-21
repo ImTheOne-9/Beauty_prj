@@ -108,7 +108,7 @@ export default function RecommendationsPage() {
               No scans yet. Upload a selfie to get your first score.
             </div>
           ) : (
-            scanHistoryItems.slice(0, 4).map((scan) => (
+            scanHistoryItems.slice(0, 4).map((scan:any) => (
               <div key={scan.id} className="rounded-2xl border border-rose-100 bg-white/80 p-4">
                 <div className="flex items-center justify-between">
                   <p className="text-xs uppercase tracking-[0.24em] text-rose-500">Scan {String(scan.id).slice(0, 8)}</p>
