@@ -1,9 +1,10 @@
 import { Sparkles } from 'lucide-react'
 import { motion } from 'framer-motion'
-import { NavLink } from 'react-router-dom'
+import { NavLink, useNavigate } from 'react-router-dom'
 import { cn } from '@/shared/lib/cn'
 import { Button } from '@/shared/components/ui/Button'
 import { useAuth } from '@/features/auth/hooks/useAuth'
+import { useToast } from '@/shared/hooks/useToast'
 
 const navItems = [
   { to: '/', label: 'Home' },
@@ -11,10 +12,25 @@ const navItems = [
   { to: '/recommendations', label: 'Recommendations' },
   { to: '/products', label: 'Products' },
   { to: '/dashboard', label: 'Dashboard' },
+  { to: '/profile', label: 'Profile' },
 ]
 
 export function AnimatedNavbar() {
   const { user, signOut, isAdmin } = useAuth()
+  const navigate = useNavigate()
+
+  const toast = useToast()
+
+  const handleSignOut = async () => {
+    try {
+      await signOut()
+      toast.success('Signed out')
+      navigate('/auth')
+    } catch (error) {
+      console.error('Sign out failed', error)
+      toast.error('Sign out failed')
+    }
+  }
 
   const visibleNavItems = isAdmin
     ? [...navItems, { to: '/admin', label: 'Admin' }]
@@ -48,7 +64,7 @@ export function AnimatedNavbar() {
             </NavLink>
           ))}
           {user ? (
-            <Button variant="ghost" size="sm" onClick={() => void signOut()}>
+            <Button variant="ghost" size="sm" type="button" onClick={handleSignOut}>
               Sign Out
             </Button>
           ) : (

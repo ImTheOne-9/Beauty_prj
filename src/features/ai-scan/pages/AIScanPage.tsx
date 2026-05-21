@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import type { ChangeEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
+import { useToast } from '@/shared/hooks/useToast'
 import { AIResultCard } from '@/shared/components/ui/AIResultCard'
 import { Button } from '@/shared/components/ui/Button'
 import { Card } from '@/shared/components/ui/Card'
@@ -128,17 +129,26 @@ export default function AIScanPage() {
   const quotaByPlan: Record<string, number> = {
     free: 2,
     premium: 10,
+    pro: 25,
   }
   const maxFreeScans = quotaByPlan[plan] ?? quotaByPlan.free
   const scansUsed = scanHistoryQuery.data?.length ?? 0
   const canScan = scansUsed < maxFreeScans
   const remainingFreeScans = Math.max(0, maxFreeScans - scansUsed)
 
+  const toast = useToast()
+
   const persistMutation = useMutation({
     mutationFn: async () => {
       if (!scanResult) return null
       const userId = user?.id ?? ''
       return persistScan(userId, scanResult)
+    },
+    onSuccess: () => {
+      toast.success('Scan saved')
+    },
+    onError: () => {
+      toast.error('Save failed')
     },
   })
 
@@ -348,9 +358,7 @@ export default function AIScanPage() {
                         View Full Recommendations →
                       </Button>
                     </Link>
-                    <p className="text-[10px] text-mist">
-                      {persistMutation.isPending ? 'Saving...' : persistMutation.error ? 'Save failed.' : 'Scan saved ✓'}
-                    </p>
+                    <p className="text-[10px] text-mist">{persistMutation.isPending ? 'Saving...' : null}</p>
                   </div>
                 ) : null}
               </div>

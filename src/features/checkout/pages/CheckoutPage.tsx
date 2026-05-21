@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom'
 import { Check } from 'lucide-react'
 import { Button } from '@/shared/components/ui/Button'
+import { useAuth } from '@/features/auth/hooks/useAuth'
+import { setSubscriptionTier } from '@/shared/lib/subscription'
+import { useToast } from '@/shared/hooks/useToast'
 
 const planCards = [
   {
@@ -40,6 +43,16 @@ const planCards = [
 ]
 
 export default function CheckoutPage() {
+  const { user, subscriptionTier } = useAuth()
+  const toast = useToast()
+
+  const activePlan = subscriptionTier?.toLowerCase() || 'free'
+  const handleSelectPlan = (planId: string) => {
+    const userId = user?.id ?? 'guest'
+    setSubscriptionTier(userId, planId)
+    toast.success(`Plan updated: ${planId}`)
+  }
+
   return (
     <section className="section-shell pb-16 pt-6">
       <div className="relative mx-auto max-w-6xl space-y-10">
@@ -50,9 +63,7 @@ export default function CheckoutPage() {
           <h1 className="mt-3 font-display text-4xl text-slate-900 md:text-5xl">
             Choose a scan plan for your AI journey
           </h1>
-          <p className="mt-4 max-w-2xl text-sm text-slate-600">
-            Flexible options for individuals and teams with more scans, deeper insights, and longer history.
-          </p>
+          <p className="mt-4 max-w-2xl text-sm text-slate-600">Flexible options for individuals and teams with more scans, deeper insights, and longer history.</p>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3 lg:gap-8">
@@ -70,7 +81,12 @@ export default function CheckoutPage() {
                 <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-600">
                   {plan.badge}
                 </span>
-                {plan.highlight ? (
+              {/* status handled via global toast */}
+                {activePlan === plan.id ? (
+                  <span className="rounded-full bg-emerald-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-700">
+                    Current
+                  </span>
+                ) : plan.highlight ? (
                   <span className="rounded-full bg-rose-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-rose-700">
                     Best value
                   </span>
@@ -106,8 +122,10 @@ export default function CheckoutPage() {
                     ? '!bg-rose-500 !text-white hover:!bg-rose-400 shadow-[0_16px_40px_rgba(244,63,94,0.25)]'
                     : '!bg-slate-900 !text-white hover:!bg-slate-800'
                 }`}
+                onClick={() => handleSelectPlan(plan.id)}
+                disabled={activePlan === plan.id}
               >
-                {plan.cta}
+                {activePlan === plan.id ? 'Selected' : plan.cta}
               </Button>
 
               <button className="mt-4 flex items-center gap-2 text-xs text-slate-500 hover:text-slate-700">

@@ -1,4 +1,5 @@
 import { useAuthStore } from '@/features/auth/store/auth-store'
+import { getSubscriptionTier } from '@/shared/lib/subscription'
 import { getAdminRole, type AdminRole } from '@/shared/lib/admin'
 
 export function useAuth() {
@@ -10,6 +11,8 @@ export function useAuth() {
   const initialized = useAuthStore((state) => state.initialized)
   const signOut = useAuthStore((state) => state.signOut)
 
+  const overrideTier = getSubscriptionTier(user?.id ?? 'guest')
+
   // Compute admin role from session user
   const adminRole: AdminRole | null = role === 'admin' ? 'superadmin' : getAdminRole(session?.user ?? null)
   const isAdmin = role === 'admin' || !!adminRole
@@ -19,7 +22,7 @@ export function useAuth() {
     session,
     role,
     profile,
-    subscriptionTier: profile?.subscription_tier ?? 'free',
+    subscriptionTier: overrideTier ?? profile?.subscription_tier ?? 'free',
     adminRole,
     isAdmin,
     isLoading,

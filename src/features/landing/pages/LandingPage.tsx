@@ -181,9 +181,9 @@ export default function LandingPage() {
             transition={{ duration: 1.15, ease: 'easeOut', delay: 0.12 }}
           >
             <div className="overflow-hidden rounded-[1.75rem] border border-black/5 bg-white/75 shadow-[0_30px_80px_rgba(163,93,107,0.08)] backdrop-blur-xl">
-              <div className="border-b border-black/5 px-6 py-4">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-rose-500">LIVE FEATURE</p>
-              </div>
+                <div className="border-b border-black/5 px-6 py-4">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-rose-500">LIVE FEATURE</p>
+                </div>
               <img src="/luxury-demo.svg" alt="Luxury beauty product" className="h-[min(30rem,40vh)] w-full object-cover" />
               <div className="border-t border-black/5 p-5 lg:p-6">
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-rose-500">Featured Product</p>
