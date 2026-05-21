@@ -1,4 +1,5 @@
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 
 export default function Hero() {
   return (
@@ -13,8 +14,26 @@ export default function Hero() {
         </p>
 
         <div className="mt-8 flex flex-wrap gap-4">
-          <button className="rounded-full bg-rose-600 px-6 py-3 font-semibold text-white shadow-lg shadow-rose-500/20 transition hover:brightness-110">Start AI Scan</button>
-          <button className="rounded-full border border-rose-200 bg-white/70 px-6 py-3 font-semibold text-rose-800">Explore Features</button>
+          {[
+            { to: '/scan', label: 'Start AI Scan', solid: true },
+            { to: '/products', label: 'Explore Features', solid: false },
+          ].map((item) => {
+            const MotionLink = motion(Link)
+
+            return (
+              <MotionLink
+                key={item.label}
+                to={item.to}
+                whileHover={{ y: -2, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className={item.solid
+                  ? 'rounded-full bg-rose-600 px-6 py-3 font-semibold text-white shadow-lg shadow-rose-500/20 transition hover:brightness-110'
+                  : 'rounded-full border border-rose-200 bg-white/70 px-6 py-3 font-semibold text-rose-800'}
+              >
+                {item.label}
+              </MotionLink>
+            )
+          })}
         </div>
 
         <div className="mt-8 grid max-w-xl grid-cols-3 gap-3 text-xs text-rose-700">

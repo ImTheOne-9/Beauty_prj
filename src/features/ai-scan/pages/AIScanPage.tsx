@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import type { ChangeEvent } from 'react'
 import { Link } from 'react-router-dom'
 import { useMutation } from '@tanstack/react-query'
 import { AIResultCard } from '@/shared/components/ui/AIResultCard'
@@ -13,6 +14,7 @@ import { useUIStore } from '@/store/ui-store'
 import { useRecommendations } from '@/features/recommendations/hooks/useRecommendations'
 import { ScanProductGrid } from '@/shared/components/ui/ScanProductGrid'
 import { mockProducts } from '@/shared/data/mock-products'
+import { type ProductRecommendation, type ScanResult } from '@/shared/lib/types'
 
 const scanMessages = [
   'Calibrating light map...',
@@ -20,6 +22,88 @@ const scanMessages = [
   'Estimating hydration and sebum trends...',
   'Matching ingredients to skin profile...',
 ]
+
+type RankedRecommendation = ProductRecommendation & {
+  matchScore: number
+  matchReason: string
+}
+
+function rankRecommendations(products: ProductRecommendation[], scanResult: ScanResult | null): RankedRecommendation[] {
+  if (!scanResult) {
+    return products.map((product) => ({ ...product, matchScore: 0, matchReason: 'Awaiting scan results' }))
+  }
+
+  return products
+    .map((product) => {
+      const text = `${product.category} ${product.name} ${product.description} ${product.reason}`.toLowerCase()
+      let matchScore = 10
+      const reasons: string[] = []
+
+      const hydrationKeywords = ['serum', 'moisturizer', 'essence', 'barrier', 'peptide']
+      const acneKeywords = ['cleanser', 'niacinamide', 'probiotic', 'toner', 'treatment']
+      const oilinessKeywords = ['cleanser', 'toner', 'niacinamide', 'probiotic', 'sunscreen']
+      const darkCircleKeywords = ['eye', 'mask', 'vitamin c', 'peptide', 'brighten']
+
+      if (scanResult.hydration.status !== 'great' && hydrationKeywords.some((keyword) => text.includes(keyword))) {
+        matchScore += 22
+        reasons.push('Hydration support')
+      }
+
+      if ((scanResult.acne.status === 'moderate' || scanResult.acne.status === 'attention') && acneKeywords.some((keyword) => text.includes(keyword))) {
+        matchScore += 20
+        reasons.push('Breakout control')
+      }
+
+      if ((scanResult.oiliness.status === 'moderate' || scanResult.oiliness.status === 'attention') && oilinessKeywords.some((keyword) => text.includes(keyword))) {
+        matchScore += 16
+        reasons.push('Oil-balance')
+      }
+
+      if ((scanResult.darkCircles.status === 'moderate' || scanResult.darkCircles.status === 'attention') && darkCircleKeywords.some((keyword) => text.includes(keyword))) {
+        matchScore += 24
+        reasons.push('Under-eye recovery')
+      }
+
+      if (scanResult.skinScore < 90 && ['serum', 'mask', 'treatment', 'moisturizer'].some((keyword) => text.includes(keyword))) {
+        matchScore += 8
+        reasons.push('Overall skin support')
+      }
+
+      if (product.category.toLowerCase().includes('sunscreen') && scanResult.skinScore >= 80) {
+        matchScore += 10
+        reasons.push('Protect current progress')
+      }
+
+      if (scanResult.hydration.status === 'great' && hydrationKeywords.some((keyword) => text.includes(keyword))) {
+        matchScore += 10
+        reasons.push('Maintain glow')
+      }
+
+      return {
+        ...product,
+        matchScore,
+        matchReason: reasons.length > 0 ? reasons.join(' · ') : 'General routine support',
+      }
+    })
+    .sort((left, right) => right.matchScore - left.matchScore)
+}
+
+function buildRecommendationSummary(scanResult: ScanResult | null) {
+  if (!scanResult) return 'Run a scan to unlock matched skincare.'
+
+  const notes: string[] = []
+
+  if (scanResult.darkCircles.status !== 'great') notes.push('under-eye recovery')
+  if (scanResult.oiliness.status !== 'great') notes.push('oil balance')
+  if (scanResult.acne.status !== 'great') notes.push('barrier support')
+  if (scanResult.hydration.status !== 'great') notes.push('hydration support')
+
+  if (notes.length === 0) {
+    return 'Your scan looks balanced — these picks are focused on maintaining glow and protection.'
+  }
+
+  return `Top matches are tuned for ${notes.join(', ')}.`
+}
 
 export default function AIScanPage() {
   const { phase, imagePreview, scanResult, setImagePreview, runFakeScan, reset } = useScanStore()
@@ -34,6 +118,8 @@ export default function AIScanPage() {
 
   const { data: recommendedProducts, isLoading: loadingProducts } = useRecommendations()
   const displayProducts = recommendedProducts && recommendedProducts.length > 0 ? recommendedProducts : mockProducts
+  const rankedProducts = useMemo(() => rankRecommendations(displayProducts, scanResult), [displayProducts, scanResult])
+  const recommendationSummary = useMemo(() => buildRecommendationSummary(scanResult), [scanResult])
 
   const persistMutation = useMutation({
     mutationFn: async () => {
@@ -75,7 +161,7 @@ export default function AIScanPage() {
     return 'Analysis complete. Explore your personalized routine.'
   }, [phase])
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     if (!file) return
     setImagePreview(URL.createObjectURL(file))
@@ -106,167 +192,256 @@ export default function AIScanPage() {
 
       persistMutation.mutate()
     }
-  }, [
-    phase,
-    scanResult,
-    persistMutation,
-    persistMutation.isError,
-    persistMutation.isPending,
-    persistMutation.isSuccess,
-  ])
+  }, [phase, scanResult, persistMutation, persistMutation.isError, persistMutation.isPending, persistMutation.isSuccess])
+
+  // Dev helper: open `/scan?demo=1` to auto-populate a demo selfie and run the fake scan
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search)
+      if (params.get('demo') === '1') {
+        setImagePreview('/demo-products/serum.svg')
+        void runFakeScan()
+      }
+    } catch {
+      // ignore
+    }
+  }, [setImagePreview, runFakeScan])
 
   return (
-    <section className="section-shell pb-10 space-y-6">
-
-      {/* ── Compact Scan Bar ── */}
-      <Card className="p-4">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:gap-6">
-
-          {/* Left: controls */}
-          <div className="flex flex-col gap-3 lg:w-72 shrink-0">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.22em] text-cyan font-bold">AI Scan Studio</p>
-              <h1 className="font-display text-xl font-extrabold text-pearl leading-tight">Skin Intelligence Capture</h1>
-              <p className="mt-0.5 text-xs text-mist">{statusText}</p>
-            </div>
-
-            <label className="flex cursor-pointer items-center gap-2 rounded-xl border border-dashed border-rose-200/80 bg-white/80 px-4 py-2.5 text-xs text-mist transition hover:border-cyan/60">
-              <span>📷 Upload Selfie</span>
-              <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-            </label>
-
-            <div className="flex flex-wrap gap-2">
-              <Button variant="ghost" size="sm" onClick={() => setWebcamOpen(true)}>Webcam</Button>
-              {webcamOpen ? <Button variant="ghost" size="sm" onClick={captureFromWebcam}>Capture</Button> : null}
-              <Button size="sm" onClick={() => void runFakeScan()} disabled={!imagePreview || phase === 'scanning'}>
-                Run Scan
-              </Button>
-              <Button variant="accent" size="sm" onClick={reset}>Reset</Button>
-            </div>
-
-            {cameraError ? <p className="text-xs text-rose-300">{cameraError}</p> : null}
-
-            {phase === 'scanning' ? (
-              <motion.div className="space-y-1" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                {scanMessages.map((message, index) => (
-                  <motion.p
-                    key={message}
-                    className="text-[11px] text-mist"
-                    initial={{ opacity: 0.2 }}
-                    animate={{ opacity: [0.2, 1, 0.4] }}
-                    transition={{ duration: 1.8, repeat: Infinity, delay: index * 0.35 }}
-                  >
-                    {message}
-                  </motion.p>
-                ))}
-              </motion.div>
-            ) : null}
-
-            {phase === 'complete' ? (
-              <div className="space-y-1.5">
-                <Link to="/recommendations">
-                  <Button className="w-full" size="sm">View Full Recommendations →</Button>
-                </Link>
-                <p className="text-[10px] text-mist">
-                  {persistMutation.isPending ? 'Saving...' : persistMutation.error ? 'Save failed.' : 'Scan saved ✓'}
-                </p>
-              </div>
-            ) : null}
-          </div>
-
-          {/* Right: image preview + result metrics side by side */}
-          <div className="flex flex-1 gap-4 items-start">
-            {/* Thumbnail preview (increased size) */}
-            <div className="h-52 w-44 shrink-0 overflow-hidden rounded-2xl border border-rose-200/70 bg-velvet">
-              {webcamOpen ? (
-                <video ref={videoRef} autoPlay playsInline className="h-full w-full object-cover" />
-              ) : imagePreview ? (
-                <img src={imagePreview} alt="Scan preview" className="h-full w-full object-cover" />
-              ) : (
-                <div className="flex h-full items-center justify-center text-[10px] text-mist text-center px-2">No image yet</div>
-              )}
-            </div>
-
-            {/* Metric cards in a 2×2 compact grid */}
-            {scanResult ? (
-              <div className="grid flex-1 grid-cols-2 gap-2">
-                {[
-                  { metric: 'Skin Score', score: scanResult.skinScore, status: 'great' as const, insight: 'Overall quality' },
-                  { metric: 'Acne', score: scanResult.acne.value, status: scanResult.acne.status, insight: 'Inflammation level' },
-                  { metric: 'Hydration', score: scanResult.hydration.value, status: scanResult.hydration.status, insight: 'Moisture retention' },
-                  { metric: 'Dark Circles', score: scanResult.darkCircles.value, status: scanResult.darkCircles.status, insight: 'Under-eye fatigue' },
-                ].map((item) => (
-                  <AIResultCard key={item.metric} metric={item.metric} score={item.score} status={item.status} insight={item.insight} />
-                ))}
-              </div>
-              ) : (
-                <div className="flex flex-1 items-center justify-center rounded-2xl border border-dashed border-rose-100 text-xs text-mist/50 h-52">
-                Scan results will appear here
-              </div>
-            )}
-          </div>
-        </div>
-      </Card>
-
-      {/* ── Product Recommendations (always visible, prominent) ── */}
-      {phase === 'complete' ? (
+    <section className="section-shell pb-20 pt-4">
+      <div className="mx-auto max-w-[1600px] space-y-6">
         <motion.div
-          className="space-y-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, ease: 'easeOut', delay: 0.1 }}
+          className="rounded-[2rem] border border-rose-100/50 bg-[linear-gradient(180deg,rgba(255,250,250,0.98),rgba(255,245,246,0.9))] p-6 shadow-[0_20px_60px_rgba(230,155,170,0.06)] backdrop-blur-xl"
+          initial={{ opacity: 0, y: 18, scale: 0.992 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 0.65, ease: 'easeOut' }}
         >
-          <div className="flex items-end justify-between">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.24em] text-cyan font-bold">Personalized Routine</p>
-              <h2 className="mt-1 font-display text-2xl font-extrabold text-pearl md:text-3xl">
-                Precision-Matched Skincare
-              </h2>
-              <p className="mt-1 text-xs text-mist max-w-2xl">
-                Product suggestions tailored to your skin scan. Click a product to buy from our partners.
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-3xl">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.38em] text-rose-600">AI Scan Studio</p>
+              <h1 className="mt-2 font-display text-3xl font-black tracking-[-0.04em] text-pearl md:text-5xl">
+                Skin Intelligence Capture
+              </h1>
+              <p className="mt-3 max-w-2xl text-sm leading-relaxed text-mist md:text-base">
+                Upload a selfie or use webcam to generate a calm, polished skin analysis with matched products below.
               </p>
             </div>
-            <Link to="/recommendations" className="hidden md:block shrink-0">
-              <Button variant="ghost" size="sm" className="text-xs">View all →</Button>
-            </Link>
+
+            <div className="grid grid-cols-3 gap-3 text-xs md:min-w-[360px]">
+              {[
+                ['Upload', 'Selfie or webcam'],
+                ['Analyze', 'Texture and hydration'],
+                ['Recommend', 'Matched routine'],
+              ].map(([title, desc]) => (
+                <div key={title} className="rounded-2xl border border-rose-100/60 bg-white/80 p-3 text-left shadow-sm">
+                  <p className="text-[10px] uppercase tracking-[0.28em] text-rose-600">{title}</p>
+                  <p className="mt-1 text-[11px] leading-relaxed text-mist">{desc}</p>
+                </div>
+              ))}
+            </div>
           </div>
-
-          <Card className="p-5 bg-white/30 backdrop-blur-md border border-rose-200/45">
-            {loadingProducts ? (
-              <div className="flex h-32 items-center justify-center text-sm text-mist font-semibold">
-                Preparing matching products...
-              </div>
-            ) : (
-              <ScanProductGrid products={displayProducts} />
-            )}
-          </Card>
         </motion.div>
-      ) : null}
 
-      <Modal
-        open={showOnboarding}
-        title="Welcome to AI Scan"
-        onClose={() => {
-          setShowOnboarding(false)
-          markScanOnboardingSeen()
-        }}
-      >
-        <div className="space-y-3 text-sm text-mist">
-          <p>1. Upload a selfie or open your webcam.</p>
-          <p>2. Run the AI scan to generate skin metrics and score.</p>
-          <p>3. Browse the product grid below and click to buy at partner stores.</p>
-          <Button
-            className="mt-2 w-full"
-            onClick={() => {
-              setShowOnboarding(false)
-              markScanOnboardingSeen()
-            }}
-          >
-            Start Experience
-          </Button>
+        <div className="grid gap-6 lg:grid-cols-[0.88fr,1.12fr]">
+          <Card className="overflow-hidden border border-rose-100/50 bg-[linear-gradient(180deg,rgba(255,250,250,0.96),rgba(255,245,246,0.9))] p-0 shadow-[0_18px_50px_rgba(230,155,170,0.06)]">
+            <div className="border-b border-rose-100/50 bg-[linear-gradient(180deg,rgba(255,250,250,0.98),rgba(255,245,246,0.92))] px-6 py-5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-rose-600">Capture</p>
+              <p className="mt-1 text-sm leading-relaxed text-mist">Choose a source and run the scan when you’re ready.</p>
+            </div>
+
+            <div className="space-y-5 p-6">
+              <div className="space-y-3">
+                <label className="flex cursor-pointer items-center justify-between gap-4 rounded-2xl border border-dashed border-rose-200/70 bg-white/75 px-4 py-3 text-sm text-mist transition hover:border-rose-300 hover:bg-white">
+                  <span className="flex items-center gap-2">
+                    <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-rose-50 text-rose-600">✦</span>
+                    Upload Selfie
+                  </span>
+                  <span className="text-[10px] uppercase tracking-[0.28em] text-rose-400">File</span>
+                  <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                </label>
+
+                <div className="flex flex-wrap gap-2">
+                  <Button variant="ghost" size="sm" onClick={() => setWebcamOpen(true)}>
+                    Webcam
+                  </Button>
+                  {webcamOpen ? (
+                    <Button variant="ghost" size="sm" onClick={captureFromWebcam}>
+                      Capture
+                    </Button>
+                  ) : null}
+                  <Button size="sm" onClick={() => void runFakeScan()} disabled={!imagePreview || phase === 'scanning'}>
+                    Run Scan
+                  </Button>
+                  <Button variant="accent" size="sm" onClick={reset}>
+                    Reset
+                  </Button>
+                </div>
+
+                {cameraError ? <p className="text-xs text-rose-400">{cameraError}</p> : null}
+              </div>
+
+              <div className="rounded-[1.5rem] border border-rose-100/50 bg-[linear-gradient(180deg,rgba(255,250,250,0.94),rgba(255,245,246,0.86))] p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-rose-600">Scan status</p>
+                  <span className="rounded-full border border-rose-100 bg-white/80 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-rose-500">
+                    {phase}
+                  </span>
+                </div>
+                <p className="text-sm leading-relaxed text-mist">{statusText}</p>
+                {phase === 'scanning' ? (
+                  <motion.div className="mt-4 space-y-2 rounded-2xl border border-rose-100/40 bg-white/80 p-4" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                    {scanMessages.map((message, index) => (
+                      <motion.p
+                        key={message}
+                        className="text-[11px] text-mist"
+                        initial={{ opacity: 0.15, x: -4 }}
+                        animate={{ opacity: [0.25, 1, 0.35], x: [0, 3, 0] }}
+                        transition={{ duration: 1.8, repeat: Infinity, delay: index * 0.35 }}
+                      >
+                        {message}
+                      </motion.p>
+                    ))}
+                  </motion.div>
+                ) : null}
+
+                {phase === 'complete' ? (
+                  <div className="mt-4 space-y-2">
+                    <Link to="/recommendations" className="block">
+                      <Button className="w-full" size="sm">
+                        View Full Recommendations →
+                      </Button>
+                    </Link>
+                    <p className="text-[10px] text-mist">
+                      {persistMutation.isPending ? 'Saving...' : persistMutation.error ? 'Save failed.' : 'Scan saved ✓'}
+                    </p>
+                  </div>
+                ) : null}
+              </div>
+            </div>
+          </Card>
+
+          <Card className="overflow-hidden border border-rose-100/50 bg-[linear-gradient(180deg,rgba(255,250,250,0.96),rgba(255,245,246,0.9))] p-0 shadow-[0_18px_50px_rgba(230,155,170,0.06)]">
+            <div className="border-b border-rose-100/50 bg-[linear-gradient(180deg,rgba(255,250,250,0.98),rgba(255,245,246,0.92))] px-6 py-5">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.34em] text-rose-600">Analysis canvas</p>
+              <p className="mt-1 text-sm leading-relaxed text-mist">Your uploaded image and result cards live here in a calm, editorial layout.</p>
+            </div>
+
+            <div className="space-y-5 p-6">
+              <div className="grid gap-5 xl:grid-cols-[280px,1fr]">
+                <div className="relative overflow-hidden rounded-[1.75rem] border border-rose-100/40 bg-[linear-gradient(180deg,rgba(255,250,250,0.95),rgba(255,250,250,0.88))] shadow-sm">
+                  <div className="border-b border-rose-100/40 px-4 py-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-rose-400">Preview</p>
+                  </div>
+                  <div className="relative flex h-[24rem] items-center justify-center bg-[radial-gradient(circle_at_top,rgba(254,215,222,0.08),transparent_38%),linear-gradient(180deg,rgba(255,250,250,0.84),rgba(255,245,246,0.92))]">
+                    {webcamOpen ? (
+                      <video ref={videoRef} autoPlay playsInline className="h-full w-full object-cover" />
+                    ) : imagePreview ? (
+                      <img src={imagePreview} alt="Scan preview" className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="space-y-2 px-6 text-center text-sm text-mist/65">
+                        <p className="font-semibold text-mist/80">No image yet</p>
+                        <p>Upload a selfie or open webcam to begin the scan.</p>
+                      </div>
+                    )}
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(254,215,222,0.12),transparent_40%),linear-gradient(180deg,transparent,rgba(255,250,250,0.08))]" />
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  {scanResult ? (
+                    <div className="grid grid-cols-2 gap-3 md:grid-cols-2">
+                      {[
+                        { metric: 'Skin Score', score: scanResult.skinScore, status: 'great' as const, insight: 'Overall quality' },
+                        { metric: 'Acne', score: scanResult.acne.value, status: scanResult.acne.status, insight: 'Inflammation level' },
+                        { metric: 'Hydration', score: scanResult.hydration.value, status: scanResult.hydration.status, insight: 'Moisture retention' },
+                        { metric: 'Dark Circles', score: scanResult.darkCircles.value, status: scanResult.darkCircles.status, insight: 'Under-eye fatigue' },
+                      ].map((item) => (
+                        <AIResultCard key={item.metric} metric={item.metric} score={item.score} status={item.status} insight={item.insight} />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="grid gap-3 md:grid-cols-2">
+                      {[
+                        ['Skin Score', 'Awaiting scan'],
+                        ['Hydration', 'Pending analysis'],
+                        ['Texture', 'Awaiting scan'],
+                        ['Match Rate', 'Queued'],
+                      ].map(([label, value]) => (
+                        <div key={label} className="rounded-[1.5rem] border border-dashed border-rose-100/50 bg-[linear-gradient(180deg,rgba(255,250,250,0.92),rgba(255,245,246,0.86))] p-4">
+                          <p className="text-[10px] uppercase tracking-[0.28em] text-rose-400">{label}</p>
+                          <p className="mt-3 font-display text-2xl font-semibold text-pearl/70">{value}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {phase !== 'complete' ? (
+                    <div className="rounded-[1.5rem] border border-rose-100/40 bg-[linear-gradient(180deg,rgba(255,250,250,0.94),rgba(255,245,246,0.86))] p-4 text-sm text-mist">
+                      Result cards will populate here after the scan completes, keeping the interface calm and balanced.
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+            </div>
+          </Card>
         </div>
-      </Modal>
+
+        {phase === 'complete' ? (
+          <motion.div
+            className="mt-20 space-y-4 lg:mt-28"
+            initial={{ opacity: 0, y: 28 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.55, ease: 'easeOut', delay: 0.12 }}
+          >
+            <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+              <div>
+                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-rose-600">Personalized Routine</p>
+                <h2 className="mt-1 font-display text-2xl font-extrabold text-pearl md:text-3xl">Precision-Matched Skincare</h2>
+                <p className="mt-1 max-w-2xl text-xs text-mist">{recommendationSummary}</p>
+              </div>
+              <Link to="/recommendations" className="hidden shrink-0 md:block">
+                <Button variant="ghost" size="sm" className="text-xs">
+                  View all →
+                </Button>
+              </Link>
+            </div>
+
+            <Card className="border border-rose-100/50 bg-white/80 p-5 backdrop-blur-md">
+              {loadingProducts ? (
+                <div className="flex h-32 items-center justify-center text-sm font-semibold text-mist">
+                  Preparing matching products...
+                </div>
+              ) : (
+                <ScanProductGrid products={rankedProducts.slice(0, 6)} />
+              )}
+            </Card>
+          </motion.div>
+        ) : null}
+
+        <Modal
+          open={showOnboarding}
+          title="Welcome to AI Scan"
+          onClose={() => {
+            setShowOnboarding(false)
+            markScanOnboardingSeen()
+          }}
+        >
+          <div className="space-y-3 text-sm text-mist">
+            <p>1. Upload a selfie or open your webcam.</p>
+            <p>2. Run the AI scan to generate skin metrics and score.</p>
+            <p>3. Browse the product grid below and click to buy at partner stores.</p>
+            <Button
+              className="mt-2 w-full"
+              onClick={() => {
+                setShowOnboarding(false)
+                markScanOnboardingSeen()
+              }}
+            >
+              Start Experience
+            </Button>
+          </div>
+        </Modal>
+      </div>
     </section>
   )
 }
-

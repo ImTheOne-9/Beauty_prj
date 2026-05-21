@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, ChevronRight, ArrowUpRight, ShoppingCart } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ArrowUpRight, ShoppingCart, Star } from 'lucide-react'
 import { type ProductRecommendation } from '@/shared/lib/types'
 
 const PAGE_SIZE = 6
@@ -26,45 +26,78 @@ function getPartnerName(url: string): string {
 
 function CompactProductCard({ product, index }: { product: ProductRecommendation; index: number }) {
   const partner = getPartnerName(product.externalLink)
+  const matchScore = (product as any).matchScore ?? 0
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 16 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.05, duration: 0.35, ease: 'easeOut' }}
-      className="group flex flex-col overflow-hidden rounded-2xl border border-rose-100/80 bg-white/70 shadow-sm backdrop-blur-sm hover:border-rose-200 hover:shadow-md transition-all duration-300"
+      whileHover={{ y: -6 }}
+      className="group flex flex-col overflow-hidden rounded-2xl border border-rose-100/45 bg-[linear-gradient(180deg,rgba(255,250,250,0.96),rgba(255,245,246,0.9))] shadow-sm backdrop-blur-sm transition-all duration-300 hover:border-rose-200 hover:shadow-lg"
+      role="article"
+      aria-label={product.name}
     >
-      {/* Product image - short height */}
-      <div className="relative h-32 overflow-hidden bg-rose-50/40">
+      {/* Product image - taller for visual impact */}
+      <div className="relative h-48 overflow-hidden rounded-t-2xl bg-[radial-gradient(circle_at_top,rgba(254,229,236,0.12),transparent_45%),linear-gradient(180deg,rgba(255,250,250,0.96),rgba(255,245,246,0.9))]">
         <img
           src={product.image}
           alt={product.name}
           loading="lazy"
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-110"
+          className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
-        <span className="absolute bottom-2 left-2 rounded-full bg-white/90 px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wider text-rose-500 shadow-sm backdrop-blur-sm">
+        <div className="absolute inset-0 bg-gradient-to-t from-rose-900/6 via-transparent to-transparent" />
+        <div className="absolute top-3 right-3 flex flex-col items-end gap-2">
+          {typeof product.rating === 'number' ? (
+            <div className="flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[11px] font-semibold text-rose-700 shadow-sm">
+              <Star className="h-3 w-3 text-amber-400" />
+              <span className="text-xs">{product.rating.toFixed(1)}</span>
+            </div>
+          ) : null}
+          <div className="rounded-full bg-gradient-to-r from-rose-50 to-white/80 px-2 py-0.5 text-[11px] font-mono text-rose-600 shadow-sm">{Math.round(matchScore)} pts</div>
+        </div>
+        {product.discount ? (
+          <div className="absolute -right-3 top-12 rotate-6 rounded-md bg-gradient-to-tr from-pink-500 to-rose-600 px-3 py-1 text-xs font-bold text-white shadow-lg">-{product.discount}%</div>
+        ) : null}
+        {index === 0 ? (
+          <div className="absolute top-3 left-3 rounded-md bg-rose-600 px-3 py-1 text-xs font-semibold text-white shadow-sm">Top Pick</div>
+        ) : null}
+
+        <span className="absolute bottom-3 left-3 rounded-full border border-white/70 bg-white/90 px-3 py-1 text-[11px] font-extrabold uppercase tracking-wider text-rose-600 shadow-sm backdrop-blur-sm">
           {product.category}
         </span>
       </div>
 
       {/* Info area */}
-      <div className="flex flex-1 flex-col gap-1.5 p-3">
-        <h4 className="line-clamp-2 text-xs font-extrabold leading-snug text-rose-950">{product.name}</h4>
-        <p className="line-clamp-2 text-[10px] leading-relaxed text-mist/80">{product.reason}</p>
+        <div className="flex flex-1 flex-col gap-2 p-4">
+        <h4 className="line-clamp-2 text-sm font-bold leading-snug text-rose-950">{product.name}</h4>
+        <p className="line-clamp-2 text-xs leading-relaxed text-mist/80">{product.description}</p>
 
-        <a
-          href={product.externalLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-auto block w-full"
-        >
-          <button className="mt-2 flex w-full items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 px-2 py-2 text-[10px] font-extrabold uppercase tracking-wider text-white shadow-sm shadow-rose-500/15 transition-all duration-200 hover:brightness-105 active:scale-[0.97]">
-            <ShoppingCart className="h-3 w-3" />
-            {partner}
-            <ArrowUpRight className="h-3 w-3 opacity-75" />
-          </button>
-        </a>
+        <div className="mt-3 flex items-center justify-between">
+          <div className="flex flex-col">
+            <div className="flex items-baseline gap-2">
+              {product.originalPrice ? <span className="text-[12px] text-mist/60 line-through">{product.originalPrice}</span> : null}
+              {product.price ? <span className="text-sm font-extrabold text-rose-900">{product.price}</span> : null}
+            </div>
+            <p className="text-[10px] text-mist/70">{product.reason}</p>
+            <div className="mt-2 flex items-center gap-3 text-[11px] text-mist/65">
+              {typeof product.reviews === 'number' ? <span className="flex items-center gap-1"><Star className="h-3 w-3 text-amber-400" />{product.rating} · {product.reviews} reviews</span> : null}
+              {typeof product.stock === 'number' ? (
+                <span className={`${product.stock <= 5 ? 'text-rose-600 font-bold' : 'text-mist/65'}`}>{product.stock <= 5 ? `Only ${product.stock} left` : 'In stock'}</span>
+              ) : null}
+            </div>
+          </div>
+
+          <div className="shrink-0 w-36">
+            <a href={product.externalLink} target="_blank" rel="noopener noreferrer">
+              <button aria-label={`Buy ${product.name} at ${partner}`} className="w-full rounded-xl bg-gradient-to-r from-rose-600 to-pink-500 px-3 py-3 text-sm font-bold text-white shadow-[0_8px_30px_rgba(230,90,120,0.18)] hover:scale-[0.998] active:scale-95">
+                <div className="flex items-center justify-center gap-2"><ShoppingCart className="h-4 w-4" />Mua tại Example</div>
+              </button>
+            </a>
+            <div className="mt-2 text-right text-[11px] text-mist/65">{partner}</div>
+            <div className="mt-1 text-center text-[11px] text-mist/60">Secure checkout · Free returns</div>
+          </div>
+        </div>
       </div>
     </motion.div>
   )
@@ -106,7 +139,9 @@ export function ScanProductGrid({ products }: ScanProductGridProps) {
             className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-3 grid-rows-2"
           >
             {pageProducts.map((product, index) => (
-              <CompactProductCard key={product.id} product={product} index={index} />
+              <div key={product.id} className={`${index === 0 ? 'lg:col-span-2' : ''}`}>
+                <CompactProductCard product={product} index={index} />
+              </div>
             ))}
           </motion.div>
         </AnimatePresence>

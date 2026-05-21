@@ -1,5 +1,6 @@
 import { Suspense, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
+import { Link } from 'react-router-dom'
 import gsap from 'gsap'
 import ScrollTrigger from 'gsap/ScrollTrigger'
 import Lenis from '@studio-freight/lenis'
@@ -12,6 +13,13 @@ import Testimonials from '@/features/landing/components/Testimonials'
 
 export default function LandingPage() {
   const pageRef = useRef<HTMLElement | null>(null)
+  const MotionLink = motion.create(Link)
+  const heroLines = [
+    { text: 'WE’RE', accent: false },
+    { text: 'REBUILDING', accent: false },
+    { text: 'IT FOR', accent: false },
+    { text: 'CLARITY.', accent: true },
+  ]
 
   useEffect(() => {
     gsap.registerPlugin(ScrollTrigger)
@@ -95,11 +103,39 @@ export default function LandingPage() {
         </div>
 
         <div className="mx-auto grid min-h-[calc(100vh-1rem)] w-full max-w-[1720px] grid-cols-1 gap-4 px-3 py-3 lg:grid-cols-[1.08fr,0.92fr] lg:px-4 lg:py-4 xl:px-5">
-          <div className="flex min-h-[44rem] flex-col justify-between rounded-[1.75rem] border border-black/5 bg-white/65 p-5 shadow-[0_30px_80px_rgba(163,93,107,0.08)] backdrop-blur-xl lg:p-8 xl:p-10">
-            <div data-hero-reveal>
+          <motion.div
+            className="relative flex min-h-[44rem] flex-col justify-between rounded-[1.75rem] border border-black/5 bg-white/65 p-5 shadow-[0_30px_80px_rgba(163,93,107,0.08)] backdrop-blur-xl lg:p-8 xl:p-10"
+            initial={{ opacity: 0, y: 24, scale: 0.985, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+            transition={{ duration: 1.05, ease: 'easeOut' }}
+          >
+            <div className="pointer-events-none absolute inset-0 rounded-[1.75rem] bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.55),transparent_40%),linear-gradient(135deg,rgba(255,255,255,0.25),transparent_45%)] opacity-80" />
+            <div className="relative z-10" data-hero-reveal>
               <p className="text-xs font-semibold uppercase tracking-[0.4em] text-rose-500">THE DIGITAL BEAUTY WORLD WAS BUILT FOR NOISE.</p>
-              <h1 className="mt-5 max-w-4xl font-display text-6xl font-black leading-[0.92] tracking-[-0.05em] text-rose-950 sm:text-7xl xl:text-[7rem]">
-                WE’RE REBUILDING IT FOR <span className="text-rose-500">CLARITY.</span>
+              <h1 className="mt-5 max-w-4xl font-display text-6xl font-black leading-[0.9] tracking-[-0.05em] sm:text-7xl xl:text-[7rem]">
+                {heroLines.map((line, lineIndex) => (
+                  <motion.span
+                    key={line.text}
+                    className={`relative block overflow-hidden ${line.accent ? 'text-rose-500' : 'text-rose-950'}`}
+                    initial={{ opacity: 0, y: 26, scale: 0.98, filter: 'blur(10px)' }}
+                    animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+                    transition={{
+                      duration: 1.1,
+                      ease: 'easeOut',
+                      delay: 0.26 + lineIndex * 0.14,
+                    }}
+                  >
+                    <motion.span
+                      aria-hidden="true"
+                      className={`absolute inset-0 block select-none ${line.accent ? 'text-rose-400' : 'text-rose-900'} opacity-10 blur-[0.5px]`}
+                      animate={{ opacity: [0.05, 0.1, 0.05], y: [0, -0.25, 0] }}
+                      transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                    >
+                      {line.text}
+                    </motion.span>
+                    <span className="relative">{line.text}</span>
+                  </motion.span>
+                ))}
               </h1>
               <p className="mt-6 max-w-2xl text-lg leading-relaxed text-rose-700 lg:text-xl">
                 A premium AI beauty experience with cinematic motion, luxury product curation, and blocks that read like an editorial homepage.
@@ -107,12 +143,22 @@ export default function LandingPage() {
             </div>
 
             <div className="mt-8 flex flex-wrap gap-3">
-              <button className="rounded-full bg-rose-600 px-6 py-3 font-semibold text-white shadow-lg shadow-rose-500/20 transition hover:brightness-110">
+              <MotionLink
+                to="/scan"
+                whileHover={{ y: -2, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="rounded-full bg-rose-600 px-6 py-3 font-semibold text-white shadow-lg shadow-rose-500/20 transition hover:brightness-110"
+              >
                 Start AI Scan
-              </button>
-              <button className="rounded-full border border-rose-200 bg-white/80 px-6 py-3 font-semibold text-rose-800">
+              </MotionLink>
+              <MotionLink
+                to="/recommendations"
+                whileHover={{ y: -2, scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                className="rounded-full border border-rose-200 bg-white/80 px-6 py-3 font-semibold text-rose-800"
+              >
                 View Our Work
-              </button>
+              </MotionLink>
             </div>
 
             <div className="mt-10 grid gap-3 sm:grid-cols-3">
@@ -127,9 +173,14 @@ export default function LandingPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </motion.div>
 
-          <div className="grid gap-4 self-stretch">
+          <motion.div
+            className="grid gap-4 self-stretch"
+            initial={{ opacity: 0, y: 28, scale: 0.985, filter: 'blur(10px)' }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: 'blur(0px)' }}
+            transition={{ duration: 1.15, ease: 'easeOut', delay: 0.12 }}
+          >
             <div className="overflow-hidden rounded-[1.75rem] border border-black/5 bg-white/75 shadow-[0_30px_80px_rgba(163,93,107,0.08)] backdrop-blur-xl">
               <div className="border-b border-black/5 px-6 py-4">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-rose-500">LIVE FEATURE</p>
@@ -153,7 +204,7 @@ export default function LandingPage() {
                 A modular layout inspired by editorial tech pages: bold statements, large image blocks, and clear sections that feel premium instead of busy.
               </p>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -259,8 +310,22 @@ export default function LandingPage() {
             Turn one selfie into a complete AI skincare routine.
           </h2>
           <div className="mt-8 flex flex-wrap gap-3">
-            <button className="rounded-full bg-white px-6 py-3 font-semibold text-rose-900">Launch Scan</button>
-            <button className="rounded-full border border-white/30 bg-white/10 px-6 py-3 font-semibold text-white backdrop-blur-sm">Create Account</button>
+            <MotionLink
+              to="/scan"
+              whileHover={{ y: -2, scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="rounded-full bg-white px-6 py-3 font-semibold text-rose-900"
+            >
+              Launch Scan
+            </MotionLink>
+            <MotionLink
+              to="/auth"
+              whileHover={{ y: -2, scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="rounded-full border border-white/30 bg-white/10 px-6 py-3 font-semibold text-white backdrop-blur-sm"
+            >
+              Create Account
+            </MotionLink>
           </div>
         </div>
       </section>
