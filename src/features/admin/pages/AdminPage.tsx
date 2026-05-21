@@ -25,6 +25,9 @@ import {
   Package,
   RefreshCw,
   UserCheck,
+  TrendingUp,
+  ShoppingBag,
+  CreditCard,
 } from 'lucide-react'
 import { Button } from '@/shared/components/ui/Button'
 import { Card } from '@/shared/components/ui/Card'
@@ -41,7 +44,7 @@ import {
 } from '@/services/supabase/database-service'
 import { canAccessAdminSection, getAdminRoleLabel, type AdminSection, type AdminRole } from '@/shared/lib/admin'
 import { parseProductTags, encodeProductTags } from '@/shared/lib/product-tags'
-import { type ScanResult } from '@/shared/lib/types'
+import { type ScanResult, type OrderRecord } from '@/shared/lib/types'
 
 const sidebarSections: Array<{
   id: AdminSection
@@ -49,12 +52,13 @@ const sidebarSections: Array<{
   description: string
   icon: typeof LayoutGrid
 }> = [
-    { id: 'overview', label: 'Overview', description: 'System health and metrics', icon: LayoutGrid },
-    { id: 'products', label: 'Products', description: 'Catalog CRUD and live sync', icon: Store },
-    { id: 'scans', label: 'Scans', description: 'Review scans and simulate results', icon: Camera },
-    { id: 'recommendations', label: 'Recommendations', description: 'Manage product matches', icon: Sparkles },
-    { id: 'access', label: 'Access', description: 'Roles and permissions', icon: Users },
-    { id: 'settings', label: 'Settings', description: 'Platform and environment', icon: Wrench },
+    { id: 'overview', label: 'Tổng quan', description: 'Tình trạng hệ thống và chỉ số', icon: LayoutGrid },
+    { id: 'products', label: 'Sản phẩm', description: 'Quản lý danh mục và đồng bộ', icon: Store },
+    { id: 'scans', label: 'Quét da', description: 'Xem lịch sử quét và mô phỏng', icon: Camera },
+    { id: 'recommendations', label: 'Gợi ý', description: 'Quản lý sản phẩm phù hợp', icon: Sparkles },
+    { id: 'access', label: 'Phân quyền', description: 'Vai trò và quyền hạn', icon: Users },
+    { id: 'settings', label: 'Cài đặt', description: 'Nền tảng và môi trường', icon: Wrench },
+    { id: 'revenue', label: 'Doanh thu', description: 'Đơn hàng và doanh số bán', icon: DollarSign },
   ]
 
 type ProductFormState = {
@@ -112,7 +116,7 @@ const emptyRecommendationForm: RecommendationFormState = {
 }
 
 function formatDate(value: string) {
-  return new Date(value).toLocaleString('en-US', {
+  return new Date(value).toLocaleString('vi-VN', {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
@@ -121,7 +125,7 @@ function formatDate(value: string) {
 }
 
 function formatTags(tags: string[]) {
-  return tags.length > 0 ? tags.join(', ') : 'No tags'
+  return tags.length > 0 ? tags.join(', ') : 'Không có thẻ'
 }
 
 function parseTags(value: string) {
@@ -205,6 +209,10 @@ export default function AdminPage() {
 
   const [userSearch, setUserSearch] = useState('')
 
+  // Revenue state
+  const [orderSearch, setOrderSearch] = useState('')
+  const [orderStatusFilter, setOrderStatusFilter] = useState<string>('All')
+
   // User Manager Form
   const [newUserEmail, setNewUserEmail] = useState('')
   const [newUserRole, setNewUserRole] = useState<AdminRole | 'user'>('analyst')
@@ -259,6 +267,11 @@ export default function AdminPage() {
     queryFn: async () => databaseService.getUsersWithRoles(),
   })
 
+  const ordersQuery = useQuery({
+    queryKey: ['admin', 'orders'],
+    queryFn: async () => databaseService.getOrders(),
+  })
+
   // Lookups & Filters
   const tabs = useMemo(
     () => sidebarSections.filter((section) => canAccessAdminSection(adminRole, section.id)),
@@ -279,6 +292,56 @@ export default function AdminPage() {
   const scanLookup = useMemo(() => {
     return new Map((scansQuery.data ?? []).map((scan) => [scan.id, scan]))
   }, [scansQuery.data])
+
+  const filteredOrders = useMemo(() => {
+    const list = ordersQuery.data ?? []
+    return list.filter((order) => {
+      const matchSearch =
+        order.id.toLowerCase().includes(orderSearch.toLowerCase()) ||
+        order.productName.toLowerCase().includes(orderSearch.toLowerCase()) ||
+        order.shippingInfo.name.toLowerCase().includes(orderSearch.toLowerCase())
+      
+      const matchStatus = orderStatusFilter === 'All' || order.status === orderStatusFilter
+      return matchSearch && matchStatus
+    })
+  }, [ordersQuery.data, orderSearch, orderStatusFilter])
+
+  const revenueStats = useMemo(() => {
+    const list = ordersQuery.data ?? []
+    const completed = list.filter((o) => o.status === 'completed')
+    const pending = list.filter((o) => o.status === 'pending')
+    const canceled = list.filter((o) => o.status === 'canceled')
+
+    const totalRevenue = completed.reduce((sum, o) => sum + o.totalPrice, 0)
+    const pendingAmount = pending.reduce((sum, o) => sum + o.totalPrice, 0)
+    
+    // Category Breakdown
+    const categoryMap = new Map<string, number>()
+    completed.forEach((o) => {
+      const cat = o.productCategory || 'Khác'
+      categoryMap.set(cat, (categoryMap.get(cat) ?? 0) + o.totalPrice)
+    })
+    const categoryBreakdown = Array.from(categoryMap.entries()).map(([name, value]) => ({ name, value }))
+
+    // Payment breakdown
+    const paymentMap = new Map<string, number>()
+    completed.forEach((o) => {
+      const pm = o.paymentMethod.toUpperCase()
+      paymentMap.set(pm, (paymentMap.get(pm) ?? 0) + o.totalPrice)
+    })
+    const paymentBreakdown = Array.from(paymentMap.entries()).map(([name, value]) => ({ name, value }))
+
+    return {
+      totalRevenue,
+      pendingAmount,
+      completedCount: completed.length,
+      pendingCount: pending.length,
+      canceledCount: canceled.length,
+      totalCount: list.length,
+      categoryBreakdown,
+      paymentBreakdown,
+    }
+  }, [ordersQuery.data])
 
   // Aggregate statistics for Overview
   const scanStats = useMemo(() => {
@@ -391,27 +454,27 @@ export default function AdminPage() {
   const overviewCards = useMemo(
     () => [
       {
-        label: 'Products',
+        label: 'Sản phẩm',
         value: productsQuery.data?.length ?? 0,
-        hint: 'Live catalog rows',
+        hint: 'Số dòng danh mục đang hoạt động',
         icon: Store,
       },
       {
-        label: 'Scans',
+        label: 'Lượt quét',
         value: scansQuery.data?.length ?? 0,
-        hint: 'Total scans analyzed',
+        hint: 'Tổng lượt quét đã phân tích',
         icon: Camera,
       },
       {
-        label: 'Recommendations',
+        label: 'Gợi ý',
         value: recommendationsQuery.data?.length ?? 0,
-        hint: 'Linked match rules',
+        hint: 'Liên kết sản phẩm phù hợp',
         icon: Sparkles,
       },
       {
-        label: 'Admin role',
+        label: 'Vai trò quản trị',
         value: getAdminRoleLabel(adminRole),
-        hint: 'Security context active',
+        hint: 'Ngữ cảnh bảo mật đang hoạt động',
         icon: ShieldCheck,
       },
     ],
@@ -440,7 +503,7 @@ export default function AdminPage() {
       }
 
       if (!payload.name || !payload.description || !payload.image_url || !payload.external_url) {
-        throw new Error('Fill all product fields before saving.')
+        throw new Error('Vui lòng điền đầy đủ thông tin sản phẩm trước khi lưu.')
       }
 
       if (productForm.id) {
@@ -468,12 +531,12 @@ export default function AdminPage() {
 
   const saveScanMutation = useMutation({
     mutationFn: async () => {
-      if (!scanForm.id) throw new Error('Select a scan to update.')
+      if (!scanForm.id) throw new Error('Chọn một lượt quét để cập nhật.')
       const parsedMetrics = JSON.parse(scanForm.metricsJson)
       const score = Number(scanForm.score)
 
       if (Number.isNaN(score) || score < 0 || score > 100) {
-        throw new Error('Score must be a number between 0 and 100.')
+        throw new Error('Điểm phải là số từ 0 đến 100.')
       }
 
       return databaseService.updateScan(scanForm.id, {
@@ -506,7 +569,7 @@ export default function AdminPage() {
       }
 
       if (!payload.scanId || !payload.productId || !payload.reason) {
-        throw new Error('Fill scan, product and reason before saving.')
+        throw new Error('Vui lòng điền ID quét, ID sản phẩm và lý do trước khi lưu.')
       }
 
       if (recommendationForm.id) {
@@ -542,7 +605,7 @@ export default function AdminPage() {
   const createUserRoleMutation = useMutation({
     mutationFn: async () => {
       if (!newUserEmail || !newUserEmail.includes('@')) {
-        throw new Error('Please enter a valid email address.')
+        throw new Error('Vui lòng nhập địa chỉ email hợp lệ.')
       }
       return databaseService.createUserWithRole(newUserEmail, newUserRole)
     },
@@ -584,10 +647,10 @@ export default function AdminPage() {
 
       const scanResult: ScanResult = {
         skinScore: calculatedScore,
-        hydration: { label: 'Hydration', value: simHydration, status: getStatus('hydration', simHydration) },
-        acne: { label: 'Acne', value: simAcne, status: getStatus('acne', simAcne) },
-        oiliness: { label: 'Oiliness', value: simOiliness, status: getStatus('oiliness', simOiliness) },
-        darkCircles: { label: 'Dark Circles', value: simDarkCircles, status: getStatus('darkCircles', simDarkCircles) },
+        hydration: { label: 'Độ ẩm', value: simHydration, status: getStatus('hydration', simHydration) },
+        acne: { label: 'Mụn', value: simAcne, status: getStatus('acne', simAcne) },
+        oiliness: { label: 'Độ dầu', value: simOiliness, status: getStatus('oiliness', simOiliness) },
+        darkCircles: { label: 'Quầng thâm', value: simDarkCircles, status: getStatus('darkCircles', simDarkCircles) },
       }
 
       // Check if we can save to database
@@ -602,7 +665,7 @@ export default function AdminPage() {
         const recommendations = topProducts.map((p, idx) => ({
           id: makeId(),
           productId: p.id,
-          reason: `Simulated recommendation: mapped for target ${idx === 0 ? 'hydration' : idx === 1 ? 'acne' : 'dark circles'}`,
+          reason: `Gợi ý mô phỏng: phù hợp cho mục tiêu ${idx === 0 ? 'độ ẩm' : idx === 1 ? 'mụn' : 'quầng thâm'}`,
         }))
 
         const scan = { id, userId: null, result: scanResult, created_at: now, recommendations }
@@ -621,7 +684,7 @@ export default function AdminPage() {
         scanId,
         topProducts.map((product, idx) => ({
           productId: product.id,
-          reason: `Simulated match for target ${idx === 0 ? 'hydration' : idx === 1 ? 'acne' : 'dark circles'}`,
+          reason: `Kết quả mô phỏng cho mục tiêu ${idx === 0 ? 'độ ẩm' : idx === 1 ? 'mụn' : 'quầng thâm'}`,
         })),
       )
       return scanId
@@ -629,6 +692,62 @@ export default function AdminPage() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['admin', 'scans'] })
       await queryClient.invalidateQueries({ queryKey: ['admin', 'recommendations'] })
+    },
+  })
+
+  // Order & Revenue Mutations
+  const updateOrderStatusMutation = useMutation({
+    mutationFn: async ({ orderId, status }: { orderId: string; status: 'pending' | 'completed' | 'canceled' }) => {
+      return databaseService.updateOrderStatus(orderId, status)
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'orders'] })
+    },
+  })
+
+  const deleteOrderMutation = useMutation({
+    mutationFn: async (orderId: string) => {
+      return databaseService.deleteOrder(orderId)
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'orders'] })
+    },
+  })
+
+  const simulateOrderMutation = useMutation({
+    mutationFn: async () => {
+      const products = productsQuery.data || []
+      if (products.length === 0) throw new Error('Không có sản phẩm nào để giả lập đơn hàng.')
+      const prod = products[Math.floor(Math.random() * products.length)]
+      const quantity = Math.floor(Math.random() * 2) + 1
+      const price = 250000 + Math.floor(Math.random() * 8) * 50000 // Mock custom price
+      
+      const firstNames = ['Hoàng', 'Lê', 'Nguyễn', 'Trần', 'Phạm', 'Đỗ', 'Bùi', 'Vũ']
+      const lastNames = ['Nam', 'Hà', 'Trang', 'Hùng', 'Oanh', 'Dũng', 'Phúc', 'Linh']
+      const name = `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${lastNames[Math.floor(Math.random() * lastNames.length)]}`
+      const phone = `098${Math.floor(1000000 + Math.random() * 9000000)}`
+      const address = `${Math.floor(Math.random() * 100) + 1} Đường Hoa Mai, TP. Hồ Chí Minh`
+      
+      const paymentMethods = ['cod', 'momo', 'visa', 'apple'] as const
+      
+      const newOrder: OrderRecord = {
+        id: `BG-${Math.floor(100000 + Math.random() * 900000)}`,
+        productId: prod.id,
+        productName: prod.name,
+        productImage: prod.image_url || 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?auto=format&fit=crop&w=400&q=80',
+        productCategory: parseProductTags(prod).category || 'Serum',
+        quantity,
+        price,
+        totalPrice: price * quantity,
+        paymentMethod: paymentMethods[Math.floor(Math.random() * paymentMethods.length)],
+        shippingInfo: { name, phone, address },
+        status: 'pending',
+        createdAt: new Date().toISOString(),
+      }
+      return databaseService.createOrder(newOrder)
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['admin', 'orders'] })
     },
   })
 
@@ -641,8 +760,8 @@ export default function AdminPage() {
     scans.slice(0, 4).forEach((scan) => {
       logs.push({
         id: `scan-${scan.id}`,
-        user: `User ${scan.user_id.slice(0, 5)}...`,
-        event: `Completed skin analysis with score ${scan.score}`,
+        user: `Người dùng ${scan.user_id.slice(0, 5)}...`,
+        event: `Hoàn thành phân tích da với điểm số ${scan.score}`,
         time: formatDate(scan.created_at),
         type: scan.score > 80 ? 'success' : 'info',
       })
@@ -652,8 +771,8 @@ export default function AdminPage() {
     prods.slice(0, 3).forEach((prod) => {
       logs.push({
         id: `prod-${prod.id}`,
-        user: 'Catalog Admin',
-        event: `Modified catalog entry "${prod.name}"`,
+        user: 'Quản trị danh mục',
+        event: `Đã chỉnh sửa mục danh mục "${prod.name}"`,
         time: formatDate(prod.created_at),
         type: 'success',
       })
@@ -662,8 +781,8 @@ export default function AdminPage() {
     // Fallbacks
     if (logs.length === 0) {
       logs.push(
-        { id: '1', user: 'System', event: 'Database connection established.', time: 'Just now', type: 'success' },
-        { id: '2', user: 'Super Admin', event: 'Sign in from new IP address.', time: '10m ago', type: 'info' },
+        { id: '1', user: 'Hệ thống', event: 'Kết nối cơ sở dữ liệu thành công.', time: 'Vừa xong', type: 'success' },
+        { id: '2', user: 'Super Admin', event: 'Đăng nhập từ địa chỉ IP mới.', time: '10 phút trước', type: 'info' },
       )
     }
 
@@ -677,7 +796,7 @@ export default function AdminPage() {
     usersQuery.isLoading
 
   if (isBusy && !productsQuery.data && !scansQuery.data && !recommendationsQuery.data) {
-    return <Loader fullScreen label="Loading admin control room" />
+    return <Loader fullScreen label="Đang tải bảng điều khiển quản trị" />
   }
 
   return (
@@ -690,9 +809,9 @@ export default function AdminPage() {
               <ShieldCheck className="h-4 w-4" />
               {getAdminRoleLabel(adminRole)}
             </div>
-            <h1 className="mt-3 font-display text-3xl text-rose-950">Admin Console</h1>
+            <h1 className="mt-3 font-display text-3xl text-rose-950">Bảng điều khiển</h1>
             <p className="mt-2 text-sm leading-6 text-mist">
-              Manage product data, scan records, and user access permissions in real time.
+              Quản lý dữ liệu sản phẩm, lịch sử quét da và quyền truy cập người dùng theo thời gian thực.
             </p>
           </div>
 
@@ -734,10 +853,10 @@ export default function AdminPage() {
               }}
             >
               <RefreshCw className="mr-2 h-4 w-4" />
-              Refresh data
+              Làm mới dữ liệu
             </Button>
             <Button variant="ghost" className="w-full justify-center" onClick={() => void signOut()}>
-              Sign out
+              Đăng xuất
             </Button>
           </div>
         </aside>
@@ -750,26 +869,26 @@ export default function AdminPage() {
               <div className="space-y-5">
                 <div className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-rose-600">
                   <Database className="h-4 w-4" />
-                  Supabase platform connection
+                  Kết nối nền tảng Supabase
                 </div>
                 <div className="space-y-3">
                   <h2 className="font-display text-4xl text-rose-950 md:text-5xl">
-                    Operate the whole beauty platform from one place
+                    Vận hành toàn bộ nền tảng làm đẹp từ một nơi
                   </h2>
                   <p className="max-w-2xl text-sm leading-7 text-mist md:text-base">
-                    Real-time Supabase connection is active. Changes to catalog, scans, and roles will sync immediately and reflect on the public application.
+                    Kết nối Supabase theo thời gian thực đang hoạt động. Các thay đổi về danh mục, quét da và vai trò sẽ được đồng bộ ngay lập tức và phản ánh trên ứng dụng.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-3">
                   <Button onClick={() => setActiveSection('products')}>
-                    Open product manager
+                    Quản lý sản phẩm
                     <PencilLine className="h-4 w-4" />
                   </Button>
                   <Button variant="ghost" onClick={() => setActiveSection('scans')}>
-                    Review scans & Simulator
+                    Quét da & Mô phỏng
                   </Button>
                   <Button variant="ghost" onClick={() => setActiveSection('access')}>
-                    Edit user permissions
+                    Chỉnh sửa quyền người dùng
                   </Button>
                 </div>
               </div>
@@ -806,29 +925,29 @@ export default function AdminPage() {
                 <Card className="border border-rose-100 p-5 bg-white flex flex-col justify-between">
                   <div>
                     <div className="flex justify-between items-center text-xs uppercase tracking-[0.2em] text-cyan">
-                      <span>Supabase Link</span>
+                      <span>Kết nối Supabase</span>
                       <Wifi className="h-4 w-4 text-emerald-500 animate-pulse" />
                     </div>
-                    <h3 className="mt-3 font-display text-2xl text-rose-950">Online</h3>
+                    <h3 className="mt-3 font-display text-2xl text-rose-950">Trực tuyến</h3>
                     <p className="mt-1 text-xs text-mist leading-relaxed">
-                      API endpoint is live and accepts CRUD operations.
+                      API đang hoạt động và chấp nhận các thao tác CRUD.
                     </p>
                   </div>
                   <div className="mt-4 pt-3 border-t border-rose-50 flex items-center justify-between text-xs">
-                    <span className="text-mist/70">Database Latency:</span>
+                    <span className="text-mist/70">Độ trễ CSDL:</span>
                     <span className="font-semibold text-emerald-600">
-                      {pingStatus === 'pinging' ? '...' : pingTime && pingTime > 0 ? `${pingTime}ms` : 'Check failed'}
+                      {pingStatus === 'pinging' ? '...' : pingTime && pingTime > 0 ? `${pingTime}ms` : 'Kiểm tra thất bại'}
                     </span>
                   </div>
                 </Card>
 
                 <Card className="border border-rose-100 p-5 bg-white">
-                  <p className="text-xs uppercase tracking-[0.2em] text-cyan">Database Queries</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-cyan">Truy vấn CSDL</p>
                   <h3 className="mt-3 font-display text-2xl text-rose-950">
-                    {scansQuery.data ? scansQuery.data.length + (productsQuery.data?.length ?? 0) : '0'} rows
+                    {scansQuery.data ? scansQuery.data.length + (productsQuery.data?.length ?? 0) : '0'} dòng
                   </h3>
                   <p className="mt-2 text-xs text-mist">
-                    Catalog products, recommendation links, and records.
+                    Sản phẩm, liên kết gợi ý và bản ghi.
                   </p>
                   <div className="mt-3 pt-3 border-t border-rose-50 text-right">
                     <button
@@ -837,27 +956,27 @@ export default function AdminPage() {
                       className="text-xs text-rose-600 hover:underline flex items-center justify-end gap-1 ml-auto"
                     >
                       <Activity className="h-3 w-3" />
-                      {pingStatus === 'pinging' ? 'Testing...' : 'Test Connection Ping'}
+                      {pingStatus === 'pinging' ? 'Đang kiểm tra...' : 'Kiểm tra kết nối'}
                     </button>
                   </div>
                 </Card>
 
                 <Card className="border border-rose-100 p-5 bg-white">
-                  <p className="text-xs uppercase tracking-[0.2em] text-cyan">CPU Simulator</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-cyan">Mô phỏng CPU</p>
                   <h3 className="mt-3 font-display text-2xl text-rose-950">14% - 24%</h3>
                   <div className="w-full bg-rose-50 h-2 rounded-full mt-3 overflow-hidden">
                     <div className="bg-gradient-to-r from-rose-400 to-pink-500 h-full rounded-full w-[18%]" />
                   </div>
-                  <p className="mt-2 text-[10px] text-mist/70">Average computing server usage</p>
+                  <p className="mt-2 text-[10px] text-mist/70">Mức sử dụng máy chủ trung bình</p>
                 </Card>
 
                 <Card className="border border-rose-100 p-5 bg-white">
-                  <p className="text-xs uppercase tracking-[0.2em] text-cyan">Memory Load</p>
+                  <p className="text-xs uppercase tracking-[0.2em] text-cyan">Tải bộ nhớ</p>
                   <h3 className="mt-3 font-display text-2xl text-rose-950">512 MB</h3>
                   <div className="w-full bg-rose-50 h-2 rounded-full mt-3 overflow-hidden">
                     <div className="bg-gradient-to-r from-cyan to-teal-400 h-full rounded-full w-[50%]" />
                   </div>
-                  <p className="mt-2 text-[10px] text-mist/70">512MB utilized of 1024MB allocated</p>
+                  <p className="mt-2 text-[10px] text-mist/70">Đã sử dụng 512MB trên tổng 1024MB được phân bổ</p>
                 </Card>
               </div>
 
@@ -866,8 +985,8 @@ export default function AdminPage() {
                 {/* SVG Graph: Skin Score Histogram */}
                 <Card className="border border-rose-100 p-6 bg-white space-y-4">
                   <div>
-                    <h3 className="font-display text-xl text-rose-950">Skin Score Distribution</h3>
-                    <p className="text-xs text-mist">Frequency of scores generated from historical client scans.</p>
+                    <h3 className="font-display text-xl text-rose-950">Phân bố điểm da</h3>
+                    <p className="text-xs text-mist">Tần suất điểm số từ các lượt quét lịch sử của khách hàng.</p>
                   </div>
                   <div className="h-44 flex items-end justify-between gap-2 border-b border-rose-100 pb-2">
                     {scanStats.scoreRanges.map((count, i) => {
@@ -889,15 +1008,15 @@ export default function AdminPage() {
                 {/* Aggregated Skin Metrics */}
                 <Card className="border border-rose-100 p-6 bg-white space-y-4">
                   <div>
-                    <h3 className="font-display text-xl text-rose-950">Average Skin Metrics</h3>
-                    <p className="text-xs text-mist">Average values parsed across all active client scan records.</p>
+                    <h3 className="font-display text-xl text-rose-950">Chỉ số da trung bình</h3>
+                    <p className="text-xs text-mist">Giá trị trung bình từ tất cả các bản ghi quét da.</p>
                   </div>
                   <div className="space-y-3 pt-2">
                     {[
-                      { name: 'Hydration', val: scanStats.avgHydration, color: 'from-cyan to-blue-400', desc: 'Higher is better hydrated' },
-                      { name: 'Acne Severity', val: scanStats.avgAcne, color: 'from-rose-400 to-pink-500', desc: 'Lower is better' },
-                      { name: 'Sebum / Oiliness', val: scanStats.avgOiliness, color: 'from-amber-400 to-yellow-500', desc: 'Balanced at ~50' },
-                      { name: 'Dark Circles', val: scanStats.avgDarkCircles, color: 'from-purple-400 to-indigo-500', desc: 'Lower is better' },
+                      { name: 'Độ ẩm', val: scanStats.avgHydration, color: 'from-cyan to-blue-400', desc: 'Càng cao càng tốt' },
+                      { name: 'Mức độ mụn', val: scanStats.avgAcne, color: 'from-rose-400 to-pink-500', desc: 'Càng thấp càng tốt' },
+                      { name: 'Bã nhờn / Độ dầu', val: scanStats.avgOiliness, color: 'from-amber-400 to-yellow-500', desc: 'Cân bằng ở ~50' },
+                      { name: 'Quầng thâm', val: scanStats.avgDarkCircles, color: 'from-purple-400 to-indigo-500', desc: 'Càng thấp càng tốt' },
                     ].map((metric) => (
                       <div key={metric.name} className="space-y-1">
                         <div className="flex justify-between text-xs font-semibold text-rose-950">
@@ -921,11 +1040,11 @@ export default function AdminPage() {
               <Card className="border border-rose-100 p-6 bg-white space-y-4">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h3 className="font-display text-xl text-rose-950">System Activity Feed</h3>
-                    <p className="text-xs text-mist">Live notifications and audit logging of actions and scans.</p>
+                    <h3 className="font-display text-xl text-rose-950">Hoạt động hệ thống</h3>
+                    <p className="text-xs text-mist">Thông báo trực tiếp và nhật ký hoạt động.</p>
                   </div>
                   <span className="text-[10px] bg-rose-50 text-rose-600 px-2.5 py-1 rounded-full uppercase tracking-wider font-bold">
-                    Audit Log
+                    Nhật ký
                   </span>
                 </div>
                 <div className="divide-y divide-rose-50 max-h-60 overflow-y-auto pr-1">
@@ -953,25 +1072,25 @@ export default function AdminPage() {
               {/* Product Form */}
               <Card className="border border-rose-100 p-6 self-start bg-white shadow-sm">
                 <AdminSectionTitle
-                  eyebrow="Catalog CRUD"
-                  title={productForm.id ? 'Edit product' : 'Add new product'}
-                  description="Add or edit platform items. Pricing, stock numbers, and discounts are decoded cleanly on save."
+                  eyebrow="Quản lý danh mục"
+                  title={productForm.id ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'}
+                  description="Thêm hoặc chỉnh sửa sản phẩm. Giá cả, số lượng tồn kho và giảm giá sẽ được xử lý khi lưu."
                 />
                 <div className="mt-5 space-y-4">
                   <div>
-                    <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Name</label>
+                    <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Tên sản phẩm</label>
                     <Input
-                      placeholder="Product name (e.g. Cleansing Balm)"
+                      placeholder="Tên sản phẩm (ví dụ: Sữa rửa mặt)"
                       value={productForm.name}
                       onChange={(event) => setProductForm((state) => ({ ...state, name: event.target.value }))}
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Description</label>
+                    <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Mô tả</label>
                     <textarea
                       className="min-h-[90px] w-full rounded-2xl border border-rose-200/80 bg-white/80 px-4 py-3 text-sm text-pearl placeholder:text-mist/70 focus:border-cyan focus:outline-none focus:ring-2 focus:ring-cyan/25"
-                      placeholder="Enter detailed description of what it does..."
+                      placeholder="Nhập mô tả chi tiết về sản phẩm..."
                       value={productForm.description}
                       onChange={(event) => setProductForm((state) => ({ ...state, description: event.target.value }))}
                     />
@@ -979,28 +1098,28 @@ export default function AdminPage() {
 
                   <div className="grid gap-3 grid-cols-2">
                     <div>
-                      <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Category</label>
+                      <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Danh mục</label>
                       <select
                         className="w-full rounded-2xl border border-rose-200/80 bg-white/85 px-4 py-3 text-sm text-pearl focus:border-cyan focus:outline-none focus:ring-2 focus:ring-cyan/25"
                         value={productForm.category}
                         onChange={(event) => setProductForm((state) => ({ ...state, category: event.target.value }))}
                       >
-                        <option value="Cleanser">Cleanser</option>
+                        <option value="Cleanser">Sữa rửa mặt</option>
                         <option value="Serum">Serum</option>
-                        <option value="Moisturizer">Moisturizer</option>
-                        <option value="Toner">Toner</option>
-                        <option value="Sunscreen">Sunscreen</option>
-                        <option value="Treatment">Treatment</option>
-                        <option value="Essence">Essence</option>
-                        <option value="Mask">Mask</option>
-                        <option value="Eye Care">Eye Care</option>
+                        <option value="Moisturizer">Dưỡng ẩm</option>
+                        <option value="Toner">Tôner</option>
+                        <option value="Sunscreen">Kem chống nắng</option>
+                        <option value="Treatment">Điều trị</option>
+                        <option value="Essence">Tinh chất</option>
+                        <option value="Mask">Mặt nạ</option>
+                        <option value="Eye Care">Chăm sóc mắt</option>
                       </select>
                     </div>
 
                     <div>
-                      <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Stock count</label>
+                      <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Số lượng tồn</label>
                       <Input
-                        placeholder="In stock (e.g. 15)"
+                        placeholder="Tồn kho (ví dụ: 15)"
                         type="number"
                         value={productForm.stock}
                         onChange={(event) => setProductForm((state) => ({ ...state, stock: event.target.value }))}
@@ -1010,7 +1129,7 @@ export default function AdminPage() {
 
                   <div className="grid gap-3 grid-cols-3">
                     <div>
-                      <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Price</label>
+                      <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Giá bán</label>
                       <div className="relative">
                         <DollarSign className="absolute left-3 top-3 h-4 w-4 text-mist/60" />
                         <Input
@@ -1023,7 +1142,7 @@ export default function AdminPage() {
                     </div>
 
                     <div>
-                      <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Original Price</label>
+                      <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Giá gốc</label>
                       <div className="relative">
                         <DollarSign className="absolute left-3 top-3 h-4 w-4 text-mist/60" />
                         <Input
@@ -1036,7 +1155,7 @@ export default function AdminPage() {
                     </div>
 
                     <div>
-                      <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Discount %</label>
+                      <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Giảm giá %</label>
                       <Input
                         placeholder="25"
                         type="number"
@@ -1047,7 +1166,7 @@ export default function AdminPage() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Image URL</label>
+                    <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Đường dẫn hình ảnh</label>
                     <Input
                       placeholder="https://images.unsplash.com/photo-..."
                       value={productForm.imageUrl}
@@ -1056,7 +1175,7 @@ export default function AdminPage() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Affiliate Link</label>
+                    <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Liên kết đối tác</label>
                     <Input
                       placeholder="https://example.com/partner-item"
                       value={productForm.externalUrl}
@@ -1065,7 +1184,7 @@ export default function AdminPage() {
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Tags (Comma-separated)</label>
+                    <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Thẻ (cách nhau bằng dấu phẩy)</label>
                     <Input
                       placeholder="sensitive, barrier, peptide"
                       value={productForm.tags}
@@ -1081,10 +1200,10 @@ export default function AdminPage() {
                       onClick={() => saveProductMutation.mutate()}
                       disabled={saveProductMutation.isPending}
                     >
-                      {saveProductMutation.isPending ? 'Saving...' : productForm.id ? 'Update product' : 'Create product'}
+                      {saveProductMutation.isPending ? 'Đang lưu...' : productForm.id ? 'Cập nhật sản phẩm' : 'Tạo sản phẩm'}
                     </Button>
                     <Button variant="ghost" onClick={() => setProductForm(emptyProductForm)}>
-                      Reset
+                      Đặt lại
                     </Button>
                   </div>
                 </div>
@@ -1099,7 +1218,7 @@ export default function AdminPage() {
                     <input
                       type="text"
                       className="w-full rounded-full border border-rose-100 pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-rose-200"
-                      placeholder="Search products by name/description..."
+                      placeholder="Tìm sản phẩm theo tên/mô tả..."
                       value={productSearch}
                       onChange={(e) => setProductSearch(e.target.value)}
                     />
@@ -1110,22 +1229,22 @@ export default function AdminPage() {
                     value={productCategoryFilter}
                     onChange={(e) => setProductCategoryFilter(e.target.value)}
                   >
-                    <option value="All">All Categories</option>
-                    <option value="Cleanser">Cleansers</option>
-                    <option value="Serum">Serums</option>
-                    <option value="Moisturizer">Moisturizers</option>
-                    <option value="Toner">Toners</option>
-                    <option value="Sunscreen">Sunscreens</option>
-                    <option value="Treatment">Treatments</option>
-                    <option value="Essence">Essences</option>
-                    <option value="Mask">Masks</option>
-                    <option value="Eye Care">Eye Care</option>
+                    <option value="All">Tất cả danh mục</option>
+                    <option value="Cleanser">Sữa rửa mặt</option>
+                    <option value="Serum">Serum</option>
+                    <option value="Moisturizer">Dưỡng ẩm</option>
+                    <option value="Toner">Tôner</option>
+                    <option value="Sunscreen">Kem chống nắng</option>
+                    <option value="Treatment">Điều trị</option>
+                    <option value="Essence">Tinh chất</option>
+                    <option value="Mask">Mặt nạ</option>
+                    <option value="Eye Care">Chăm sóc mắt</option>
                   </select>
                 </div>
 
                 {filteredProducts.length === 0 ? (
                   <div className="text-center py-12 bg-white border border-rose-100 rounded-3xl text-mist">
-                    No products matched search or category.
+                    Không có sản phẩm khớp với tìm kiếm hoặc danh mục.
                   </div>
                 ) : null}
 
@@ -1163,31 +1282,31 @@ export default function AdminPage() {
                             {parsed.stock !== undefined && (
                               <span className={`flex items-center gap-1 ${parsed.stock <= 5 ? 'text-amber-600 font-bold' : 'text-mist/75'}`}>
                                 <Package className="h-3 w-3" />
-                                {parsed.stock} in stock
+                                {parsed.stock} tồn kho
                               </span>
                             )}
                           </div>
 
                           <p className="text-[10px] text-mist/70 leading-none">
-                            Tags: {formatTags(parsed.cleanTags)}
+                            Thẻ: {formatTags(parsed.cleanTags)}
                           </p>
 
                           <div className="flex flex-wrap gap-2 pt-2">
                             <Button size="sm" variant="ghost" onClick={() => setProductForm(mapProductForm(product))}>
-                              Edit properties
+                              Chỉnh sửa
                             </Button>
                             <Button
                               size="sm"
                               variant="ghost"
                               onClick={() => {
-                                if (confirm(`Delete ${product.name}?`)) {
+                                if (confirm(`Xóa ${product.name}?`)) {
                                   deleteProductMutation.mutate(product.id)
                                 }
                               }}
                               disabled={deleteProductMutation.isPending}
                             >
                               <Trash2 className="h-4 w-4" />
-                              Delete product
+                              Xóa sản phẩm
                             </Button>
                           </div>
                         </div>
@@ -1211,7 +1330,7 @@ export default function AdminPage() {
                     <input
                       type="text"
                       className="w-full rounded-full border border-rose-100 pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-rose-200"
-                      placeholder="Search scans by user UUID or Scan ID..."
+                      placeholder="Tìm kiếm lượt quét bằng UUID người dùng hoặc Mã lượt quét..."
                       value={scanSearch}
                       onChange={(e) => setScanSearch(e.target.value)}
                     />
@@ -1219,7 +1338,7 @@ export default function AdminPage() {
 
                   <div className="space-y-1">
                     <div className="flex justify-between text-xs text-rose-950 font-bold uppercase tracking-wider">
-                      <span>Score Range:</span>
+                      <span>Khoảng điểm:</span>
                       <span>{scanScoreFilter[0]} - {scanScoreFilter[1]}</span>
                     </div>
                     <div className="flex gap-4 items-center">
@@ -1245,13 +1364,13 @@ export default function AdminPage() {
 
                 <Card className="border border-rose-100 p-6 bg-white">
                   <AdminSectionTitle
-                    eyebrow="Scan records"
-                    title="Skin Analyses history"
-                    description="Select a scan to inspect the metrics, alter scores, or delete historical records."
+                    eyebrow="Bản ghi quét"
+                    title="Lịch sử phân tích da"
+                    description="Chọn một lượt quét để kiểm tra các chỉ số, thay đổi điểm số, hoặc xóa bản ghi lịch sử."
                   />
                   <div className="mt-5 space-y-3 max-h-[500px] overflow-y-auto pr-1">
                     {filteredScans.length === 0 ? (
-                      <p className="text-center py-6 text-mist text-sm">No scans match the filters.</p>
+                      <p className="text-center py-6 text-mist text-sm">Không có lượt quét nào khớp với bộ lọc.</p>
                     ) : null}
 
                     {filteredScans.map((scan) => (
@@ -1266,12 +1385,12 @@ export default function AdminPage() {
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
-                            <p className="font-semibold text-rose-950">Scan {scan.id.slice(0, 8)}</p>
-                            <p className="mt-0.5 text-xs text-mist truncate">User: {scan.user_id}</p>
+                            <p className="font-semibold text-rose-950">Lượt quét {scan.id.slice(0, 8)}</p>
+                            <p className="mt-0.5 text-xs text-mist truncate">Người dùng: {scan.user_id}</p>
                             <p className="mt-1 text-[10px] text-mist">{formatDate(scan.created_at)}</p>
                           </div>
                           <div className="rounded-full bg-rose-50 border border-rose-100 px-3 py-1 text-xs font-bold text-rose-600">
-                            Score {scan.score}
+                            Điểm {scan.score}
                           </div>
                         </div>
                       </button>
@@ -1286,15 +1405,15 @@ export default function AdminPage() {
                 {scanForm.id ? (
                   <Card className="border border-rose-100 p-6 bg-white">
                     <AdminSectionTitle
-                      eyebrow="Scan editor"
-                      title={`Inspect scan ${scanForm.id.slice(0, 8)}`}
-                      description="Update score or manually overwrite the stored JSON analytics payload."
+                      eyebrow="Trình chỉnh sửa quét"
+                      title={`Chi tiết lượt quét ${scanForm.id.slice(0, 8)}`}
+                      description="Cập nhật điểm số hoặc ghi đè thủ công dữ liệu phân tích JSON đã lưu."
                     />
                     <div className="mt-5 space-y-4">
                       <div>
-                        <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Score</label>
+                        <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Điểm số</label>
                         <Input
-                          placeholder="Score"
+                          placeholder="Điểm số"
                           type="number"
                           value={scanForm.score}
                           onChange={(event) => setScanForm((state) => ({ ...state, score: event.target.value }))}
@@ -1302,10 +1421,10 @@ export default function AdminPage() {
                       </div>
 
                       <div>
-                        <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Metrics JSON</label>
+                        <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Dữ liệu chỉ số JSON</label>
                         <textarea
                           className="min-h-[140px] w-full rounded-2xl border border-rose-200/80 bg-white/80 px-4 py-3 font-mono text-xs text-pearl placeholder:text-mist/70 focus:border-cyan focus:outline-none focus:ring-2 focus:ring-cyan/25"
-                          placeholder="Metrics JSON"
+                          placeholder="Dữ liệu chỉ số JSON"
                           value={scanForm.metricsJson}
                           onChange={(event) => setScanForm((state) => ({ ...state, metricsJson: event.target.value }))}
                         />
@@ -1317,22 +1436,22 @@ export default function AdminPage() {
 
                       <div className="flex flex-wrap gap-2 pt-2">
                         <Button onClick={() => saveScanMutation.mutate()} disabled={saveScanMutation.isPending}>
-                          Save updates
+                          Lưu cập nhật
                         </Button>
                         <Button variant="ghost" onClick={() => setScanForm(emptyScanForm)}>
-                          Cancel
+                          Hủy
                         </Button>
                         <Button
                           variant="ghost"
                           onClick={() => {
-                            if (confirm('Delete this scan record permanently?')) {
+                            if (confirm('Xóa vĩnh viễn bản ghi quét này?')) {
                               deleteScanMutation.mutate(scanForm.id)
                             }
                           }}
                           disabled={deleteScanMutation.isPending}
                         >
                           <Trash2 className="h-4 w-4" />
-                          Delete scan
+                          Xóa lượt quét
                         </Button>
                       </div>
                     </div>
@@ -1343,20 +1462,20 @@ export default function AdminPage() {
                 <Card className="border border-rose-200 bg-gradient-to-br from-rose-50/50 to-amber-50/30 p-6">
                   <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-rose-600 font-extrabold">
                     <Sliders className="h-4 w-4 text-rose-500 animate-pulse" />
-                    <span>Developer Studio</span>
+                    <span>Phòng lập trình viên</span>
                   </div>
-                  <h3 className="mt-2 font-display text-2xl text-rose-950">Scan Simulator</h3>
+                  <h3 className="mt-2 font-display text-2xl text-rose-950">Trình giả lập quét da</h3>
                   <p className="mt-1 text-sm text-mist">
-                    Trigger simulated results and save them directly to Supabase to test recommendation triggers.
+                    Kích hoạt kết quả giả lập và lưu trực tiếp vào Supabase để kiểm tra các bộ kích hoạt gợi ý.
                   </p>
 
                   <div className="mt-5 space-y-4">
                     <div>
                       <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">
-                        Target User ID (Leave blank to use signed-in admin)
+                        Mã ID người dùng đích (Để trống để dùng admin hiện tại)
                       </label>
                       <Input
-                        placeholder="Supabase User UUID (e.g. 5d5a7d8...)"
+                        placeholder="UUID người dùng Supabase (ví dụ: 5d5a7d8...)"
                         value={targetUserId}
                         onChange={(e) => setTargetUserId(e.target.value)}
                       />
@@ -1366,7 +1485,7 @@ export default function AdminPage() {
                       {/* Hydration Slider */}
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs font-semibold text-rose-950">
-                          <span>Hydration Level</span>
+                          <span>Độ ẩm</span>
                           <span className="text-cyan-600 font-extrabold">{simHydration}%</span>
                         </div>
                         <input
@@ -1382,7 +1501,7 @@ export default function AdminPage() {
                       {/* Acne Slider */}
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs font-semibold text-rose-950">
-                          <span>Acne Severity (lower values represent clearer skin)</span>
+                          <span>Mức độ mụn (giá trị thấp hơn thể hiện da sạch hơn)</span>
                           <span className="text-rose-600 font-extrabold">{simAcne}%</span>
                         </div>
                         <input
@@ -1398,7 +1517,7 @@ export default function AdminPage() {
                       {/* Oiliness Slider */}
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs font-semibold text-rose-950">
-                          <span>Sebum / Oiliness</span>
+                          <span>Bã nhờn / Độ dầu</span>
                           <span className="text-amber-600 font-extrabold">{simOiliness}%</span>
                         </div>
                         <input
@@ -1414,7 +1533,7 @@ export default function AdminPage() {
                       {/* Dark Circles Slider */}
                       <div className="space-y-1">
                         <div className="flex justify-between text-xs font-semibold text-rose-950">
-                          <span>Dark Circles fatigue</span>
+                          <span>Độ mệt mỏi quầng thâm</span>
                           <span className="text-purple-600 font-extrabold">{simDarkCircles}%</span>
                         </div>
                         <input
@@ -1429,7 +1548,7 @@ export default function AdminPage() {
                     </div>
 
                     <div className="bg-white/80 p-3 rounded-2xl border border-rose-100 flex items-center justify-between text-xs">
-                      <span className="text-mist font-semibold">Calculated Skin Score:</span>
+                      <span className="text-mist font-semibold">Điểm da tính toán:</span>
                       <span className="text-lg font-bold text-rose-900">
                         {Math.round((simHydration + (100 - simAcne) + (100 - simOiliness) + (100 - simDarkCircles)) / 4)} / 100
                       </span>
@@ -1440,7 +1559,7 @@ export default function AdminPage() {
                     ) : null}
 
                     {runSimulatorMutation.isSuccess ? (
-                      <p className="text-xs text-emerald-600 font-bold">Mock Scan inserted successfully! ✓</p>
+                      <p className="text-xs text-emerald-600 font-bold">Đã chèn lượt quét giả lập thành công! ✓</p>
                     ) : null}
 
                     <Button
@@ -1448,7 +1567,7 @@ export default function AdminPage() {
                       onClick={() => runSimulatorMutation.mutate()}
                       disabled={runSimulatorMutation.isPending}
                     >
-                      {runSimulatorMutation.isPending ? 'Inserting record...' : 'Simulate Skin Scan & Save'}
+                      {runSimulatorMutation.isPending ? 'Đang chèn bản ghi...' : 'Giả lập quét da & Lưu'}
                     </Button>
                   </div>
                 </Card>
@@ -1462,33 +1581,33 @@ export default function AdminPage() {
               {/* Creator Form */}
               <Card className="border border-rose-100 p-6 bg-white">
                 <AdminSectionTitle
-                  eyebrow="Recommendation CRUD"
-                  title={recommendationForm.id ? 'Edit recommendation' : 'Create recommendation link'}
-                  description="Tie a specific product to a scan ID. Customize the match reason that appears in the customer timeline."
+                  eyebrow="Quản lý gợi ý"
+                  title={recommendationForm.id ? 'Chỉnh sửa gợi ý sản phẩm' : 'Tạo liên kết gợi ý sản phẩm'}
+                  description="Liên kết một sản phẩm cụ thể với Mã lượt quét (Scan ID). Tùy chỉnh lý do phù hợp hiển thị trong dòng thời gian của khách hàng."
                 />
                 <div className="mt-5 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
                   <div>
-                    <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Scan ID</label>
+                    <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Mã lượt quét (Scan ID)</label>
                     <Input
-                      placeholder="Scan UUID (e.g. 10f3f31d-...)"
+                      placeholder="UUID lượt quét (ví dụ: 10f3f31d-...)"
                       value={recommendationForm.scanId}
                       onChange={(event) => setRecommendationForm((state) => ({ ...state, scanId: event.target.value }))}
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Product ID</label>
+                    <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Mã sản phẩm (Product ID)</label>
                     <Input
-                      placeholder="Product UUID (e.g. ac95f484-...)"
+                      placeholder="UUID sản phẩm (ví dụ: ac95f484-...)"
                       value={recommendationForm.productId}
                       onChange={(event) => setRecommendationForm((state) => ({ ...state, productId: event.target.value }))}
                     />
                   </div>
 
                   <div>
-                    <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Match Reason Text</label>
+                    <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Lý do phù hợp (Match Reason)</label>
                     <Input
-                      placeholder="Why recommended (e.g. Aligns with low hydration...)"
+                      placeholder="Lý do gợi ý (ví dụ: Phù hợp với da thiếu nước...)"
                       value={recommendationForm.reason}
                       onChange={(event) => setRecommendationForm((state) => ({ ...state, reason: event.target.value }))}
                     />
@@ -1501,10 +1620,10 @@ export default function AdminPage() {
 
                 <div className="mt-4 flex flex-wrap gap-2">
                   <Button onClick={() => saveRecommendationMutation.mutate()} disabled={saveRecommendationMutation.isPending}>
-                    {saveRecommendationMutation.isPending ? 'Saving...' : recommendationForm.id ? 'Update recommendation' : 'Create recommendation'}
+                    {saveRecommendationMutation.isPending ? 'Đang lưu...' : recommendationForm.id ? 'Cập nhật gợi ý' : 'Tạo gợi ý'}
                   </Button>
                   <Button variant="ghost" onClick={() => setRecommendationForm(emptyRecommendationForm)}>
-                    Reset
+                    Đặt lại
                   </Button>
                 </div>
               </Card>
@@ -1516,7 +1635,7 @@ export default function AdminPage() {
                   <input
                     type="text"
                     className="w-full rounded-full border border-rose-100 pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-rose-200"
-                    placeholder="Search by Scan, Product, or Reason keywords..."
+                    placeholder="Tìm kiếm theo từ khóa Lượt quét, Sản phẩm hoặc Lý do..."
                     value={recommendationSearch}
                     onChange={(e) => setRecommendationSearch(e.target.value)}
                   />
@@ -1527,22 +1646,22 @@ export default function AdminPage() {
                   value={recommendationCategoryFilter}
                   onChange={(e) => setRecommendationCategoryFilter(e.target.value)}
                 >
-                  <option value="All">All Categories</option>
-                  <option value="Cleanser">Cleansers</option>
-                  <option value="Serum">Serums</option>
-                  <option value="Moisturizer">Moisturizers</option>
-                  <option value="Toner">Toners</option>
-                  <option value="Sunscreen">Sunscreens</option>
-                  <option value="Treatment">Treatments</option>
-                  <option value="Essence">Essences</option>
-                  <option value="Mask">Masks</option>
-                  <option value="Eye Care">Eye Care</option>
+                  <option value="All">Tất cả danh mục</option>
+                  <option value="Cleanser">Sữa rửa mặt</option>
+                  <option value="Serum">Tinh chất / Serum</option>
+                  <option value="Moisturizer">Kem dưỡng ẩm</option>
+                  <option value="Toner">Nước hoa hồng / Toner</option>
+                  <option value="Sunscreen">Kem chống nắng</option>
+                  <option value="Treatment">Sản phẩm đặc trị</option>
+                  <option value="Essence">Tinh chất dưỡng / Essence</option>
+                  <option value="Mask">Mặt nạ</option>
+                  <option value="Eye Care">Chăm sóc mắt</option>
                 </select>
               </div>
 
               {filteredRecommendations.length === 0 ? (
                 <div className="text-center py-12 bg-white border border-rose-100 rounded-3xl text-mist">
-                  No recommendation records matched search criteria.
+                  Không có bản ghi gợi ý nào khớp với tiêu chí tìm kiếm.
                 </div>
               ) : null}
 
@@ -1557,7 +1676,7 @@ export default function AdminPage() {
                     <Card key={recommendation.id} className="border border-rose-100 p-5 bg-white">
                       <div className="flex items-start justify-between gap-3">
                         <div className="min-w-0">
-                          <p className="text-[10px] uppercase tracking-[0.2em] text-cyan font-bold">Match Link</p>
+                          <p className="text-[10px] uppercase tracking-[0.2em] text-cyan font-bold">Liên kết gợi ý</p>
                           <h3 className="mt-2 font-display text-2xl text-rose-950 font-bold truncate">
                             {product?.name ?? recommendation.product_id.slice(0, 8)}
                           </h3>
@@ -1575,25 +1694,25 @@ export default function AdminPage() {
                         </span>
                       </div>
                       <div className="mt-4 grid gap-2 rounded-2xl border border-rose-100 bg-rose-50/60 p-4 text-[11px] text-mist">
-                        <p className="truncate"><span className="font-semibold text-rose-950">Scan UUID:</span> {recommendation.scan_id} {scan && `(Score ${scan.score})`}</p>
-                        <p className="truncate"><span className="font-semibold text-rose-950">Product UUID:</span> {recommendation.product_id}</p>
+                        <p className="truncate"><span className="font-semibold text-rose-950">UUID Lượt quét:</span> {recommendation.scan_id} {scan && `(Điểm số: ${scan.score})`}</p>
+                        <p className="truncate"><span className="font-semibold text-rose-950">UUID Sản phẩm:</span> {recommendation.product_id}</p>
                       </div>
                       <div className="mt-4 flex flex-wrap gap-2 pt-1">
                         <Button size="sm" variant="ghost" onClick={() => setRecommendationForm(mapRecommendationForm(recommendation))}>
-                          Edit match details
+                          Sửa chi tiết gợi ý
                         </Button>
                         <Button
                           size="sm"
                           variant="ghost"
                           onClick={() => {
-                            if (confirm('Remove this recommendation link?')) {
+                            if (confirm('Xóa liên kết gợi ý này?')) {
                               deleteRecommendationMutation.mutate(recommendation.id)
                             }
                           }}
                           disabled={deleteRecommendationMutation.isPending}
                         >
                           <Trash2 className="h-4 w-4" />
-                          Delete match
+                          Xóa gợi ý
                         </Button>
                       </div>
                     </Card>
@@ -1609,9 +1728,9 @@ export default function AdminPage() {
               {/* Users list and Role Editor */}
               <Card className="border border-rose-100 p-6 bg-white shadow-sm space-y-5">
                 <div>
-                  <h3 className="font-display text-2xl text-rose-950">User Role Assignments</h3>
+                  <h3 className="font-display text-2xl text-rose-950">Phân quyền người dùng</h3>
                   <p className="text-xs text-mist mt-1">
-                    Manage sandbox user permissions. Setting a user to regular "user" removes admin sidebar rights immediately.
+                    Quản lý quyền hạn của người dùng thử nghiệm. Thiết lập một tài khoản thành "user" sẽ thu hồi quyền truy cập trang quản trị ngay lập tức.
                   </p>
                 </div>
 
@@ -1621,7 +1740,7 @@ export default function AdminPage() {
                   <input
                     type="text"
                     className="w-full rounded-full border border-rose-100 pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-rose-200"
-                    placeholder="Search users by email..."
+                    placeholder="Tìm kiếm người dùng bằng email..."
                     value={userSearch}
                     onChange={(e) => setUserSearch(e.target.value)}
                   />
@@ -1633,9 +1752,9 @@ export default function AdminPage() {
                     <thead>
                       <tr className="border-b border-rose-100 text-rose-950 font-bold uppercase tracking-wider">
                         <th className="pb-3 pr-2">Email</th>
-                        <th className="pb-3 px-2">Assigned Permission</th>
-                        <th className="pb-3 px-2">Created</th>
-                        <th className="pb-3 pl-2 text-right">Actions</th>
+                        <th className="pb-3 px-2">Quyền được gán</th>
+                        <th className="pb-3 px-2">Ngày tạo</th>
+                        <th className="pb-3 pl-2 text-right">Hành động</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-rose-50">
@@ -1644,7 +1763,7 @@ export default function AdminPage() {
                           <td className="py-3 pr-2 font-medium truncate max-w-[150px]" title={item.email}>
                             {item.email}
                             {item.email.toLowerCase() === currentAuthUser?.email?.toLowerCase() && (
-                              <span className="ml-1 text-[9px] bg-cyan/10 text-cyan-700 px-1 py-0.5 rounded font-extrabold">You</span>
+                              <span className="ml-1 text-[9px] bg-cyan/10 text-cyan-700 px-1 py-0.5 rounded font-extrabold">Bạn</span>
                             )}
                           </td>
                           <td className="py-3 px-2">
@@ -1653,12 +1772,12 @@ export default function AdminPage() {
                               value={item.role}
                               onChange={(e) => updateUserRoleMutation.mutate({ userId: item.id, role: e.target.value })}
                             >
-                              <option value="superadmin">Super Admin</option>
-                              <option value="catalog">Catalog Admin</option>
-                              <option value="operations">Operations Admin</option>
-                              <option value="content">Content Admin</option>
-                              <option value="analyst">Analyst</option>
-                              <option value="user">User (No Admin Access)</option>
+                              <option value="superadmin">Quản trị viên cấp cao (Super Admin)</option>
+                              <option value="catalog">Quản trị danh mục (Catalog Admin)</option>
+                              <option value="operations">Quản trị vận hành (Operations Admin)</option>
+                              <option value="content">Quản trị nội dung (Content Admin)</option>
+                              <option value="analyst">Nhà phân tích (Analyst)</option>
+                              <option value="user">Người dùng (Không có quyền Admin)</option>
                             </select>
                           </td>
                           <td className="py-3 px-2 text-mist">
@@ -1667,14 +1786,14 @@ export default function AdminPage() {
                           <td className="py-3 pl-2 text-right">
                             <button
                               onClick={() => {
-                                if (confirm(`Remove custom permissions for ${item.email}?`)) {
+                                if (confirm(`Gỡ bỏ quyền tùy chỉnh của ${item.email}?`)) {
                                   deleteUserRoleMutation.mutate(item.id)
                                 }
                               }}
                               className="text-rose-600 hover:text-rose-800"
                               disabled={deleteUserRoleMutation.isPending}
                             >
-                              Reset
+                              Đặt lại
                             </button>
                           </td>
                         </tr>
@@ -1690,35 +1809,35 @@ export default function AdminPage() {
                 <Card className="border border-rose-100 p-6 bg-white shadow-sm space-y-4">
                   <h3 className="font-display text-xl text-rose-950 flex items-center gap-1.5">
                     <PlusCircle className="h-5 w-5 text-rose-500" />
-                    Assign Role to User
+                    Gán quyền cho người dùng
                   </h3>
                   <p className="text-xs text-mist leading-relaxed">
-                    Grant mock or Supabase users specific modules. The permissions will be active immediately.
+                    Cấp quyền truy cập các mô-đun cụ thể cho người dùng giả lập hoặc người dùng Supabase. Quyền hạn sẽ có hiệu lực ngay lập tức.
                   </p>
 
                   <div className="space-y-3">
                     <div>
-                      <label className="text-[10px] font-semibold text-rose-950 uppercase tracking-wide block mb-1">User Email</label>
+                      <label className="text-[10px] font-semibold text-rose-950 uppercase tracking-wide block mb-1">Email người dùng</label>
                       <Input
-                        placeholder="e.g. client@lumina.ai"
+                        placeholder="Ví dụ: client@lumina.ai"
                         value={newUserEmail}
                         onChange={(e) => setNewUserEmail(e.target.value)}
                       />
                     </div>
 
                     <div>
-                      <label className="text-[10px] font-semibold text-rose-950 uppercase tracking-wide block mb-1">Access Level</label>
+                      <label className="text-[10px] font-semibold text-rose-950 uppercase tracking-wide block mb-1">Mức độ truy cập</label>
                       <select
                         className="w-full rounded-2xl border border-rose-200/80 bg-white px-4 py-2.5 text-xs text-pearl focus:outline-none focus:ring-1 focus:ring-rose-300"
                         value={newUserRole}
                         onChange={(e) => setNewUserRole(e.target.value as any)}
                       >
-                        <option value="superadmin">Super Admin (All modules)</option>
-                        <option value="catalog">Catalog Admin (Products & recommendations)</option>
-                        <option value="operations">Operations Admin (Products & scans)</option>
-                        <option value="content">Content Admin (Products, text recommendations)</option>
-                        <option value="analyst">Analyst (Scans, read-only analytics)</option>
-                        <option value="user">Regular User (Forbidden from Admin)</option>
+                        <option value="superadmin">Quản trị viên cấp cao (Tất cả mô-đun)</option>
+                        <option value="catalog">Quản trị danh mục (Sản phẩm & Gợi ý)</option>
+                        <option value="operations">Quản trị vận hành (Sản phẩm & Lượt quét)</option>
+                        <option value="content">Quản trị nội dung (Sản phẩm, Lý do gợi ý)</option>
+                        <option value="analyst">Nhà phân tích (Lượt quét, Chỉ xem phân tích)</option>
+                        <option value="user">Người dùng thông thường (Bị cấm truy cập Admin)</option>
                       </select>
                     </div>
 
@@ -1731,7 +1850,7 @@ export default function AdminPage() {
                       onClick={() => createUserRoleMutation.mutate()}
                       disabled={createUserRoleMutation.isPending}
                     >
-                      {createUserRoleMutation.isPending ? 'Assigning...' : 'Assign User Permission'}
+                      {createUserRoleMutation.isPending ? 'Đang gán...' : 'Gán quyền người dùng'}
                     </Button>
                   </div>
                 </Card>
@@ -1739,17 +1858,17 @@ export default function AdminPage() {
                 {/* Role Explanations */}
                 <Card className="border border-rose-100 p-6 bg-white shadow-sm">
                   <AdminSectionTitle
-                    eyebrow="Access Matrix"
-                    title="Role Modules Scope"
-                    description="Modules visibility list based on role mapping rules."
+                    eyebrow="Ma trận truy cập"
+                    title="Phạm vi mô-đun của vai trò"
+                    description="Danh sách hiển thị mô-đun dựa trên quy tắc ánh xạ vai trò."
                   />
                   <div className="mt-5 space-y-3 text-xs text-rose-950">
                     {[
-                      { role: 'Super Admin', scope: 'Full access across all dashboard segments and simulation tools.' },
-                      { role: 'Catalog Admin', scope: 'Catalog additions, price details, and recommendations matching.' },
-                      { role: 'Operations Admin', scope: 'Catalog lists, scan history inspection, and simulator tools.' },
-                      { role: 'Content Admin', scope: 'Product copy corrections and recommendation match reason editing.' },
-                      { role: 'Analyst', scope: 'Read-only metrics charts, scan logs inspection, and connection tests.' },
+                      { role: 'Quản trị viên cấp cao (Super Admin)', scope: 'Toàn quyền truy cập trên tất cả các phân đoạn bảng điều khiển và công cụ giả lập.' },
+                      { role: 'Quản trị danh mục (Catalog Admin)', scope: 'Thêm sản phẩm vào danh mục, chi tiết giá và kết hợp gợi ý sản phẩm.' },
+                      { role: 'Quản trị vận hành (Operations Admin)', scope: 'Xem danh sách danh mục, kiểm tra lịch sử quét và sử dụng các công cụ giả lập.' },
+                      { role: 'Quản trị nội dung (Content Admin)', scope: 'Chỉnh sửa nội dung mô tả sản phẩm và chỉnh sửa lý do gợi ý phù hợp.' },
+                      { role: 'Nhà phân tích (Analyst)', scope: 'Xem biểu đồ chỉ số ở chế độ chỉ đọc, kiểm tra nhật ký quét và kiểm tra kết nối.' },
                     ].map((item) => (
                       <div key={item.role} className="rounded-2xl border border-rose-50 bg-rose-50/20 px-3 py-2.5">
                         <p className="font-semibold flex items-center gap-1.5">
@@ -1770,33 +1889,33 @@ export default function AdminPage() {
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
               {[
                 {
-                  title: 'Platform state',
-                  detail: 'Supabase-backed catalog, scan logs, and admin permissions are live.',
+                  title: 'Trạng thái nền tảng',
+                  detail: 'Danh mục hỗ trợ bởi Supabase, nhật ký quét và quyền quản trị đang hoạt động trực tiếp.',
                   icon: CheckCircle2,
                 },
                 {
-                  title: 'Review tools',
-                  detail: 'Configure scan scores, modify tags, and customize the matched reason copy.',
+                  title: 'Công cụ đánh giá',
+                  detail: 'Cấu hình điểm số quét, sửa đổi thẻ và tùy chỉnh mô tả lý do phù hợp.',
                   icon: ListChecks,
                 },
                 {
-                  title: 'Governance',
-                  detail: 'Limit access by job functions through granular developer mock roles.',
+                  title: 'Quản trị quyền',
+                  detail: 'Giới hạn quyền truy cập theo chức năng công việc thông qua các vai trò giả lập chi tiết cho nhà phát triển.',
                   icon: Clock3,
                 },
                 {
-                  title: 'Simulator tools',
-                  detail: 'Create artificial scan outcomes to verify catalog and recommendation loops.',
+                  title: 'Công cụ giả lập',
+                  detail: 'Tạo kết quả quét nhân tạo để xác minh danh mục sản phẩm và chu trình gợi ý.',
                   icon: Megaphone,
                 },
                 {
-                  title: 'Data sync',
-                  detail: 'Live client pages retrieve items from the DB rather than mock files.',
+                  title: 'Đồng bộ dữ liệu',
+                  detail: 'Các trang khách hàng thực tế truy xuất các mục từ cơ sở dữ liệu thay vì các tệp giả lập.',
                   icon: Database,
                 },
                 {
-                  title: 'Refresh loop',
-                  detail: 'Click refresh or clear caches to revalidate queries after updates.',
+                  title: 'Chu kỳ tải lại',
+                  detail: 'Nhấp tải lại hoặc xóa bộ nhớ đệm để xác thực lại các truy vấn sau khi cập nhật.',
                   icon: Rocket,
                 },
               ].map((item) => {
@@ -1814,6 +1933,155 @@ export default function AdminPage() {
                   </Card>
                 )
               })}
+            </div>
+          ) : null}
+
+          {/* REVENUE TAB */}
+          {activeSection === 'revenue' ? (
+            <div className="space-y-6">
+              {/* Revenue header */}
+              <Card className="border border-rose-100 p-6 bg-white">
+                <div className="flex justify-between items-center">
+                  <h3 className="font-display text-2xl text-rose-950">Doanh thu & Đơn hàng</h3>
+                  <Button
+                    onClick={() => simulateOrderMutation.mutate()}
+                    disabled={simulateOrderMutation.isPending}
+                    className="flex items-center gap-1"
+                  >
+                    {simulateOrderMutation.isPending ? 'Đang mô phỏng...' : 'Mô phỏng đơn hàng'}
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </div>
+              </Card>
+
+              {/* Metrics grid */}
+              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Card className="border border-rose-100 p-5 bg-white">
+                  <p className="text-xs uppercase text-cyan">Doanh thu tổng</p>
+                  <h4 className="mt-2 font-display text-2xl text-rose-950">
+                    {revenueStats.totalRevenue.toLocaleString('vi-VN')}₫
+                  </h4>
+                  <p className="mt-1 text-xs text-mist">Hoàn thành</p>
+                </Card>
+                <Card className="border border-rose-100 p-5 bg-white">
+                  <p className="text-xs uppercase text-cyan">Doanh thu chờ</p>
+                  <h4 className="mt-2 font-display text-2xl text-rose-950">
+                    {revenueStats.pendingAmount.toLocaleString('vi-VN')}₫
+                  </h4>
+                  <p className="mt-1 text-xs text-mist">Chưa xử lý</p>
+                </Card>
+                <Card className="border border-rose-100 p-5 bg-white">
+                  <p className="text-xs uppercase text-cyan">Số đơn</p>
+                  <h4 className="mt-2 font-display text-2xl text-rose-950">{revenueStats.totalCount}</h4>
+                  <p className="mt-1 text-xs text-mist">Tổng đơn</p>
+                </Card>
+                <Card className="border border-rose-100 p-5 bg-white">
+                  <p className="text-xs uppercase text-cyan">Giá trị đơn trung bình</p>
+                  <h4 className="mt-2 font-display text-2xl text-rose-950">
+                    {(revenueStats.completedCount ? (revenueStats.totalRevenue / revenueStats.completedCount).toFixed(0) : 0).toLocaleString('vi-VN')}₫
+                  </h4>
+                  <p className="mt-1 text-xs text-mist">AOV</p>
+                </Card>
+              </div>
+
+              {/* Filters */}
+              <div className="flex items-center gap-4">
+                <Input
+                  placeholder="Tìm kiếm đơn hàng..."
+                  value={orderSearch}
+                  onChange={(e) => setOrderSearch(e.target.value)}
+                  className="flex-1"
+                />
+                <select
+                  className="rounded border border-rose-100 px-3 py-1 text-sm"
+                  value={orderStatusFilter}
+                  onChange={(e) => setOrderStatusFilter(e.target.value)}
+                >
+                  <option value="All">Tất cả</option>
+                  <option value="pending">Chờ xử lý</option>
+                  <option value="completed">Hoàn thành</option>
+                  <option value="canceled">Đã hủy</option>
+                </select>
+              </div>
+
+              {/* Orders table */}
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse text-xs">
+                  <thead className="border-b border-rose-100 text-rose-950 font-bold uppercase">
+                    <tr>
+                      <th className="pb-3">Mã đơn</th>
+                      <th className="pb-3">Sản phẩm</th>
+                      <th className="pb-3">Giá</th>
+                      <th className="pb-3">Trạng thái</th>
+                      <th className="pb-3 text-right">Hành động</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-rose-50">
+                    {filteredOrders.map((order) => (
+                      <tr key={order.id} className="hover:bg-rose-50/20 text-rose-950">
+                        <td className="py-2 font-medium">{order.id}</td>
+                        <td className="py-2">{order.productName}</td>
+                        <td className="py-2">{order.totalPrice.toLocaleString('vi-VN')}₫</td>
+                        <td className="py-2">
+                          <select
+                            className="rounded border border-rose-100 bg-white px-2 py-1 text-xs"
+                            value={order.status}
+                            onChange={(e) =>
+                              updateOrderStatusMutation.mutate({
+                                orderId: order.id,
+                                status: e.target.value as any,
+                              })
+                            }
+                            disabled={updateOrderStatusMutation.isPending}
+                          >
+                            <option value="pending">Chờ</option>
+                            <option value="completed">Hoàn thành</option>
+                            <option value="canceled">Hủy</option>
+                          </select>
+                        </td>
+                        <td className="py-2 text-right">
+                          <button
+                            onClick={() => {
+                              if (confirm(`Xóa đơn ${order.id}?`)) deleteOrderMutation.mutate(order.id);
+                            }}
+                            disabled={deleteOrderMutation.isPending}
+                            className="text-rose-600 hover:text-rose-800 flex items-center gap-1"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Xóa
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Category breakdown */}
+              <Card className="border border-rose-100 p-5 bg-white">
+                <h4 className="font-display text-lg text-rose-950 mb-2">Doanh thu theo danh mục</h4>
+                <div className="space-y-2">
+                  {revenueStats.categoryBreakdown.map((cat) => (
+                    <div key={cat.name} className="flex justify-between text-sm">
+                      <span>{cat.name}</span>
+                      <span>{cat.value.toLocaleString('vi-VN')}₫</span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+
+              {/* Payment breakdown */}
+              <Card className="border border-rose-100 p-5 bg-white">
+                <h4 className="font-display text-lg text-rose-950 mb-2">Doanh thu theo phương thức thanh toán</h4>
+                <div className="space-y-2">
+                  {revenueStats.paymentBreakdown.map((pay) => (
+                    <div key={pay.name} className="flex justify-between text-sm">
+                      <span>{pay.name}</span>
+                      <span>{pay.value.toLocaleString('vi-VN')}₫</span>
+                    </div>
+                  ))}
+                </div>
+              </Card>
             </div>
           ) : null}
         </div>

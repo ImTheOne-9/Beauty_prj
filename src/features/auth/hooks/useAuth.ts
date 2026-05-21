@@ -10,7 +10,7 @@ export function useAuth() {
   const signOut = useAuthStore((state) => state.signOut)
 
   // Compute admin role from session user
-  const adminRole: AdminRole | null = getAdminRole(session?.user ?? null)
+  const adminRole: AdminRole | null = role === 'admin' ? 'superadmin' : getAdminRole(session?.user ?? null)
   const isAdmin = role === 'admin' || !!adminRole
 
   return {
