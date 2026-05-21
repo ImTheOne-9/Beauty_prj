@@ -20,4 +20,12 @@ export type ProductRecommendation = {
   reason: string
   externalLink: string
   category: string
+  price?: string
+  originalPrice?: string
+  discount?: number // percent
+  rating?: number
+  reviews?: number
+  stock?: number
+  matchScore?: number
+  matchReason?: string
 }

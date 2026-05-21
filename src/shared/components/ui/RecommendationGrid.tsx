@@ -4,9 +4,10 @@ import { type ProductRecommendation } from '@/shared/lib/types'
 
 type RecommendationGridProps = {
   products: ProductRecommendation[]
+  ctaVariant?: 'A' | 'B'
 }
 
-export function RecommendationGrid({ products }: RecommendationGridProps) {
+export function RecommendationGrid({ products, ctaVariant }: RecommendationGridProps) {
   return (
     <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
       {products.map((product, index) => (
@@ -16,8 +17,8 @@ export function RecommendationGrid({ products }: RecommendationGridProps) {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, amount: 0.2 }}
           transition={{ delay: index * 0.06, duration: 0.4 }}
-        >
-          <ProductCard product={product} />
+          >
+          <ProductCard product={product} ctaVariant={ctaVariant} />
         </motion.div>
       ))}
     </div>
