@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom'
-import { Card } from '@/shared/components/ui/Card'
-import { Button } from '@/shared/components/ui/Button'
-import { MailCheck } from 'lucide-react'
+import { Link } from 'react-router-dom';
+import { Card } from '@/shared/components/ui/Card';
+import { MailCheck } from 'lucide-react';
+
 export default function VerifyEmailPage() {
   return (
     <section className="section-shell pb-12">
@@ -18,11 +18,14 @@ export default function VerifyEmailPage() {
           </p>
         </div>
         <div className="pt-4">
-          <Button asChild variant="outline" className="w-full">
-            <Link to="/auth">Return to login</Link>
-          </Button>
+          <Link
+            to="/auth"
+            className="inline-flex items-center justify-center rounded-2xl px-5 py-2.5 font-display text-sm font-semibold transition-transform duration-300 border border-rose-100 bg-white/60 text-rose-600 hover:border-rose-200 hover:bg-white/70 w-full"
+          >
+            Return to login
+          </Link>
         </div>
       </Card>
     </section>
-  )
+  );
 }

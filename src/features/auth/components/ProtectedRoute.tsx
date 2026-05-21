@@ -9,7 +9,7 @@ type ProtectedRouteProps = PropsWithChildren<{
 }>
 export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const location = useLocation()
-  const { user, role, initialized, isLoading } = useAuth()
+  const { user, role, isAdmin, initialized, isLoading } = useAuth()
 
   if (!initialized || isLoading) {
     return <Loader fullScreen label="Checking secure session" />
@@ -19,7 +19,9 @@ export function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) 
     return <Navigate to="/auth" replace state={{ from: location.pathname }} />
   }
 
-  if (allowedRoles && !allowedRoles.includes(role)) {
+  // If allowedRoles is specified, ensure the user has one of the roles.
+  // "admin" role is treated as any admin (isAdmin flag) for backward compatibility.
+  if (allowedRoles && !allowedRoles.includes(role) && !(allowedRoles.includes('admin' as UserRole) && isAdmin)) {
     return <Navigate to="/dashboard" replace />
   }
 
