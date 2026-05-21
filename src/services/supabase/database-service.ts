@@ -16,7 +16,7 @@ export type AdminProductRecord = {
   brand: string | null
   category_id: string
   created_at: string
-  price: number | null
+  price?: number | string | null
 }
 
 export type AdminScanRecord = {
@@ -53,7 +53,9 @@ export type AdminProductConfigRecord = {
   created_at: string
 }
 
-type CreateProductInput = Omit<AdminProductRecord, 'id' | 'created_at'>
+type CreateProductInput = Omit<AdminProductRecord, 'id' | 'created_at' | 'price'> & {
+  price?: number | null
+}
 
 type UpdateProductInput = Partial<CreateProductInput>
 
