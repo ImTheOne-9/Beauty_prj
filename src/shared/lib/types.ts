@@ -29,3 +29,22 @@ export type ProductRecommendation = {
   matchScore?: number
   matchReason?: string
 }
+
+export type OrderRecord = {
+  id: string
+  productId: string
+  productName: string
+  productImage: string
+  productCategory: string
+  quantity: number
+  price: number
+  totalPrice: number
+  paymentMethod: 'cod' | 'momo' | 'visa' | 'apple'
+  shippingInfo: {
+    name: string
+    phone: string
+    address: string
+  }
+  status: 'pending' | 'completed' | 'canceled'
+  createdAt: string
+}

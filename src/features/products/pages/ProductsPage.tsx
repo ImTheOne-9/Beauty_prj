@@ -4,6 +4,7 @@ import { mockProducts } from '@/shared/data/mock-products'
 import { useQuery } from '@tanstack/react-query'
 import { databaseService } from '@/services/supabase/database-service'
 import { type ProductRecommendation } from '@/shared/lib/types'
+import { parseProductTags } from '@/shared/lib/product-tags'
 
 export default function ProductsPage() {
   const { data, isLoading } = useQuery({
@@ -12,15 +13,14 @@ export default function ProductsPage() {
   })
 
   const products: ProductRecommendation[] = (data && data.length
-    ? data.map((product) => ({
-        id: product.id,
-        name: product.name,
-        image: product.image_url,
-        description: product.description,
-        reason: `Catalog pick tagged for ${product.tags.join(', ') || 'general skincare'}.`,
-        externalLink: product.external_url,
-        category: product.tags[0] ?? 'skincare',
-      }))
+    ? data.map((product) => {
+        const parsed = parseProductTags(product)
+        return {
+          ...parsed,
+          externalLink: product.external_url,
+          reason: `Catalog pick tagged for ${parsed.cleanTags.join(', ') || 'general skincare'}.`,
+        }
+      })
     : mockProducts)
 
   if (isLoading) {

@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 import { ArrowRight, ShieldCheck, Sparkles, Users } from 'lucide-react'
 import { Card } from '@/shared/components/ui/Card'
-import { Button } from '@/shared/components/ui/Button'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { getAdminRoleLabel } from '@/shared/lib/admin'
 

@@ -5,6 +5,7 @@ import { Modal } from '@/shared/components/ui/Modal'
 import { Button } from '@/shared/components/ui/Button'
 import { Input } from '@/shared/components/ui/Input'
 import { type ProductRecommendation } from '@/shared/lib/types'
+import { databaseService } from '@/services/supabase/database-service'
 
 type CheckoutModalProps = {
   open: boolean
@@ -38,7 +39,23 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
   useEffect(() => {
     if (phase === 'success') {
       const rand = Math.floor(100000 + Math.random() * 900000)
-      setOrderId(`BG-${rand}`)
+      const newOrderId = `BG-${rand}`
+      setOrderId(newOrderId)
+
+      databaseService.createOrder({
+        id: newOrderId,
+        productId: product.id,
+        productName: product.name,
+        productImage: product.image,
+        productCategory: product.category,
+        quantity,
+        price,
+        totalPrice: price * quantity,
+        paymentMethod,
+        shippingInfo,
+        status: 'completed',
+        createdAt: new Date().toISOString(),
+      })
     }
   }, [phase])
 
@@ -232,7 +249,7 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
               </div>
               <motion.button 
                 type="submit" 
-                whileHover={isFormValid ? { scale: 1.01, brightness: 1.05 } : {}}
+                whileHover={isFormValid ? { scale: 1.01, filter: "brightness(1.05)" } : {}}
                 whileTap={isFormValid ? { scale: 0.99 } : {}}
                 className={`w-full py-4 px-6 rounded-2xl font-display font-extrabold uppercase tracking-widest text-sm text-white shadow-lg transition-all duration-300 flex items-center justify-center gap-2 ${
                   isFormValid 

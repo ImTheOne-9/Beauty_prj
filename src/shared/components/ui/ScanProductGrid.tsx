@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronLeft, ChevronRight, ArrowUpRight, ShoppingCart, Star } from 'lucide-react'
+import { ChevronLeft, ChevronRight, ShoppingCart, Star } from 'lucide-react'
 import { type ProductRecommendation } from '@/shared/lib/types'
+import { CheckoutModal } from '@/shared/components/ui/CheckoutModal'
 
 const PAGE_SIZE = 6
 
@@ -27,6 +28,7 @@ function getPartnerName(url: string): string {
 function CompactProductCard({ product, index }: { product: ProductRecommendation; index: number }) {
   const partner = getPartnerName(product.externalLink)
   const matchScore = (product as any).matchScore ?? 0
+  const [checkoutOpen, setCheckoutOpen] = useState(false)
 
   return (
     <motion.div
@@ -89,16 +91,25 @@ function CompactProductCard({ product, index }: { product: ProductRecommendation
           </div>
 
           <div className="shrink-0 w-36">
-            <a href={product.externalLink} target="_blank" rel="noopener noreferrer">
-              <button aria-label={`Buy ${product.name} at ${partner}`} className="w-full rounded-xl bg-gradient-to-r from-rose-600 to-pink-500 px-3 py-3 text-sm font-bold text-white shadow-[0_8px_30px_rgba(230,90,120,0.18)] hover:scale-[0.998] active:scale-95">
-                <div className="flex items-center justify-center gap-2"><ShoppingCart className="h-4 w-4" />Mua tại Example</div>
-              </button>
-            </a>
+            <button 
+              onClick={() => setCheckoutOpen(true)}
+              aria-label={`Buy ${product.name} at ${partner}`} 
+              className="w-full rounded-xl bg-gradient-to-r from-rose-600 to-pink-500 px-3 py-3 text-sm font-bold text-white shadow-[0_8px_30px_rgba(230,90,120,0.18)] hover:scale-[0.998] active:scale-95"
+            >
+              <div className="flex items-center justify-center gap-2"><ShoppingCart className="h-4 w-4" />Mua tại {partner}</div>
+            </button>
             <div className="mt-2 text-right text-[11px] text-mist/65">{partner}</div>
             <div className="mt-1 text-center text-[11px] text-mist/60">Secure checkout · Free returns</div>
           </div>
         </div>
       </div>
+      {checkoutOpen ? (
+        <CheckoutModal
+          open={checkoutOpen}
+          onClose={() => setCheckoutOpen(false)}
+          product={product}
+        />
+      ) : null}
     </motion.div>
   )
 }

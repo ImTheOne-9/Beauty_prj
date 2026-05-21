@@ -3,14 +3,14 @@ import { env } from '@/config/env'
 
 export type AdminRole = 'superadmin' | 'catalog' | 'operations' | 'content' | 'analyst'
 
-export type AdminSection = 'overview' | 'products' | 'scans' | 'recommendations' | 'access' | 'settings'
+export type AdminSection = 'overview' | 'products' | 'scans' | 'recommendations' | 'access' | 'settings' | 'revenue'
 
 const roleSections: Record<AdminRole, AdminSection[]> = {
-  superadmin: ['overview', 'products', 'scans', 'recommendations', 'access', 'settings'],
-  catalog: ['overview', 'products', 'recommendations', 'settings'],
-  operations: ['overview', 'products', 'scans', 'settings'],
+  superadmin: ['overview', 'products', 'scans', 'recommendations', 'access', 'settings', 'revenue'],
+  catalog: ['overview', 'products', 'recommendations', 'settings', 'revenue'],
+  operations: ['overview', 'products', 'scans', 'settings', 'revenue'],
   content: ['overview', 'products', 'recommendations', 'settings'],
-  analyst: ['overview', 'scans', 'recommendations', 'settings'],
+  analyst: ['overview', 'scans', 'recommendations', 'settings', 'revenue'],
 }
 
 function normalizeRole(value?: string | null): AdminRole | null {
@@ -30,6 +30,22 @@ export function getAdminRole(user: User | null): AdminRole | null {
   if (!user) return null
 
   const email = user.email?.toLowerCase() ?? ''
+
+  // Attempt to check local storage roles first for development overrides
+  const storedRolesStr = localStorage.getItem('lumina_user_roles')
+  if (storedRolesStr) {
+    try {
+      const list = JSON.parse(storedRolesStr)
+      const found = list.find((u: any) => u.email.toLowerCase() === email)
+      if (found && found.role) {
+        if (found.role === 'user') return null
+        return found.role as AdminRole
+      }
+    } catch {
+      // ignore
+    }
+  }
+
   const metadataRole = normalizeRole(
     (user.app_metadata as { role?: string } | undefined)?.role ??
       (user.user_metadata as { role?: string } | undefined)?.role,
@@ -58,16 +74,16 @@ export function canAccessAdminSection(role: AdminRole | null, section: AdminSect
 export function getAdminRoleLabel(role: AdminRole | null) {
   switch (role) {
     case 'superadmin':
-      return 'Super Admin'
+      return 'Quản trị tối cao (Super Admin)'
     case 'catalog':
-      return 'Catalog Admin'
+      return 'Quản lý danh mục (Catalog Admin)'
     case 'operations':
-      return 'Operations Admin'
+      return 'Quản lý vận hành (Operations Admin)'
     case 'content':
-      return 'Content Admin'
+      return 'Quản lý nội dung (Content Admin)'
     case 'analyst':
-      return 'Analyst'
+      return 'Chuyên viên phân tích (Analyst)'
     default:
-      return 'Admin'
+      return 'Quản trị viên (Admin)'
   }
 }
