@@ -77,7 +77,7 @@ export function ProductCard({ product, ctaVariant }: ProductCardProps) {
               } hover:brightness-105 active:scale-[0.98] transition-all`}
           >
             <ShoppingCart className="h-4 w-4" />
-            Mua ngay (Thanh toán nhanh)
+            Buy Now (Quick Checkout)
             <ArrowUpRight className="h-3.5 w-3.5 opacity-80" />
           </Button>
 

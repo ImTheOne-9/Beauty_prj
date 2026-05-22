@@ -76,14 +76,14 @@ export function getAdminRoleLabel(role: AdminRole | null) {
     case 'superadmin':
       return 'Super Admin'
     case 'catalog':
-      return 'Quản lý danh mục (Catalog Admin)'
+      return 'Catalog Admin'
     case 'operations':
-      return 'Quản lý vận hành (Operations Admin)'
+      return 'Operations Admin'
     case 'content':
-      return 'Quản lý nội dung (Content Admin)'
+      return 'Content Admin'
     case 'analyst':
-      return 'Chuyên viên phân tích (Analyst)'
+      return 'Analyst'
     default:
-      return 'Quản trị viên (Admin)'
+      return 'Admin'
   }
 }

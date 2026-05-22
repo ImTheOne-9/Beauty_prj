@@ -96,7 +96,7 @@ function CompactProductCard({ product, index }: { product: ProductRecommendation
               aria-label={`Buy ${product.name} at ${partner}`} 
               className="w-full rounded-xl bg-gradient-to-r from-rose-600 to-pink-500 px-3 py-3 text-sm font-bold text-white shadow-[0_8px_30px_rgba(230,90,120,0.18)] hover:scale-[0.998] active:scale-95"
             >
-              <div className="flex items-center justify-center gap-2"><ShoppingCart className="h-4 w-4" />Mua tại {partner}</div>
+              <div className="flex items-center justify-center gap-2"><ShoppingCart className="h-4 w-4" />Buy at {partner}</div>
             </button>
             <div className="mt-2 text-right text-[11px] text-mist/65">{partner}</div>
             <div className="mt-1 text-center text-[11px] text-mist/60">Secure checkout · Free returns</div>

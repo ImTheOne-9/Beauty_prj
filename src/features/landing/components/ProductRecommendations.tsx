@@ -47,7 +47,7 @@ export default function ProductRecommendations() {
       <div className="rounded-[1.75rem] border border-white/40 bg-white/55 p-4 shadow-[0_24px_60px_rgba(255,192,203,0.12)] backdrop-blur-sm">
         {products.length === 0 ? (
           <div className="rounded-[1.5rem] border border-rose-100/50 bg-white/80 p-8 text-center text-sm text-mist">
-            Chưa có sản phẩm nào được thêm vào. Vui lòng cập nhật catalog sản phẩm trong trang quản trị.
+            No products have been added yet. Please update the product catalog in the admin page.
           </div>
         ) : (
           <ScanProductGrid products={products} />

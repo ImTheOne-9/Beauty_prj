@@ -318,10 +318,10 @@ export default function AIScanPage() {
 
                 {cameraError ? <p className="text-xs text-rose-400">{cameraError}</p> : null}
                 {scanHistoryQuery.isLoading ? (
-                  <p className="text-[11px] text-mist">Đang kiểm tra số lần quét...</p>
+                  <p className="text-[11px] text-mist">Checking scan quota...</p>
                 ) : (
                   <p className="text-[11px] text-mist">
-                    Gói {plan}: {maxFreeScans} lượt — còn {remainingFreeScans} lượt.
+                    {plan} Plan: {maxFreeScans} scans — {remainingFreeScans} remaining.
                   </p>
                 )}
               </div>
@@ -466,17 +466,17 @@ export default function AIScanPage() {
           </motion.div>
         ) : null}
 
-        <Modal open={showPaywall} title="Cần nâng cấp để quét tiếp" onClose={() => setShowPaywall(false)}>
+        <Modal open={showPaywall} title="Upgrade to continue scanning" onClose={() => setShowPaywall(false)}>
           <div className="space-y-4 text-sm text-mist">
-            <p>Bạn đã dùng hết {maxFreeScans} lượt quét của gói {plan}. Vui lòng nạp tiền để tiếp tục quét.</p>
+            <p>You have used all {maxFreeScans} scans for the {plan} plan. Please upgrade to continue scanning.</p>
             <div className="rounded-2xl border border-rose-100 bg-white/80 p-4 text-xs text-rose-950">
-              <p className="font-semibold">Gợi ý:</p>
-              <p className="mt-1">Nâng cấp gói để mở khóa quét không giới hạn và lưu trữ lịch sử đầy đủ.</p>
+              <p className="font-semibold">Tip:</p>
+              <p className="mt-1">Upgrade your plan to unlock unlimited scans and full history retention.</p>
             </div>
             <div className="flex flex-wrap gap-3">
-              <Button onClick={() => setShowPaywall(false)}>Đóng</Button>
+              <Button onClick={() => setShowPaywall(false)}>Close</Button>
               <Link to="/checkout">
-                <Button variant="ghost">Nạp tiền</Button>
+                <Button variant="ghost">Upgrade</Button>
               </Link>
             </div>
           </div>

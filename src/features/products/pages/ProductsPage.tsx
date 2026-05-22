@@ -32,7 +32,7 @@ export default function ProductsPage() {
       </div>
       {products.length === 0 ? (
         <div className="rounded-[2rem] border border-rose-100/60 bg-white/80 p-12 text-center text-sm text-mist">
-          Không có sản phẩm nào trong catalog. Vui lòng thêm sản phẩm mới từ trang quản trị.
+          No products in the catalog. Please add new products from the admin page.
         </div>
       ) : (
         <RecommendationGrid products={products} />
