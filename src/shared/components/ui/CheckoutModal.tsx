@@ -92,7 +92,7 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
   }
 
   return (
-    <Modal open={open} title="Thanh Toán Nhanh" onClose={onClose}>
+    <Modal open={open} title="Quick Checkout" onClose={onClose}>
       <AnimatePresence mode="wait">
         {phase === 'form' && (
           <motion.form 
@@ -107,7 +107,7 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
             <div className="relative overflow-hidden rounded-2xl border border-rose-300/40 bg-gradient-to-br from-rose-50/70 to-white/80 p-4 shadow-sm backdrop-blur-md">
               <div className="absolute right-0 top-0 rounded-bl-xl bg-gradient-to-r from-rose-500 to-pink-500 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em] text-white flex items-center gap-1 shadow-sm">
                 <Sparkles className="h-3 w-3" />
-                Đề Xuất AI
+                AI Pick
               </div>
               <div className="flex gap-4">
                 <img 
@@ -129,8 +129,8 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
             {/* Quantity Selector - Luxury counter feel */}
             <div className="flex items-center justify-between rounded-2xl bg-gradient-to-br from-white/60 to-rose-50/20 p-4 border border-rose-200/30 shadow-[0_4px_20px_rgba(216,94,128,0.02)]">
               <div>
-                <p className="text-sm font-extrabold text-rose-950">Số lượng</p>
-                <p className="text-xs text-mist">Chọn số lượng sản phẩm</p>
+                <p className="text-sm font-extrabold text-rose-950">Quantity</p>
+                <p className="text-xs text-mist">Select product quantity</p>
               </div>
               <div className="flex items-center gap-4 bg-white/80 rounded-xl border border-rose-200/50 p-1 shadow-sm">
                 <motion.button
@@ -157,7 +157,7 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
             <div className="space-y-3.5">
               <p className="text-sm font-extrabold text-rose-950 flex items-center gap-1.5">
                 <Truck className="h-4 w-4 text-rose-500" />
-                Thông tin nhận hàng
+                Shipping Information
               </p>
               
               <div className="relative">
@@ -166,7 +166,7 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
                 </span>
                 <Input 
                   type="text" 
-                  placeholder="Họ và tên của bạn" 
+                  placeholder="Your full name" 
                   value={shippingInfo.name}
                   onChange={(e) => handleInputChange('name', e.target.value)}
                   className="pl-11 border-rose-200/60 bg-white/70 shadow-sm focus:bg-white transition-all duration-300"
@@ -180,7 +180,7 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
                 </span>
                 <Input 
                   type="tel" 
-                  placeholder="Số điện thoại nhận hàng" 
+                  placeholder="Phone number" 
                   value={shippingInfo.phone}
                   onChange={(e) => handleInputChange('phone', e.target.value)}
                   className="pl-11 border-rose-200/60 bg-white/70 shadow-sm focus:bg-white transition-all duration-300"
@@ -194,7 +194,7 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
                 </span>
                 <Input 
                   type="text" 
-                  placeholder="Địa chỉ giao hàng (Số nhà, Đường, Quận, TP)" 
+                  placeholder="Shipping address (House number, Street, City)" 
                   value={shippingInfo.address}
                   onChange={(e) => handleInputChange('address', e.target.value)}
                   className="pl-11 border-rose-200/60 bg-white/70 shadow-sm focus:bg-white transition-all duration-300"
@@ -205,12 +205,12 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
 
             {/* Payment Method Grid - Outstanding active card highlight */}
             <div className="space-y-3">
-              <p className="text-sm font-extrabold text-rose-950">Phương thức thanh toán</p>
+              <p className="text-sm font-extrabold text-rose-950">Payment Method</p>
               <div className="grid grid-cols-2 gap-2.5">
                 {[
-                  { id: 'cod', name: 'COD (Tiền mặt)', icon: Truck },
-                  { id: 'momo', name: 'Ví MoMo', icon: Wallet },
-                  { id: 'visa', name: 'Thẻ Visa/Master', icon: CreditCard },
+                  { id: 'cod', name: 'COD (Cash)', icon: Truck },
+                  { id: 'momo', name: 'MoMo Wallet', icon: Wallet },
+                  { id: 'visa', name: 'Visa/Mastercard', icon: CreditCard },
                   { id: 'apple', name: 'Apple Pay', icon: ShoppingBag }
                 ].map((method) => {
                   const Icon = method.icon
@@ -244,7 +244,7 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
             {/* Total price and Confirm Button - Ultra luxury shine gradient */}
             <div className="pt-4 border-t border-rose-200/40">
               <div className="flex justify-between items-center mb-4.5 px-1">
-                <span className="text-sm text-rose-900/70 font-extrabold uppercase tracking-wider">Tổng thanh toán:</span>
+                <span className="text-sm text-rose-900/70 font-extrabold uppercase tracking-wider">Total Payment:</span>
                 <span className="text-2xl font-display font-black text-cyan-600 tracking-wide">{formattedPrice(price * quantity)}</span>
               </div>
               <motion.button 
@@ -258,7 +258,7 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
                 }`}
                 disabled={!isFormValid}
               >
-                Xác nhận đặt hàng
+                Confirm Order
               </motion.button>
             </div>
           </motion.form>
@@ -279,8 +279,8 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
               <div className="absolute -inset-2 rounded-full bg-cyan-400/10 blur-xl animate-pulse" />
             </div>
             <div className="space-y-1.5 max-w-sm">
-              <h4 className="font-display text-xl font-black text-rose-950">Đang kết nối cổng thanh toán</h4>
-              <p className="text-xs text-mist leading-relaxed px-4">Hệ thống đang mã hóa giao dịch và tạo đơn hàng an toàn. Vui lòng không tắt trình duyệt...</p>
+              <h4 className="font-display text-xl font-black text-rose-950">Connecting to payment gateway</h4>
+              <p className="text-xs text-mist leading-relaxed px-4">System is encrypting transaction and creating secure order. Please do not close the browser...</p>
             </div>
           </motion.div>
         )}
@@ -313,43 +313,43 @@ export function CheckoutModal({ open, onClose, product }: CheckoutModalProps) {
             </div>
 
             <div className="space-y-1.5 max-w-sm">
-              <h4 className="font-display text-2xl font-black text-emerald-500 tracking-wide">Đặt hàng thành công!</h4>
-              <p className="text-xs text-mist leading-relaxed px-2">Cảm ơn bạn đã lựa chọn chăm sóc da cùng Beauty AI. Đơn hàng của bạn đã được kiểm duyệt và chuẩn bị giao hàng.</p>
+              <h4 className="font-display text-2xl font-black text-emerald-500 tracking-wide">Order Placed Successfully!</h4>
+              <p className="text-xs text-mist leading-relaxed px-2">Thank you for choosing skincare with Beauty AI. Your order has been approved and is being prepared for shipping.</p>
             </div>
 
             {/* Receipt Summary Card - High-end Voucher styling */}
             <div className="w-full text-left rounded-2xl border border-rose-200/50 bg-gradient-to-br from-rose-50/40 to-white/80 p-5 space-y-3.5 text-xs text-rose-950 shadow-sm backdrop-blur-md relative overflow-hidden">
               <div className="absolute -right-4 -top-4 h-16 w-16 bg-gradient-to-br from-cyan-500/5 to-teal-500/5 rounded-full" />
               <div className="flex justify-between border-b border-rose-200/30 pb-2.5">
-                <span className="text-rose-900/60 font-extrabold uppercase tracking-wider">Mã đơn hàng:</span>
+                <span className="text-rose-900/60 font-extrabold uppercase tracking-wider">Order ID:</span>
                 <span className="font-mono font-black text-cyan-600 text-sm tracking-wider">{orderId}</span>
               </div>
               <div className="space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-rose-900/60 font-semibold">Sản phẩm:</span>
+                  <span className="text-rose-900/60 font-semibold">Product:</span>
                   <span className="font-extrabold max-w-[200px] truncate text-right text-rose-950">{product.name}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-rose-900/60 font-semibold">Số lượng:</span>
-                  <span className="font-extrabold text-rose-950">{quantity} sản phẩm</span>
+                  <span className="text-rose-900/60 font-semibold">Quantity:</span>
+                  <span className="font-extrabold text-rose-950">{quantity} items</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-rose-900/60 font-semibold">Phương thức:</span>
-                  <span className="uppercase font-extrabold text-rose-900">{paymentMethod === 'cod' ? 'COD (Tiền mặt)' : paymentMethod}</span>
+                  <span className="text-rose-900/60 font-semibold">Method:</span>
+                  <span className="uppercase font-extrabold text-rose-900">{paymentMethod === 'cod' ? 'COD (Cash)' : paymentMethod}</span>
                 </div>
               </div>
               <div className="flex justify-between border-t border-rose-200/30 pt-3.5 font-semibold items-center">
-                <span className="text-rose-950 font-black text-xs uppercase tracking-wider">Tổng số tiền:</span>
+                <span className="text-rose-950 font-black text-xs uppercase tracking-wider">Total Amount:</span>
                 <span className="text-lg font-display font-black text-cyan-600 tracking-wide">{formattedPrice(price * quantity)}</span>
               </div>
               <div className="text-[10px] text-emerald-600 bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 flex items-center gap-2.5 mt-3 shadow-inner">
                 <Truck className="h-4 w-4 text-emerald-500 shrink-0" />
-                <span className="font-medium">Hàng chuẩn bị được chuyển tới bưu cục vận chuyển. Dự kiến giao hàng trong 2 - 3 ngày làm việc.</span>
+                <span className="font-medium">Your items are being transferred to the shipping carrier. Expected delivery in 2-3 business days.</span>
               </div>
             </div>
 
             <Button onClick={onClose} className="w-full justify-center mt-2 py-3 bg-gradient-to-r from-rose-500 to-rose-600 text-white font-extrabold tracking-widest shadow-md">
-              Đóng và tiếp tục
+              Close and Continue
             </Button>
           </motion.div>
         )}

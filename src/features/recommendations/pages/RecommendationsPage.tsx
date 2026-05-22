@@ -160,7 +160,7 @@ export default function RecommendationsPage() {
         <div className="mt-6">
           {productsList.length === 0 ? (
             <div className="rounded-[1.5rem] border border-rose-100/50 bg-[linear-gradient(180deg,rgba(255,250,250,0.94),rgba(255,245,246,0.86))] p-8 text-center text-sm text-mist">
-              Không có sản phẩm phù hợp để hiển thị. Vui lòng thêm sản phẩm từ trang quản trị.
+              No suitable products to display. Please add products from the admin page.
             </div>
           ) : (
             <RecommendationGrid products={productsList} ctaVariant={ctaVariant} />

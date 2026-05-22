@@ -322,17 +322,17 @@ export const databaseService = {
 
   seedOrders(): OrderRecord[] {
     const products = [
-      { id: 'p1', name: 'Serum B5 La Roche-Posay Hyalu B5', category: 'Serum', price: 390000, image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=400&q=80' },
-      { id: 'p2', name: 'Kem Dưỡng Ẩm CeraVe Moisturising Cream', category: 'Kem dưỡng ẩm', price: 490000, image: 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?auto=format&fit=crop&w=400&q=80' },
-      { id: 'p3', name: 'Nước Hoa Hồng Paula\'s Choice BHA Salicylic Acid 2%', category: 'Toner', price: 590000, image: 'https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&w=400&q=80' },
-      { id: 'p4', name: 'Sữa Rửa Mặt Cetaphil Gentle Skin Cleanser', category: 'Sữa rửa mặt', price: 290000, image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=400&q=80' },
+      { id: 'p1', name: 'La Roche-Posay Hyalu B5 Serum', category: 'Serum', price: 390000, image: 'https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=400&q=80' },
+      { id: 'p2', name: 'CeraVe Moisturising Cream', category: 'Moisturizer', price: 490000, image: 'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?auto=format&fit=crop&w=400&q=80' },
+      { id: 'p3', name: 'Paula\'s Choice 2% BHA Liquid Exfoliant', category: 'Toner', price: 590000, image: 'https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&w=400&q=80' },
+      { id: 'p4', name: 'Cetaphil Gentle Skin Cleanser', category: 'Cleanser', price: 290000, image: 'https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=400&q=80' },
     ]
 
-    const firstNames = ['Nguyễn', 'Trần', 'Lê', 'Phạm', 'Hoàng', 'Phan', 'Vũ', 'Đặng', 'Bùi']
-    const middleNames = ['Văn', 'Thị', 'Minh', 'Anh', 'Ngọc', 'Khánh', 'Hoàng', 'Đức', 'Phương']
-    const lastNames = ['Hùng', 'Hương', 'Hải', 'Trang', 'Tú', 'Linh', 'Dương', 'Phúc', 'Yến']
+    const firstNames = ['John', 'Jane', 'Michael', 'Emily', 'Chris', 'Sarah', 'David', 'Jessica', 'Daniel']
+    const middleNames = ['A.', 'B.', 'M.', 'E.', 'J.', 'L.', 'D.', 'S.', 'R.']
+    const lastNames = ['Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez']
 
-    const cities = ['Hà Nội', 'TP. Hồ Chí Minh', 'Đà Nẵng', 'Cần Thơ', 'Hải Phòng', 'Nha Trang']
+    const cities = ['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix', 'Philadelphia']
 
     const orders: OrderRecord[] = []
 
@@ -346,7 +346,7 @@ export const databaseService = {
       const lastName = lastNames[Math.floor(Math.random() * lastNames.length)]
       const name = `${firstName} ${middleName} ${lastName}`
       const phone = `09${Math.floor(10000000 + Math.random() * 90000000)}`
-      const address = `${Math.floor(Math.random() * 150) + 1} Đường Lê Lợi, ${cities[Math.floor(Math.random() * cities.length)]}`
+      const address = `${Math.floor(Math.random() * 150) + 1} Main St, ${cities[Math.floor(Math.random() * cities.length)]}`
       
       const paymentMethods = ['cod', 'momo', 'visa', 'apple'] as const
       const paymentMethod = paymentMethods[Math.floor(Math.random() * paymentMethods.length)]
