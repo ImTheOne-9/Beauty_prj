@@ -41,9 +41,9 @@ export const MAKEUP_CATEGORY_META: Record<
     hasTexture: true,
     paletteCount: 1,
   },
-  eyelashes: { label: "Eyelashes", hasPattern: true, paletteCount: 1 },
+  eyelashes: { label: "Eyelashes/Mascara", hasPattern: true, paletteCount: 1 },
   foundation: { label: "Foundation", paletteCount: 1 },
-  highlighter: { label: "Highlighter", hasPattern: true, paletteCount: 1 },
+  highlighter: { label: "Highlight", hasPattern: true, paletteCount: 1 },
   lip_color: { label: "Lip Color", hasTexture: true, paletteCount: 1 },
   lip_liner: {
     label: "Lip Liner",
@@ -194,9 +194,7 @@ export function stripEffectForApi(effect: MakeupEffect): MakeupEffect {
 
 export function buildApiEffects(effects: MakeupEffect[]): MakeupEffect[] {
   return effects
-    .filter(
-      (effect) => effect.enabled === true,
-    )
+    .filter((effect) => effect.enabled === true)
     .map(stripEffectForApi)
     .filter((effect) => {
       if (effect.category === "skin_smooth") return true;
