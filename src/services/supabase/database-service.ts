@@ -26,8 +26,10 @@ export type AdminScanRecord = {
   id: string;
   created_at: string;
   user_id: string;
-  metrics: ScanResult;
-  score: number;
+  original_image: string | null;
+  image_url: string | null;
+  effects: any[];
+  mode: "api" | "demo";
 };
 
 export type AdminRecommendationRecord = {
@@ -308,12 +310,24 @@ export const databaseService = {
     return (data ?? []).length;
   },
 
+  async getProfiles() {
+    const { data, error } = await supabase
+      .from("profiles")
+      .select("id, email, role, subscription_tier, updated_at")
+      .order("updated_at", { ascending: false });
+    if (error) throw error;
+    return data ?? [];
+  },
+
   async getAdminScans() {
     const { data, error } = await supabase
       .from("scans")
       .select("*")
       .order("created_at", { ascending: false });
-    if (error) throw error;
+    if (error) {
+      console.error("Supabase Error:", error);
+      throw error;
+    }
     return (data ?? []) as AdminScanRecord[];
   },
 

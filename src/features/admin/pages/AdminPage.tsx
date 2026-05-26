@@ -27,6 +27,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ExternalLink,
+  X,
 } from 'lucide-react'
 import { Button } from '@/shared/components/ui/Button'
 import { Card } from '@/shared/components/ui/Card'
@@ -44,6 +45,7 @@ import {
 import { canAccessAdminSection, getAdminRoleLabel, type AdminSection, type AdminRole } from '@/shared/lib/admin'
 import { parseProductTags } from '@/shared/lib/product-tags'
 import { type ScanResult, type OrderRecord } from '@/shared/lib/types'
+import { cn } from '@/shared/lib/cn'
 
 const sidebarSections: Array<{
   id: AdminSection
@@ -56,7 +58,6 @@ const sidebarSections: Array<{
     { id: 'categories', label: 'Categories', description: 'Manage product categories', icon: ListChecks },
     { id: 'product-configs', label: 'AI Configs', description: 'Manage AI product configurations', icon: Sparkles },
     { id: 'scans', label: 'Scans', description: 'View scan history and simulation', icon: Camera },
-    { id: 'recommendations', label: 'Recommendations', description: 'Manage matched products', icon: Sparkles },
     { id: 'access', label: 'Access', description: 'Roles and permissions', icon: Users },
     { id: 'settings', label: 'Settings', description: 'Platform and environment', icon: Wrench },
     { id: 'revenue', label: 'Revenue', description: 'Orders and sales', icon: DollarSign },
@@ -72,18 +73,18 @@ type ProductFormState = {
   brand: string
 }
 
-type ScanFormState = {
-  id: string
-  score: string
-  metricsJson: string
-}
+// type ScanFormState = {
+//   id: string
+//   score: string
+//   metricsJson: string
+// }
 
-type RecommendationFormState = {
-  id: string
-  scanId: string
-  productId: string
-  reason: string
-}
+// type RecommendationFormState = {
+//   id: string
+//   scanId: string
+//   productId: string
+//   reason: string
+// }
 
 type CategoryFormState = {
   id: string
@@ -127,18 +128,18 @@ const emptyProductConfigForm: ProductConfigFormState = {
   extraParams: '{}',
 }
 
-const emptyScanForm: ScanFormState = {
-  id: '',
-  score: '',
-  metricsJson: '{}',
-}
+// const emptyScanForm: ScanFormState = {
+//   id: '',
+//   score: '',
+//   metricsJson: '{}',
+// }
 
-const emptyRecommendationForm: RecommendationFormState = {
-  id: '',
-  scanId: '',
-  productId: '',
-  reason: '',
-}
+// const emptyRecommendationForm: RecommendationFormState = {
+//   id: '',
+//   scanId: '',
+//   productId: '',
+//   reason: '',
+// }
 
 const PRODUCT_PLACEHOLDER_IMAGE =
   'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?auto=format&fit=crop&w=400&q=80'
@@ -164,22 +165,22 @@ function mapProductForm(product: AdminProductRecord): ProductFormState {
   }
 }
 
-function mapScanForm(scan: AdminScanRecord): ScanFormState {
-  return {
-    id: scan.id,
-    score: String(scan.score),
-    metricsJson: JSON.stringify(scan.metrics, null, 2),
-  }
-}
+// function mapScanForm(scan: AdminScanRecord): ScanFormState {
+//   return {
+//     id: scan.id,
+//     score: String(scan.score),
+//     metricsJson: JSON.stringify(scan.metrics, null, 2),
+//   }
+// }
 
-function mapRecommendationForm(recommendation: AdminRecommendationRecord): RecommendationFormState {
-  return {
-    id: recommendation.id,
-    scanId: recommendation.scan_id,
-    productId: recommendation.product_id,
-    reason: recommendation.reason,
-  }
-}
+// function mapRecommendationForm(recommendation: AdminRecommendationRecord): RecommendationFormState {
+//   return {
+//     id: recommendation.id,
+//     scanId: recommendation.scan_id,
+//     productId: recommendation.product_id,
+//     reason: recommendation.reason,
+//   }
+// }
 
 function AdminSectionTitle({
   eyebrow,
@@ -206,8 +207,8 @@ export default function AdminPage() {
 
   // Forms
   const [productForm, setProductForm] = useState<ProductFormState>(emptyProductForm)
-  const [scanForm, setScanForm] = useState<ScanFormState>(emptyScanForm)
-  const [recommendationForm, setRecommendationForm] = useState<RecommendationFormState>(emptyRecommendationForm)
+  // const [scanForm, setScanForm] = useState<ScanFormState>(emptyScanForm)
+  // const [recommendationForm, setRecommendationForm] = useState<RecommendationFormState>(emptyRecommendationForm)
   const [categoryForm, setCategoryForm] = useState<CategoryFormState>(emptyCategoryForm)
   const [productConfigForm, setProductConfigForm] = useState<ProductConfigFormState>(emptyProductConfigForm)
 
@@ -217,8 +218,11 @@ export default function AdminPage() {
   const [productPage, setProductPage] = useState(1)
   const productItemsPerPage = 10
 
-  const [scanSearch, setScanSearch] = useState('')
-  const [scanScoreFilter, setScanScoreFilter] = useState<[number, number]>([0, 100])
+  const [adminScanSearch, setAdminScanSearch]         = useState('')
+  const [adminScanModeFilter, setAdminScanModeFilter] = useState<'all' | 'api' | 'demo'>('all')
+  const [adminScanPage, setAdminScanPage]             = useState(1)
+  const [selectedAdminScan, setSelectedAdminScan]     = useState<any>(null)
+  const ADMIN_SCAN_PAGE_SIZE = 10
 
   const [recommendationSearch, setRecommendationSearch] = useState('')
   const [recommendationCategoryFilter, setRecommendationCategoryFilter] = useState('All')
@@ -237,13 +241,6 @@ export default function AdminPage() {
   const [newUserPassword, setNewUserPassword] = useState('')
   const [newUserRole, setNewUserRole] = useState<AdminRole | 'user'>('user')
   const [newUserPlan, setNewUserPlan] = useState<'free' | 'premium' | 'pro'>('free')
-
-  // Scan Simulator State
-  const [targetUserId, setTargetUserId] = useState('')
-  const [simHydration, setSimHydration] = useState(70)
-  const [simAcne, setSimAcne] = useState(30)
-  const [simOiliness, setSimOiliness] = useState(40)
-  const [simDarkCircles, setSimDarkCircles] = useState(25)
 
   // Ping Check
   const [pingTime, setPingTime] = useState<number | null>(null)
@@ -278,11 +275,6 @@ export default function AdminPage() {
     queryFn: () => databaseService.getAdminScans(),
   })
 
-  const recommendationsQuery = useQuery({
-    queryKey: ['admin', 'recommendations'],
-    queryFn: () => databaseService.getAdminRecommendations(),
-  })
-
   const categoriesQuery = useQuery({
     queryKey: ['admin', 'categories'],
     queryFn: () => databaseService.getAdminCategories(),
@@ -294,8 +286,8 @@ export default function AdminPage() {
   })
 
   const usersQuery = useQuery({
-    queryKey: ['admin', 'users'],
-    queryFn: async () => databaseService.getUsersWithRoles(),
+    queryKey: ['admin', 'profiles'],
+    queryFn: () => databaseService.getProfiles(),
   })
 
   const ordersQuery = useQuery({
@@ -308,6 +300,13 @@ export default function AdminPage() {
     () => sidebarSections.filter((section) => canAccessAdminSection(adminRole, section.id)),
     [adminRole],
   )
+
+  // Map userId → email
+  const userLookup = useMemo(() => {
+    const map = new Map<string, { email: string; role: string }>()
+    for (const u of usersQuery.data ?? []) map.set(u.id, u)
+    return map
+  }, [usersQuery.data])
 
   useEffect(() => {
     if (tabs.length === 0) return
@@ -336,6 +335,25 @@ export default function AdminPage() {
       return matchSearch && matchStatus
     })
   }, [ordersQuery.data, orderSearch, orderStatusFilter])
+
+  const filteredAdminScans = useMemo(() => {
+    return (scansQuery.data ?? []).filter((scan) => {
+      const userEmail = scan.user_id ? (userLookup.get(scan.user_id)?.email ?? '') : 'Guest'
+      const matchSearch =
+        scan.id.toLowerCase().includes(adminScanSearch.toLowerCase()) ||
+        (scan.user_id ?? '').toLowerCase().includes(adminScanSearch.toLowerCase()) ||
+        userEmail.toLowerCase().includes(adminScanSearch.toLowerCase())
+      const matchMode = adminScanModeFilter === 'all' || scan.mode === adminScanModeFilter
+      return matchSearch && matchMode
+    })
+  }, [scansQuery.data, adminScanSearch, adminScanModeFilter, userLookup])
+
+
+  const totalAdminScanPages = Math.max(1, Math.ceil(filteredAdminScans.length / ADMIN_SCAN_PAGE_SIZE))
+  const paginatedAdminScans = filteredAdminScans.slice(
+    (adminScanPage - 1) * ADMIN_SCAN_PAGE_SIZE,
+    adminScanPage * ADMIN_SCAN_PAGE_SIZE,
+  )
 
   const revenueStats = useMemo(() => {
     const list = ordersQuery.data ?? []
@@ -374,58 +392,6 @@ export default function AdminPage() {
     }
   }, [ordersQuery.data])
 
-  // Aggregate statistics for Overview
-  const scanStats = useMemo(() => {
-    const list = scansQuery.data ?? []
-    if (list.length === 0) {
-      return {
-        avgScore: 0,
-        avgHydration: 0,
-        avgAcne: 0,
-        avgOiliness: 0,
-        avgDarkCircles: 0,
-        scoreRanges: [0, 0, 0, 0, 0], // <60, 60-70, 70-80, 80-90, 90-100
-      }
-    }
-
-    let totalScore = 0
-    let totalHydration = 0
-    let totalAcne = 0
-    let totalOiliness = 0
-    let totalDarkCircles = 0
-    const ranges = [0, 0, 0, 0, 0]
-
-    list.forEach((scan) => {
-      totalScore += scan.score
-      if (scan.score < 60) ranges[0]++
-      else if (scan.score < 70) ranges[1]++
-      else if (scan.score < 80) ranges[2]++
-      else if (scan.score < 90) ranges[3]++
-      else ranges[4]++
-
-      const metrics = scan.metrics
-      if (metrics) {
-        totalHydration += metrics.hydration?.value ?? 0
-        totalAcne += metrics.acne?.value ?? 0
-        totalOiliness += metrics.oiliness?.value ?? 0
-        totalDarkCircles += metrics.darkCircles?.value ?? 0
-      }
-    })
-
-    const n = list.length
-    return {
-      avgScore: Math.round(totalScore / n),
-      avgHydration: Math.round(totalHydration / n),
-      avgAcne: Math.round(totalAcne / n),
-      avgOiliness: Math.round(totalOiliness / n),
-      avgDarkCircles: Math.round(totalDarkCircles / n),
-      scoreRanges: ranges,
-    }
-  }, [scansQuery.data])
-
-  const maxRangeCount = useMemo(() => {
-    return Math.max(...scanStats.scoreRanges, 1)
-  }, [scanStats.scoreRanges])
 
   // Filtered lists
   const filteredProducts = useMemo(() => {
@@ -444,37 +410,16 @@ export default function AdminPage() {
     })
   }, [productsQuery.data, productSearch, productCategoryFilter, categoriesQuery.data])
 
-  const filteredScans = useMemo(() => {
-    const list = scansQuery.data ?? []
-    return list.filter((s) => {
-      const matchesSearch =
-        s.id.toLowerCase().includes(scanSearch.toLowerCase()) ||
-        s.user_id.toLowerCase().includes(scanSearch.toLowerCase())
-      const matchesScore = s.score >= scanScoreFilter[0] && s.score <= scanScoreFilter[1]
-      return matchesSearch && matchesScore
-    })
-  }, [scansQuery.data, scanSearch, scanScoreFilter])
+  // const filteredScans = useMemo(() => {
+  //   const list = scansQuery.data ?? []
+  //   return list.filter((s) => {
+  //     const matchesSearch =
+  //       s.id.toLowerCase().includes(scanSearch.toLowerCase()) ||
+  //       s.user_id.toLowerCase().includes(scanSearch.toLowerCase())
+  //     return matchesSearch
+  //   })
+  // }, [scansQuery.data, scanSearch])
 
-  const filteredRecommendations = useMemo(() => {
-    const list = recommendationsQuery.data ?? []
-    return list.filter((r) => {
-      const product = productLookup.get(r.product_id)
-      const parsed = product ? parseProductTags(product) : null
-      const prodName = product?.name ?? ''
-
-      const matchesSearch =
-        r.scan_id.toLowerCase().includes(recommendationSearch.toLowerCase()) ||
-        r.product_id.toLowerCase().includes(recommendationSearch.toLowerCase()) ||
-        prodName.toLowerCase().includes(recommendationSearch.toLowerCase()) ||
-        r.reason.toLowerCase().includes(recommendationSearch.toLowerCase())
-
-      const matchesCat =
-        recommendationCategoryFilter === 'All' ||
-        (parsed && parsed.category.toLowerCase() === recommendationCategoryFilter.toLowerCase())
-
-      return matchesSearch && matchesCat
-    })
-  }, [recommendationsQuery.data, productLookup, recommendationSearch, recommendationCategoryFilter])
 
   const filteredUsers = useMemo(() => {
     const list = usersQuery.data ?? []
@@ -508,19 +453,13 @@ export default function AdminPage() {
         icon: Camera,
       },
       {
-        label: 'Recommendations',
-        value: recommendationsQuery.data?.length ?? 0,
-        hint: 'Matched product links',
-        icon: Sparkles,
-      },
-      {
         label: 'Admin Role',
         value: getAdminRoleLabel(adminRole),
         hint: 'Active security context',
         icon: ShieldCheck,
       },
     ],
-    [adminRole, productsQuery.data?.length, scansQuery.data?.length, recommendationsQuery.data?.length],
+    [adminRole, productsQuery.data?.length, scansQuery.data?.length],
   )
 
   // Mutations
@@ -642,27 +581,6 @@ export default function AdminPage() {
     },
   })
 
-  const saveScanMutation = useMutation({
-    mutationFn: async () => {
-      if (!scanForm.id) throw new Error('Select a scan to update.')
-      const parsedMetrics = JSON.parse(scanForm.metricsJson)
-      const score = Number(scanForm.score)
-
-      if (Number.isNaN(score) || score < 0 || score > 100) {
-        throw new Error('Score must be a number from 0 to 100.')
-      }
-
-      return databaseService.updateScan(scanForm.id, {
-        score,
-        metrics: parsedMetrics,
-      })
-    },
-    onSuccess: async () => {
-      setScanForm(emptyScanForm)
-      await queryClient.invalidateQueries({ queryKey: ['admin', 'scans'] })
-      await queryClient.invalidateQueries({ queryKey: ['scan-history'] })
-    },
-  })
 
   const deleteScanMutation = useMutation({
     mutationFn: async (id: string) => databaseService.deleteScan(id),
@@ -673,36 +591,6 @@ export default function AdminPage() {
     },
   })
 
-  const saveRecommendationMutation = useMutation({
-    mutationFn: async () => {
-      const payload = {
-        scanId: recommendationForm.scanId.trim(),
-        productId: recommendationForm.productId.trim(),
-        reason: recommendationForm.reason.trim(),
-      }
-
-      if (!payload.scanId || !payload.productId || !payload.reason) {
-        throw new Error('Please provide Scan ID, Product ID, and Reason before saving.')
-      }
-
-      if (recommendationForm.id) {
-        return databaseService.updateRecommendation(recommendationForm.id, payload)
-      }
-
-      return databaseService.createRecommendation(payload)
-    },
-    onSuccess: async () => {
-      setRecommendationForm(emptyRecommendationForm)
-      await queryClient.invalidateQueries({ queryKey: ['admin', 'recommendations'] })
-    },
-  })
-
-  const deleteRecommendationMutation = useMutation({
-    mutationFn: async (id: string) => databaseService.deleteRecommendation(id),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['admin', 'recommendations'] })
-    },
-  })
 
   // User Manager Mutations
   const updateUserRoleMutation = useMutation({
@@ -753,74 +641,56 @@ export default function AdminPage() {
   })
 
   // Scan Simulator Mutation
-  const runSimulatorMutation = useMutation({
-    mutationFn: async () => {
-      const userId = targetUserId.trim() || currentAuthUser?.id || 'guest-user'
+  // const runSimulatorMutation = useMutation({
+  //   mutationFn: async () => {
+  //     const userId = targetUserId.trim() || currentAuthUser?.id || 'guest-user'
 
-      const calculatedScore = Math.round(
-        (simHydration + (100 - simAcne) + (100 - simOiliness) + (100 - simDarkCircles)) / 4,
-      )
 
-      const getStatus = (metric: string, val: number) => {
-        if (metric === 'acne') {
-          if (val >= 80) return 'great'
-          if (val >= 20) return 'moderate'
-          return 'attention'
-        }
-        if (val >= 75) return 'great'
-        if (val >= 40) return 'moderate'
-        return 'attention'
-      }
+  //     const scanResult: ScanResult = {
 
-      const scanResult: ScanResult = {
-        skinScore: calculatedScore,
-        hydration: { label: 'Hydration', value: simHydration, status: getStatus('hydration', simHydration) },
-        acne: { label: 'Acne', value: simAcne, status: getStatus('acne', simAcne) },
-        oiliness: { label: 'Oiliness', value: simOiliness, status: getStatus('oiliness', simOiliness) },
-        darkCircles: { label: 'Dark Circles', value: simDarkCircles, status: getStatus('darkCircles', simDarkCircles) },
-      }
+  //     }
 
-      // Check if we can save to database
-      if (userId === 'guest-user' || !currentAuthUser) {
-        // Fallback to guest scans array in localStorage
-        const makeId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`
-        const id = makeId()
-        const now = new Date().toISOString()
-        const products = productsQuery.data || []
-        const topProducts = products.slice(0, 3)
+  //     // Check if we can save to database
+  //     if (userId === 'guest-user' || !currentAuthUser) {
+  //       // Fallback to guest scans array in localStorage
+  //       const makeId = () => `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`
+  //       const id = makeId()
+  //       const now = new Date().toISOString()
+  //       const products = productsQuery.data || []
+  //       const topProducts = products.slice(0, 3)
 
-        const recommendations = topProducts.map((p, idx) => ({
-          id: makeId(),
-          productId: p.id,
-          reason: `Simulated suggestion: suitable for ${idx === 0 ? 'hydration' : idx === 1 ? 'acne' : 'dark circles'} target`,
-        }))
+  //       const recommendations = topProducts.map((p, idx) => ({
+  //         id: makeId(),
+  //         productId: p.id,
+  //         reason: `Simulated suggestion: suitable for ${idx === 0 ? 'hydration' : idx === 1 ? 'acne' : 'dark circles'} target`,
+  //       }))
 
-        const scan = { id, userId: null, result: scanResult, created_at: now, recommendations }
-        const existing = JSON.parse(localStorage.getItem('guest_scans') || '[]')
-        existing.unshift(scan)
-        localStorage.setItem('guest_scans', JSON.stringify(existing))
-        return id
-      }
+  //       const scan = { id, userId: null, result: scanResult, created_at: now, recommendations }
+  //       const existing = JSON.parse(localStorage.getItem('guest_scans') || '[]')
+  //       existing.unshift(scan)
+  //       localStorage.setItem('guest_scans', JSON.stringify(existing))
+  //       return id
+  //     }
 
-      // Real Supabase insert
-      const products = productsQuery.data || []
-      const topProducts = products.slice(0, 3)
-      const scanId = await databaseService.saveScan(userId, scanResult)
+  //     // Real Supabase insert
+  //     const products = productsQuery.data || []
+  //     const topProducts = products.slice(0, 3)
+  //     const scanId = await databaseService.saveScan(userId, scanResult)
 
-      await databaseService.saveRecommendations(
-        scanId,
-        topProducts.map((product, idx) => ({
-          productId: product.id,
-          reason: `Simulated result for ${idx === 0 ? 'hydration' : idx === 1 ? 'acne' : 'dark circles'} target`,
-        })),
-      )
-      return scanId
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['admin', 'scans'] })
-      await queryClient.invalidateQueries({ queryKey: ['admin', 'recommendations'] })
-    },
-  })
+  //     await databaseService.saveRecommendations(
+  //       scanId,
+  //       topProducts.map((product, idx) => ({
+  //         productId: product.id,
+  //         reason: `Simulated result for ${idx === 0 ? 'hydration' : idx === 1 ? 'acne' : 'dark circles'} target`,
+  //       })),
+  //     )
+  //     return scanId
+  //   },
+  //   onSuccess: async () => {
+  //     await queryClient.invalidateQueries({ queryKey: ['admin', 'scans'] })
+  //     await queryClient.invalidateQueries({ queryKey: ['admin', 'recommendations'] })
+  //   },
+  // })
 
   // Order & Revenue Mutations
   const updateOrderStatusMutation = useMutation({
@@ -885,12 +755,13 @@ export default function AdminPage() {
     // Add real items if available
     const scans = scansQuery.data ?? []
     scans.slice(0, 4).forEach((scan) => {
+      const effectCount = (scan.effects ?? []).filter((e: any) => e.enabled).length;
       logs.push({
         id: `scan-${scan.id}`,
-        user: `User ${scan.user_id.slice(0, 5)}...`,
-        event: `Completed skin analysis with score ${scan.score}`,
+        user: `User ${scan.user_id?.slice(0, 5) ?? '??'}...`,
+        event: `Completed skin analysis with ${effectCount} effect(s)`,
         time: formatDate(scan.created_at),
-        type: scan.score > 80 ? 'success' : 'info',
+        type: effectCount > 2 ? 'success' : 'info',
       })
     })
 
@@ -919,10 +790,9 @@ export default function AdminPage() {
   const isBusy =
     productsQuery.isLoading ||
     scansQuery.isLoading ||
-    recommendationsQuery.isLoading ||
     usersQuery.isLoading
 
-  if (isBusy && !productsQuery.data && !scansQuery.data && !recommendationsQuery.data) {
+  if (isBusy && !productsQuery.data && !scansQuery.data) {
     return <Loader fullScreen label="Loading admin dashboard" />
   }
 
@@ -1109,61 +979,6 @@ export default function AdminPage() {
                 </Card>
               </div>
 
-              {/* Row 2: SVG Graphs and Real statistics */}
-              <div className="grid gap-6 md:grid-cols-2">
-                {/* SVG Graph: Skin Score Histogram */}
-                <Card className="border border-rose-100 p-6 bg-white space-y-4">
-                  <div>
-                    <h3 className="font-display text-xl text-rose-950">Skin Score Distribution</h3>
-                    <p className="text-xs text-mist">Frequency of scores from customer historical scans.</p>
-                  </div>
-                  <div className="h-44 flex items-end justify-between gap-2 border-b border-rose-100 pb-2">
-                    {scanStats.scoreRanges.map((count, i) => {
-                      const labels = ['<60', '60-70', '70-80', '80-90', '90+']
-                      const heightPercent = maxRangeCount > 0 ? (count / maxRangeCount) * 100 : 0
-                      return (
-                        <div key={i} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
-                          <span className="text-xs font-semibold text-rose-950">{count}</span>
-                          <div className="w-full bg-rose-50 hover:bg-rose-100 rounded-lg overflow-hidden transition-all duration-300 relative" style={{ height: `${heightPercent * 0.7}%` }}>
-                            <div className="absolute inset-0 bg-gradient-to-t from-rose-400 via-pink-500 to-rose-300" />
-                          </div>
-                          <span className="text-[10px] text-mist font-medium">{labels[i]}</span>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </Card>
-
-                {/* Aggregated Skin Metrics */}
-                <Card className="border border-rose-100 p-6 bg-white space-y-4">
-                  <div>
-                    <h3 className="font-display text-xl text-rose-950">Average Skin Metrics</h3>
-                    <p className="text-xs text-mist">Averages across all skin scan records.</p>
-                  </div>
-                  <div className="space-y-3 pt-2">
-                    {[
-                      { name: 'Hydration', val: scanStats.avgHydration, color: 'from-cyan to-blue-400', desc: 'Higher is better' },
-                      { name: 'Acne Severity', val: scanStats.avgAcne, color: 'from-rose-400 to-pink-500', desc: 'Lower is better' },
-                      { name: 'Sebum / Oiliness', val: scanStats.avgOiliness, color: 'from-amber-400 to-yellow-500', desc: 'Balanced at ~50' },
-                      { name: 'Dark Circles', val: scanStats.avgDarkCircles, color: 'from-purple-400 to-indigo-500', desc: 'Lower is better' },
-                    ].map((metric) => (
-                      <div key={metric.name} className="space-y-1">
-                        <div className="flex justify-between text-xs font-semibold text-rose-950">
-                          <span>{metric.name}</span>
-                          <span>{metric.val}%</span>
-                        </div>
-                        <div className="w-full bg-rose-50 h-3 rounded-full overflow-hidden relative">
-                          <div
-                            className={`bg-gradient-to-r ${metric.color} h-full rounded-full`}
-                            style={{ width: `${metric.val}%` }}
-                          />
-                        </div>
-                        <p className="text-[9px] text-mist/60 leading-none">{metric.desc}</p>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-              </div>
 
               {/* Row 3: Live Audit Logs / Activity Log */}
               <Card className="border border-rose-100 p-6 bg-white space-y-4">
@@ -1712,408 +1527,295 @@ export default function AdminPage() {
           ) : null}
 
           {/* SCANS TAB WITH SCAN SIMULATOR */}
-          {activeSection === 'scans' ? (
-            <div className="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
-              {/* Scan Records list */}
-              <div className="space-y-4">
-                {/* Filters */}
-                <div className="bg-white border border-rose-100 rounded-3xl p-4 space-y-3">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-mist" />
-                    <input
-                      type="text"
-                      className="w-full rounded-full border border-rose-100 pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-rose-200"
-                      placeholder="Search scans by User UUID or Scan ID..."
-                      value={scanSearch}
-                      onChange={(e) => setScanSearch(e.target.value)}
-                    />
-                  </div>
-
-                  <div className="space-y-1">
-                    <div className="flex justify-between text-xs text-rose-950 font-bold uppercase tracking-wider">
-                      <span>Score Range:</span>
-                      <span>{scanScoreFilter[0]} - {scanScoreFilter[1]}</span>
-                    </div>
-                    <div className="flex gap-4 items-center">
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        className="flex-1 accent-rose-500"
-                        value={scanScoreFilter[0]}
-                        onChange={(e) => setScanScoreFilter([Number(e.target.value), scanScoreFilter[1]])}
-                      />
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        className="flex-1 accent-rose-500"
-                        value={scanScoreFilter[1]}
-                        onChange={(e) => setScanScoreFilter([scanScoreFilter[0], Number(e.target.value)])}
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <Card className="border border-rose-100 p-6 bg-white">
-                  <AdminSectionTitle
-                    eyebrow="Scan Records"
-                    title="Skin Analysis History"
-                    description="Select a scan to review metrics, change score, or delete the record."
-                  />
-                  <div className="mt-5 space-y-3 max-h-[500px] overflow-y-auto pr-1">
-                    {filteredScans.length === 0 ? (
-                      <p className="text-center py-6 text-mist text-sm">No scans match the filter.</p>
-                    ) : null}
-
-                    {filteredScans.map((scan) => (
-                      <button
-                        key={scan.id}
-                        type="button"
-                        onClick={() => setScanForm(mapScanForm(scan))}
-                        className={`w-full rounded-2xl border px-4 py-3 text-left transition ${scanForm.id === scan.id
-                          ? 'border-rose-300 bg-rose-50 text-rose-950'
-                          : 'border-rose-100 bg-white hover:border-rose-200 hover:bg-rose-50/60'
-                          }`}
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="font-semibold text-rose-950">Scan {scan.id.slice(0, 8)}</p>
-                            <p className="mt-0.5 text-xs text-mist truncate">User: {scan.user_id}</p>
-                            <p className="mt-1 text-[10px] text-mist">{formatDate(scan.created_at)}</p>
-                          </div>
-                          <div className="rounded-full bg-rose-50 border border-rose-100 px-3 py-1 text-xs font-bold text-rose-600">
-                            Score {scan.score}
-                          </div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </Card>
-              </div>
-
-              {/* Right Side: Scan Details + Scan Simulator */}
-              <div className="space-y-6">
-                {/* Selected Scan details/editor */}
-                {scanForm.id ? (
-                  <Card className="border border-rose-100 p-6 bg-white">
-                    <AdminSectionTitle
-                      eyebrow="Scan Editor"
-                      title={`Scan Details ${scanForm.id.slice(0, 8)}`}
-                      description="Update score or manually override saved JSON analysis data."
-                    />
-                    <div className="mt-5 space-y-4">
-                      <div>
-                        <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Score</label>
-                        <Input
-                          placeholder="Score"
-                          type="number"
-                          value={scanForm.score}
-                          onChange={(event) => setScanForm((state) => ({ ...state, score: event.target.value }))}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">JSON Metrics Data</label>
-                        <textarea
-                          className="min-h-[140px] w-full rounded-2xl border border-rose-200/80 bg-white/80 px-4 py-3 font-mono text-xs text-pearl placeholder:text-mist/70 focus:border-cyan focus:outline-none focus:ring-2 focus:ring-cyan/25"
-                          placeholder="JSON Metrics Data"
-                          value={scanForm.metricsJson}
-                          onChange={(event) => setScanForm((state) => ({ ...state, metricsJson: event.target.value }))}
-                        />
-                      </div>
-
-                      {saveScanMutation.error ? (
-                        <p className="text-sm text-rose-500">{saveScanMutation.error.message}</p>
-                      ) : null}
-
-                      <div className="flex flex-wrap gap-2 pt-2">
-                        <Button onClick={() => saveScanMutation.mutate()} disabled={saveScanMutation.isPending}>
-                          Save Updates
-                        </Button>
-                        <Button variant="ghost" onClick={() => setScanForm(emptyScanForm)}>
-                          Cancel
-                        </Button>
-                        <Button
-                          variant="ghost"
-                          onClick={() => {
-                            if (confirm('Permanently delete this scan record?')) {
-                              deleteScanMutation.mutate(scanForm.id)
-                            }
-                          }}
-                          disabled={deleteScanMutation.isPending}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          Delete scan
-                        </Button>
-                      </div>
-                    </div>
-                  </Card>
-                ) : null}
-
-                {/* Scan Simulator Panel */}
-                <Card className="border border-rose-200 bg-gradient-to-br from-rose-50/50 to-amber-50/30 p-6">
-                  <div className="flex items-center gap-2 text-xs uppercase tracking-[0.24em] text-rose-600 font-extrabold">
-                    <Sliders className="h-4 w-4 text-rose-500 animate-pulse" />
-                    <span>Developer Lab</span>
-                  </div>
-                  <h3 className="mt-2 font-display text-2xl text-rose-950">Skin Scan Simulator</h3>
-                  <p className="mt-1 text-sm text-mist">
-                    Trigger simulated results and save directly to Supabase to test recommendation triggers.
-                  </p>
-
-                  <div className="mt-5 space-y-4">
-                    <div>
-                      <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">
-                        Target User ID (Leave blank to use current admin)
-                      </label>
-                      <Input
-                        placeholder="Supabase User UUID (e.g., 5d5a7d8...)"
-                        value={targetUserId}
-                        onChange={(e) => setTargetUserId(e.target.value)}
-                      />
-                    </div>
-
-                    <div className="space-y-3">
-                      {/* Hydration Slider */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs font-semibold text-rose-950">
-                          <span>Hydration</span>
-                          <span className="text-cyan-600 font-extrabold">{simHydration}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="10"
-                          max="100"
-                          className="w-full accent-cyan"
-                          value={simHydration}
-                          onChange={(e) => setSimHydration(Number(e.target.value))}
-                        />
-                      </div>
-
-                      {/* Acne Slider */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs font-semibold text-rose-950">
-                          <span>Acne Severity (lower value means clearer skin)</span>
-                          <span className="text-rose-600 font-extrabold">{simAcne}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          className="w-full accent-rose-500"
-                          value={simAcne}
-                          onChange={(e) => setSimAcne(Number(e.target.value))}
-                        />
-                      </div>
-
-                      {/* Oiliness Slider */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs font-semibold text-rose-950">
-                          <span>Sebum / Oiliness</span>
-                          <span className="text-amber-600 font-extrabold">{simOiliness}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="10"
-                          max="100"
-                          className="w-full accent-amber-500"
-                          value={simOiliness}
-                          onChange={(e) => setSimOiliness(Number(e.target.value))}
-                        />
-                      </div>
-
-                      {/* Dark Circles Slider */}
-                      <div className="space-y-1">
-                        <div className="flex justify-between text-xs font-semibold text-rose-950">
-                          <span>Dark Circles Fatigue</span>
-                          <span className="text-purple-600 font-extrabold">{simDarkCircles}%</span>
-                        </div>
-                        <input
-                          type="range"
-                          min="5"
-                          max="100"
-                          className="w-full accent-purple-500"
-                          value={simDarkCircles}
-                          onChange={(e) => setSimDarkCircles(Number(e.target.value))}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="bg-white/80 p-3 rounded-2xl border border-rose-100 flex items-center justify-between text-xs">
-                      <span className="text-mist font-semibold">Calculated Skin Score:</span>
-                      <span className="text-lg font-bold text-rose-900">
-                        {Math.round((simHydration + (100 - simAcne) + (100 - simOiliness) + (100 - simDarkCircles)) / 4)} / 100
-                      </span>
-                    </div>
-
-                    {runSimulatorMutation.error ? (
-                      <p className="text-xs text-rose-500">{runSimulatorMutation.error.message}</p>
-                    ) : null}
-
-                    {runSimulatorMutation.isSuccess ? (
-                      <p className="text-xs text-emerald-600 font-bold">Successfully inserted simulated scan! ✓</p>
-                    ) : null}
-
-                    <Button
-                      className="w-full justify-center"
-                      onClick={() => runSimulatorMutation.mutate()}
-                      disabled={runSimulatorMutation.isPending}
-                    >
-                      {runSimulatorMutation.isPending ? 'Inserting record...' : 'Simulate Scan & Save'}
-                    </Button>
-                  </div>
-                </Card>
-              </div>
-            </div>
-          ) : null}
-
-          {/* RECOMMENDATIONS TAB */}
-          {activeSection === 'recommendations' ? (
+          {activeSection === 'scans' && (
             <div className="space-y-4">
-              {/* Creator Form */}
-              <Card className="border border-rose-100 p-6 bg-white">
-                <AdminSectionTitle
-                  eyebrow="Manage Recommendations"
-                  title={recommendationForm.id ? 'Edit Product Recommendation' : 'Create Product Recommendation Link'}
-                  description="Link a specific product to a Scan ID. Customize the match reason displayed in the customer's timeline."
-                />
-                <div className="mt-5 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-                  <div>
-                    <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Scan ID</label>
-                    <Input
-                      placeholder="Scan UUID (e.g., 10f3f31d-...)"
-                      value={recommendationForm.scanId}
-                      onChange={(event) => setRecommendationForm((state) => ({ ...state, scanId: event.target.value }))}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Product ID</label>
-                    <Input
-                      placeholder="Product UUID (e.g., ac95f484-...)"
-                      value={recommendationForm.productId}
-                      onChange={(event) => setRecommendationForm((state) => ({ ...state, productId: event.target.value }))}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Match Reason</label>
-                    <Input
-                      placeholder="Recommendation reason (e.g., Suitable for dehydrated skin...)"
-                      value={recommendationForm.reason}
-                      onChange={(event) => setRecommendationForm((state) => ({ ...state, reason: event.target.value }))}
-                    />
-                  </div>
-                </div>
-
-                {saveRecommendationMutation.error ? (
-                  <p className="mt-3 text-sm text-rose-500">{saveRecommendationMutation.error.message}</p>
-                ) : null}
-
-                <div className="mt-4 flex flex-wrap gap-2">
-                  <Button onClick={() => saveRecommendationMutation.mutate()} disabled={saveRecommendationMutation.isPending}>
-                    {saveRecommendationMutation.isPending ? 'Saving...' : recommendationForm.id ? 'Update recommendation' : 'Create recommendation'}
-                  </Button>
-                  <Button variant="ghost" onClick={() => setRecommendationForm(emptyRecommendationForm)}>
-                    Reset
-                  </Button>
-                </div>
-              </Card>
-
-              {/* Search & Filter */}
+              {/* Search & filter */}
               <div className="bg-white border border-rose-100 rounded-3xl p-4 flex flex-wrap gap-3 items-center">
                 <div className="flex-1 relative min-w-[200px]">
                   <Search className="absolute left-3 top-3 h-4 w-4 text-mist" />
                   <input
                     type="text"
                     className="w-full rounded-full border border-rose-100 pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-rose-200"
-                    placeholder="Search by Scan, Product, or Reason..."
-                    value={recommendationSearch}
-                    onChange={(e) => setRecommendationSearch(e.target.value)}
+                    placeholder="Search by Scan ID, User UUID or Email..."
+                    value={adminScanSearch}
+                    onChange={(e) => { setAdminScanSearch(e.target.value); setAdminScanPage(1) }}
                   />
                 </div>
-
                 <select
                   className="rounded-full border border-rose-100 px-3 py-2 text-sm text-pearl focus:outline-none"
-                  value={recommendationCategoryFilter}
-                  onChange={(e) => setRecommendationCategoryFilter(e.target.value)}
+                  value={adminScanModeFilter}
+                  onChange={(e) => { setAdminScanModeFilter(e.target.value as any); setAdminScanPage(1) }}
                 >
-                  <option value="All">All Categories</option>
-                  <option value="Cleanser">Cleanser</option>
-                  <option value="Serum">Serum</option>
-                  <option value="Moisturizer">Moisturizer</option>
-                  <option value="Toner">Toner</option>
-                  <option value="Sunscreen">Sunscreen</option>
-                  <option value="Treatment">Treatment</option>
-                  <option value="Essence">Essence</option>
-                  <option value="Mask">Mask</option>
-                  <option value="Eye Care">Eye Care</option>
+                  <option value="all">All Modes</option>
+                  <option value="api">API Mode</option>
+                  <option value="demo">Demo Mode</option>
                 </select>
               </div>
 
-              {filteredRecommendations.length === 0 ? (
-                <div className="text-center py-12 bg-white border border-rose-100 rounded-3xl text-mist">
-                  No recommendation records match the search criteria.
+              <Card className="border border-rose-100 p-6 bg-white shadow-sm">
+                <AdminSectionTitle
+                  eyebrow="Scan History"
+                  title="All Users Scans"
+                  description={`${filteredAdminScans.length} scan record(s) — image preview, user email, applied effects.`}
+                />
+
+                <div className="mt-6 overflow-x-auto">
+                  <table className="w-full min-w-[860px] text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="border-b border-rose-100 text-rose-950 font-bold uppercase tracking-wider">
+                        <th className="pb-3 pr-3 w-[100px]">Images</th>
+                        <th className="pb-3 px-3">Scan ID</th>
+                        <th className="pb-3 px-3">Email</th>
+                        <th className="pb-3 px-3">Mode</th>
+                        <th className="pb-3 px-3 min-w-[200px]">Effects</th>
+                        <th className="pb-3 px-3 whitespace-nowrap">Created</th>
+                        <th className="pb-3 pl-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-rose-50">
+                      {paginatedAdminScans.map((scan) => {
+                        const enabledEffects = (scan.effects ?? []).filter((e: any) => e.enabled)
+                        const email = scan.user_id ? (userLookup.get(scan.user_id)?.email ?? scan.user_id.slice(0, 8) + '...') : 'Guest'
+                        return (
+                          <tr key={scan.id} className="hover:bg-rose-50/20 text-rose-950 align-middle">
+                            <td className="py-3 pr-3">
+                              <div className="flex gap-1">
+                                {[scan.original_image, scan.image_url].map((url, i) => (
+                                  <img
+                                    key={i}
+                                    src={url || 'https://placehold.co/40x40/fce7f3/9f1239?text=?'}
+                                    alt={i === 0 ? 'Before' : 'After'}
+                                    className="h-10 w-10 rounded-lg border border-rose-100 object-cover bg-rose-50"
+                                  />
+                                ))}
+                              </div>
+                            </td>
+                            <td className="py-3 px-3 font-mono font-semibold" title={scan.id}>
+                              {scan.id.slice(0, 8)}...
+                            </td>
+                            <td className="py-3 px-3 text-mist max-w-[180px] truncate" title={email}>
+                              {email}
+                            </td>
+                            <td className="py-3 px-3">
+                              <span className={cn(
+                                'text-[10px] font-bold rounded-lg px-2 py-0.5 border',
+                                scan.mode === 'api'
+                                  ? 'text-emerald-700 bg-emerald-50/50 border-emerald-100'
+                                  : 'text-rose-600 bg-rose-50/50 border-rose-100',
+                              )}>
+                                {scan.mode === 'api' ? 'API' : 'Demo'}
+                              </span>
+                            </td>
+                            <td className="py-3 px-3">
+  <div className="flex flex-wrap gap-1.5">
+    {(scan.effects ?? []).map((e: any) => (
+      <span
+        key={e.category}
+        className={cn(
+          'rounded-full px-2.5 py-0.5 text-[11px] capitalize',
+          e.enabled
+            ? 'bg-rose-50 border border-rose-100 text-rose-600'
+            : 'bg-mist/20 border border-mist text-mist',
+        )}
+      >
+        {e.category.replace(/_/g, ' ')}
+        {e.enabled ? ' (Active)' : ' (Disabled)'}
+      </span>
+    ))}
+  </div>
+</td>
+                            <td className="py-3 px-3 text-mist whitespace-nowrap">
+                              {formatDate(scan.created_at)}
+                            </td>
+                            <td className="py-3 pl-3 text-right">
+                              <div className="flex justify-end gap-1">
+                                <Button size="sm" variant="ghost" onClick={() => setSelectedAdminScan(scan)}>
+                                  View
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  onClick={() => { if (confirm('Delete this scan?')) deleteScanMutation.mutate(scan.id) }}
+                                  disabled={deleteScanMutation.isPending}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+
+                  {paginatedAdminScans.length === 0 && (
+                    <div className="text-center py-12 text-mist text-sm">No scan records found.</div>
+                  )}
                 </div>
-              ) : null}
 
-              {/* Recommendations grid */}
-              <div className="grid gap-4 xl:grid-cols-2">
-                {filteredRecommendations.map((recommendation) => {
-                  const product = productLookup.get(recommendation.product_id)
-                  const scan = scanLookup.get(recommendation.scan_id)
-                  const parsedProduct = product ? parseProductTags(product) : null
+                {totalAdminScanPages > 1 && (
+                  <div className="flex items-center justify-center gap-4 pt-4 mt-4 border-t border-rose-100">
+                    <Button variant="ghost" size="sm" disabled={adminScanPage === 1} onClick={() => setAdminScanPage(p => Math.max(1, p - 1))}>
+                      <ChevronLeft className="h-4 w-4 mr-1" /> Prev
+                    </Button>
+                    <span className="text-xs font-semibold text-pearl">Page {adminScanPage} of {totalAdminScanPages}</span>
+                    <Button variant="ghost" size="sm" disabled={adminScanPage === totalAdminScanPages} onClick={() => setAdminScanPage(p => Math.min(totalAdminScanPages, p + 1))}>
+                      Next <ChevronRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </div>
+                )}
+              </Card>
 
+              {/* Detail modal — matches RecommendationsPage ScanDetailModal */}
+              {selectedAdminScan && (() => {
+                const allEffects = selectedAdminScan.effects ?? []
+
+                const renderAdminEffectDetails = (effect: any) => {
+                  const details: { label: string; value: React.ReactNode }[] = []
+                  if (effect.palettes && effect.palettes.length > 0) {
+                    effect.palettes.forEach((p: any, i: number) => {
+                      const labelSuffix = effect.palettes.length > 1 ? ` #${i + 1}` : ''
+                      details.push({
+                        label: `Color${labelSuffix}`,
+                        value: (
+                          <div className="flex items-center gap-2">
+                            <span className="inline-block w-4 h-4 rounded-full border border-mist/20 shadow-sm" style={{ backgroundColor: p.color }} />
+                            <span className="font-mono text-[11px] uppercase text-rose-950 font-semibold">{p.color}</span>
+                          </div>
+                        ),
+                      })
+                      if (p.texture) details.push({ label: `Texture${labelSuffix}`, value: <span className="capitalize">{p.texture}</span> })
+                      if (p.colorIntensity != null) details.push({ label: `Color Intensity${labelSuffix}`, value: `${p.colorIntensity}%` })
+                      if (p.glowIntensity != null) details.push({ label: `Glow Intensity${labelSuffix}`, value: `${p.glowIntensity}%` })
+                      if (p.shimmerIntensity != null) details.push({ label: `Shimmer Intensity${labelSuffix}`, value: `${p.shimmerIntensity}%` })
+                    })
+                  }
+                  if (effect.pattern?.name) details.push({ label: 'Pattern', value: <span className="capitalize">{effect.pattern.name}</span> })
+                  if (effect.shape?.name) details.push({ label: 'Shape', value: <span className="capitalize">{effect.shape.name}</span> })
+                  if (effect.style?.type) details.push({ label: 'Style', value: <span className="capitalize">{effect.style.type}</span> })
+                  if (effect.skinSmoothStrength != null) details.push({ label: 'Smoothness Strength', value: `${effect.skinSmoothStrength}%` })
+                  if (details.length === 0) return null
                   return (
-                    <Card key={recommendation.id} className="border border-rose-100 p-5 bg-white">
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="min-w-0">
-                          <p className="text-[10px] uppercase tracking-[0.2em] text-cyan font-bold">Recommendation Link</p>
-                          <h3 className="mt-2 font-display text-2xl text-rose-950 font-bold truncate">
-                            {product?.name ?? recommendation.product_id.slice(0, 8)}
-                          </h3>
-                          {parsedProduct && (
-                            <span className="inline-block mt-1 text-[10px] bg-rose-50 text-rose-600 px-2 py-0.5 rounded font-semibold">
-                              {parsedProduct.category}
-                            </span>
-                          )}
-                          <p className="mt-2.5 text-xs text-mist leading-relaxed font-medium bg-rose-50/20 border border-rose-100/50 p-2.5 rounded-xl">
-                            {recommendation.reason}
-                          </p>
+                    <div className="mt-3 grid grid-cols-2 gap-3 text-xs border-t border-rose-100/40 pt-2">
+                      {details.map((d, index) => (
+                        <div key={index} className="flex flex-col gap-0.5">
+                          <span className="text-[9px] uppercase font-bold text-mist/60 tracking-wider">{d.label}</span>
+                          <span className="text-rose-950 font-semibold">{d.value}</span>
                         </div>
-                        <span className="rounded-full bg-rose-50 px-2.5 py-0.5 text-[10px] font-bold text-mist shrink-0 font-mono">
-                          {formatDate(recommendation.created_at)}
-                        </span>
-                      </div>
-                      <div className="mt-4 grid gap-2 rounded-2xl border border-rose-100 bg-rose-50/60 p-4 text-[11px] text-mist">
-                        <p className="truncate"><span className="font-semibold text-rose-950">Scan UUID:</span> {recommendation.scan_id} {scan && `(Score: ${scan.score})`}</p>
-                        <p className="truncate"><span className="font-semibold text-rose-950">Product UUID:</span> {recommendation.product_id}</p>
-                      </div>
-                      <div className="mt-4 flex flex-wrap gap-2 pt-1">
-                        <Button size="sm" variant="ghost" onClick={() => setRecommendationForm(mapRecommendationForm(recommendation))}>
-                          Edit recommendation details
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          onClick={() => {
-                            if (confirm('Delete this recommendation link?')) {
-                              deleteRecommendationMutation.mutate(recommendation.id)
-                            }
-                          }}
-                          disabled={deleteRecommendationMutation.isPending}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                          Delete recommendation
-                        </Button>
-                      </div>
-                    </Card>
+                      ))}
+                    </div>
                   )
-                })}
-              </div>
+                }
+
+                return (
+                <div
+                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm"
+                  onClick={(e) => { if (e.target === e.currentTarget) setSelectedAdminScan(null) }}
+                >
+                  <div className="relative w-full max-w-5xl overflow-hidden rounded-[2rem] border border-rose-100/60 bg-white shadow-2xl flex flex-col max-h-[90vh]">
+                    <button
+                      onClick={() => setSelectedAdminScan(null)}
+                      className="absolute right-5 top-5 z-10 rounded-full p-2 text-mist bg-white/90 hover:bg-rose-50 hover:text-rose-600 transition shadow-sm"
+                    >
+                      <X className="h-5 w-5" />
+                    </button>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-rose-100 overflow-y-auto flex-1">
+                      {/* Left Side: Images */}
+                      <div className="lg:col-span-5 p-6 md:p-8 space-y-4">
+                        <h3 className="font-display text-lg font-bold text-rose-950">Visual Comparison</h3>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div className="relative rounded-2xl overflow-hidden bg-rose-50 border border-rose-100 aspect-[3/4]">
+                            {selectedAdminScan.original_image ? (
+                              <img src={selectedAdminScan.original_image} className="h-full w-full object-cover" alt="Before" />
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center text-sm text-mist">Before</div>
+                            )}
+                            <span className="absolute bottom-3 left-3 rounded-full bg-black/55 px-2.5 py-0.5 text-xs font-semibold text-white">Before</span>
+                          </div>
+                          <div className="relative rounded-2xl overflow-hidden bg-rose-50 border border-rose-100 aspect-[3/4]">
+                            {selectedAdminScan.image_url ? (
+                              <img src={selectedAdminScan.image_url} className="h-full w-full object-cover" alt="After" />
+                            ) : (
+                              <div className="absolute inset-0 flex items-center justify-center text-sm text-mist">After</div>
+                            )}
+                            <span className="absolute bottom-3 left-3 rounded-full bg-rose-600 px-2.5 py-0.5 text-xs font-semibold text-white">After</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right Side: Details & All Effects */}
+                      <div className="lg:col-span-7 p-6 md:p-8 space-y-6 overflow-y-auto">
+                        <div>
+                          <p className="text-[10px] uppercase font-bold tracking-widest text-cyan">Scan Details</p>
+                          <h2 className="mt-1 font-display text-2xl text-rose-950 font-extrabold">Metadata & Effects</h2>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 rounded-2xl bg-rose-50/30 border border-rose-100/50 p-4">
+                          <div>
+                            <span className="text-[10px] uppercase font-bold text-mist/60 block">Scan ID</span>
+                            <span className="font-mono text-xs text-rose-950 font-semibold break-all">{selectedAdminScan.id}</span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] uppercase font-bold text-mist/60 block">Email</span>
+                            <span className="text-xs text-rose-950 font-semibold break-all">
+                              {selectedAdminScan.user_id ? (userLookup.get(selectedAdminScan.user_id)?.email ?? 'Unknown') : 'Guest'}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] uppercase font-bold text-mist/60 block">Mode</span>
+                            <span className={cn(
+                              'inline-block rounded-full px-2 py-0.5 text-[10px] font-bold border mt-0.5 uppercase',
+                              selectedAdminScan.mode === 'api' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100',
+                            )}>
+                              {selectedAdminScan.mode === 'api' ? 'API' : 'Demo'}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] uppercase font-bold text-mist/60 block">Created</span>
+                            <div className="flex items-center gap-2 text-xs text-rose-950 font-medium mt-0.5">
+                              {formatDate(selectedAdminScan.created_at)}
+                            </div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <h3 className="text-xs uppercase font-bold tracking-widest text-mist mb-3">All Makeup Effects</h3>
+                          {allEffects.length === 0 ? (
+                            <p className="text-xs text-mist">No makeup effects recorded for this scan.</p>
+                          ) : (
+                            <div className="space-y-4">
+                              {allEffects.map((e: any) => (
+                                <div key={e.category} className="rounded-2xl border border-rose-100/60 bg-rose-50/20 p-4 shadow-sm">
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm font-bold capitalize text-rose-950">
+                                      {e.category.replace(/_/g, ' ')}
+                                    </span>
+                                    <span className={cn(
+                                      'rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase border',
+                                      e.enabled
+                                        ? 'bg-emerald-50 border-emerald-100 text-emerald-700'
+                                        : 'bg-gray-50 border-gray-200 text-gray-400',
+                                    )}>
+                                      {e.enabled ? 'Active' : 'Disabled'}
+                                    </span>
+                                  </div>
+                                  {renderAdminEffectDetails(e)}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                )
+              })()}
             </div>
-          ) : null}
+          )}
+
+          
 
           {/* ACCESS CONTROL MANAGER */}
           {activeSection === 'access' ? (
@@ -2182,7 +1884,7 @@ export default function AdminPage() {
                             </select>
                           </td>
                           <td className="py-3 px-2 text-mist">
-                            {new Date(item.created_at).toLocaleDateString()}
+                            {new Date(item.updated_at).toLocaleDateString()}
                           </td>
                           <td className="py-3 pl-2 text-right">
                             <button
