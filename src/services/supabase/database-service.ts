@@ -84,11 +84,11 @@ type UpdateProductInput = Partial<CreateProductInput>;
 
 type UpdateApiKeyInput = Partial<CreateApiKeyInput>;
 
-type CreateRecommendationInput = {
-  scanId: string;
-  productId: string;
-  reason: string;
-};
+// type CreateRecommendationInput = {
+//   scanId: string;
+//   productId: string;
+//   reason: string;
+// };
 
 export type MakeupCatalogRow = {
   productId: string;
@@ -140,7 +140,25 @@ export type Subscription = {
     billing_interval: string;
   };
 };
+function serializeConfig(
+  input: Partial<Omit<AdminProductConfigRecord, "id" | "created_at">>
+) {
+  return {
+    ...input,
+    color_intensity: input.color_intensity != null
+      ? String(input.color_intensity)  // cast sang string vì DB đang lưu text
+      : null,
+  } as any;
+}
 
+function deserializeConfig(data: any): AdminProductConfigRecord {
+  return {
+    ...data,
+    color_intensity: data.color_intensity != null
+      ? Number(data.color_intensity)
+      : null,
+  };
+}
 export const databaseService = {
   async getMakeupCatalog(): Promise<MakeupCatalogRow[]> {
     const [
@@ -239,7 +257,7 @@ export const databaseService = {
   },
 
   async deleteApiKey(id: string) {
-    const { data, error } = await supabase.functions.invoke('manage-api-key', {
+    const { error } = await supabase.functions.invoke('manage-api-key', {
       body: { action: 'delete', id }
     })
     if (error) throw error
@@ -315,7 +333,7 @@ export const databaseService = {
       .select("*")
       .order("created_at", { ascending: false });
     if (error) throw error;
-    return (data ?? []) as AdminProductConfigRecord[];
+    return (data ?? []).map(deserializeConfig) as AdminProductConfigRecord[];
   },
 
   async getCategories() {
@@ -328,30 +346,30 @@ export const databaseService = {
   },
 
   async createProductConfig(
-    input: Omit<AdminProductConfigRecord, "id" | "created_at">,
-  ) {
-    const { data, error } = await supabase
-      .from("product_configs")
-      .insert(input)
-      .select("*")
-      .single();
-    if (error) throw error;
-    return data as AdminProductConfigRecord;
-  },
+  input: Omit<AdminProductConfigRecord, "id" | "created_at">,
+) {
+  const { data, error } = await supabase
+    .from("product_configs")
+    .insert(serializeConfig(input))  // ← giờ có đủ tất cả fields
+    .select("*")
+    .single();
+  if (error) throw error;
+  return deserializeConfig(data) as AdminProductConfigRecord;
+},
 
   async updateProductConfig(
-    id: string,
-    input: Partial<Omit<AdminProductConfigRecord, "id" | "created_at">>,
-  ) {
-    const { data, error } = await supabase
-      .from("product_configs")
-      .update(input)
-      .eq("id", id)
-      .select("*")
-      .single();
-    if (error) throw error;
-    return data as AdminProductConfigRecord;
-  },
+  id: string,
+  input: Partial<Omit<AdminProductConfigRecord, "id" | "created_at">>,
+) {
+  const { data, error } = await supabase
+    .from("product_configs")
+    .update(serializeConfig(input))
+    .eq("id", id)
+    .select("*")
+    .single();
+  if (error) throw error;
+  return deserializeConfig(data) as AdminProductConfigRecord;
+},
 
   async deleteProductConfig(id: string) {
     const { error } = await supabase

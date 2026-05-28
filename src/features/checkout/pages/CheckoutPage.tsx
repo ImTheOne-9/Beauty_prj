@@ -54,7 +54,7 @@ export default function CheckoutPage() {
     }
 
     try {
-      await authService.updateProfile(user.id, { subscription_tier: planId })
+      await authService.updateProfile(user.id, { })
       await refreshProfile()
       toast.success(`Plan updated: ${planId}`)
     } catch (error) {

@@ -56,7 +56,7 @@ export function getAdminSections(role: AdminRole | null) {
 
 export function canAccessAdminSection(
   role: AdminRole | null,
-  section: AdminSection,
+  _section: AdminSection,
 ) {
   return role === "admin";
 }

@@ -12,11 +12,9 @@ type MakeupResultPanelProps = {
 }
 
 export function MakeupResultPanel({
-  imageSource,
   resultUrl,
   downloadUrl,
   status,
-  isDemo,
   errorMessage,
 }: MakeupResultPanelProps) {
   const isProcessing = status === 'running' || status === 'queued' || status === 'processing'
