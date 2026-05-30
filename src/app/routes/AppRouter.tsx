@@ -6,6 +6,7 @@ import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute'
 import PlanPage from '@/features/plans/pages/PlanPage'
 
 const LandingPage = lazy(() => import('@/features/landing/pages/LandingPage'))
+const VirtualMakeupTryOnPage = lazy(() => import('@/features/virtual-makeup-tryon/pages/VirtualMakeupTryOnPage'))
 const AIScanPage = lazy(() => import('@/features/ai-scan/pages/AIScanPage'))
 const RecommendationsPage = lazy(() => import('@/features/recommendations/pages/RecommendationsPage'))
 const ProductsPage = lazy(() => import('@/features/products/pages/ProductsPage'))
@@ -23,6 +24,7 @@ const router = createBrowserRouter([
     element: <AppLayout />,
     children: [
       { path: '/', element: <LandingPage /> },
+      { path: '/virtual-makeup-try-on', element: <VirtualMakeupTryOnPage /> },
       { path: '/scan', element: <AIScanPage /> },
       { path: '/recommendations', element: <RecommendationsPage /> },
       { path: '/products', element: <ProductsPage /> },

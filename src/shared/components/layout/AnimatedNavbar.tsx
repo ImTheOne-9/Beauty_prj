@@ -16,7 +16,7 @@ const enterpriseMenu = {
       heading: 'Makeup',
       headingColor: '#e91e8c',
       items: [
-        { label: 'AR Makeup Virtual Try-On', to: '/scan' },
+        { label: 'AR Makeup Virtual Try-On', to: '/virtual-makeup-try-on' },
         { label: 'YouCam Tutorial', to: '/scan' },
         { label: 'AI Makeup Transfer', to: '/scan' },
         { label: 'AI Skin Shade Finder', to: '/scan' },

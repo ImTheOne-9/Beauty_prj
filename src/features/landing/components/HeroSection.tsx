@@ -83,7 +83,6 @@ function MakeupInteractiveDemo({ sliderDefault = 50 }: { sliderDefault?: number 
   const offset = 8 // độ chéo nhỏ thôi
   const leftPoly  = `polygon(0% 0%, ${sliderX - offset}% 0%, ${sliderX}% 100%, 0% 100%)`
   const rightPoly = `polygon(${sliderX - offset}% 0%, 100% 0%, 100% 100%, ${sliderX}% 100%)`
-  const handleLeft = `${sliderX - offset / 2}%` // trung điểm của đường chéo ở giữa chiều cao
 
   // Vị trí handle theo px dựa trên % container
 
