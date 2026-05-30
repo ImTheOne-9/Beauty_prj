@@ -1,5 +1,6 @@
-import { motion } from 'framer-motion'
-import { ArrowRight } from 'lucide-react'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 const newsItems = [
   {
@@ -38,9 +39,17 @@ const newsItems = [
 ]
 
 export default function NewsSection() {
+  const [current, setCurrent] = useState(0)
+
+  const prev = () => setCurrent((c) => (c === 0 ? newsItems.length - 1 : c - 1))
+  const next = () => setCurrent((c) => (c === newsItems.length - 1 ? 0 : c + 1))
+
+  const news = newsItems[current]
+
   return (
-    <section className="bg-white py-12 lg:py-16">
+    <section className="bg-gray-50 py-16 lg:py-20">
       <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
+        {/* Header */}
         <motion.div
           className="text-center"
           initial={{ opacity: 0, y: 16 }}
@@ -48,82 +57,101 @@ export default function NewsSection() {
           viewport={{ once: true, amount: 0.3 }}
           transition={{ duration: 0.6 }}
         >
-          <p className="text-xs font-bold uppercase tracking-[0.35em] text-rose-500">Latest Updates</p>
-          <h2
-            className="mt-2 text-2xl font-black tracking-tight text-gray-900 sm:text-3xl"
-            style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
-          >
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl lg:text-[2.75rem]">
             News
           </h2>
-          <p className="mx-auto mt-2 max-w-xl text-sm text-gray-500">
+          <p className="mx-auto mt-3 max-w-3xl text-base text-gray-600 sm:text-lg">
             Stay up to date with the latest developments in AI beauty technology.
           </p>
         </motion.div>
 
-        {/* Mobile: horizontal scroll; Desktop: 3-col grid */}
-        <div className="mt-8 -mx-4 px-4 sm:mx-0 sm:px-0">
-          {/* Scroll container */}
-          <div className="flex gap-4 overflow-x-auto pb-4 sm:grid sm:grid-cols-2 sm:overflow-visible sm:pb-0 lg:grid-cols-3"
-            style={{ scrollSnapType: 'x mandatory', WebkitOverflowScrolling: 'touch' }}>
-            {newsItems.map((item, i) => (
-              <motion.article
-                key={item.id}
-                className="group flex flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-lg flex-shrink-0 w-[78vw] sm:w-auto"
-                style={{ scrollSnapAlign: 'start' }}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, amount: 0.2 }}
-                transition={{ duration: 0.55, delay: i * 0.1 }}
-                whileHover={{ y: -4 }}
-              >
-                {/* Image */}
-                <div
-                  className={`relative flex h-40 items-center justify-center bg-gradient-to-br ${item.imageGradient} overflow-hidden sm:h-48`}
-                >
-                  <span className="text-5xl sm:text-6xl">{item.imgEmoji}</span>
-                  <div className="pointer-events-none absolute inset-0 bg-black/10 opacity-0 transition group-hover:opacity-100" />
-                </div>
+        {/* Carousel */}
+        <div className="relative mt-12 flex items-center justify-center gap-4 lg:gap-6">
+          {/* Prev button */}
+          <button
+            onClick={prev}
+            className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-white transition hover:border-gray-400 hover:bg-gray-50 lg:h-14 lg:w-14"
+            aria-label="Previous news"
+          >
+            <ChevronLeft className="h-6 w-6 text-gray-600 lg:h-7 lg:w-7" />
+          </button>
 
-                {/* Content */}
-                <div className="flex flex-1 flex-col p-4 sm:p-5">
-                  <div className="flex items-center gap-2">
-                    <span
-                      className={`inline-block rounded-full ${item.badgeColor} px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white`}
-                    >
-                      {item.badge}
-                    </span>
-                    <span className="text-[11px] text-gray-400">{item.date}</span>
+          {/* Card Container */}
+          <div className="flex-1 overflow-hidden" style={{ maxWidth: '900px' }}>
+            <AnimatePresence mode="wait">
+              <motion.article
+                key={news.id}
+                className="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg"
+                initial={{ opacity: 0, x: 100 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -100 }}
+                transition={{ duration: 0.4, ease: 'easeInOut' }}
+              >
+                {/* Grid layout: image | content */}
+                <div className="grid grid-cols-1 md:grid-cols-2">
+                  {/* Left: Image */}
+                  <div
+                    className={`relative flex h-64 items-center justify-center bg-gradient-to-br ${news.imageGradient} md:h-auto`}
+                  >
+                    <span className="text-7xl lg:text-8xl">{news.imgEmoji}</span>
                   </div>
 
-                  <h3 className="mt-3 text-sm font-bold leading-snug text-gray-900 group-hover:text-rose-600 transition-colors sm:text-base"
-                    style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-                    {item.title}
-                  </h3>
+                  {/* Right: Content */}
+                  <div className="flex flex-col justify-center p-8 lg:p-10">
+                    <div className="flex items-center gap-3">
+                      <span
+                        className={`inline-block rounded-full ${news.badgeColor} px-3 py-1 text-xs font-bold uppercase tracking-wide text-white`}
+                      >
+                        {news.badge}
+                      </span>
+                      <span className="text-sm text-gray-500">{news.date}</span>
+                    </div>
 
-                  <p className="mt-2 flex-1 text-xs leading-relaxed text-gray-500">{item.excerpt}</p>
+                    <h3 className="mt-4 text-xl font-bold leading-tight text-gray-900 lg:text-2xl">
+                      {news.title}
+                    </h3>
 
-                  <button className="mt-4 flex items-center gap-1 self-start text-xs font-bold uppercase tracking-wide text-rose-600 transition hover:gap-2">
-                    Read More <ArrowRight className="h-3 w-3" />
-                  </button>
+                    <p className="mt-4 text-base leading-relaxed text-gray-600">
+                      {news.excerpt}
+                    </p>
+
+                    <button className="mt-6 self-start rounded-md border-2 border-pink-600 bg-white px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-pink-600 transition hover:bg-pink-600 hover:text-white">
+                      READ MORE
+                    </button>
+                  </div>
                 </div>
               </motion.article>
-            ))}
+            </AnimatePresence>
           </div>
+
+          {/* Next button */}
+          <button
+            onClick={next}
+            className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border-2 border-gray-300 bg-white transition hover:border-gray-400 hover:bg-gray-50 lg:h-14 lg:w-14"
+            aria-label="Next news"
+          >
+            <ChevronRight className="h-6 w-6 text-gray-600 lg:h-7 lg:w-7" />
+          </button>
         </div>
 
-        {/* Scroll dots on mobile */}
-        <div className="mt-4 flex justify-center gap-1.5 sm:hidden">
+        {/* Dots indicator */}
+        <div className="mt-8 flex justify-center gap-2">
           {newsItems.map((_, i) => (
-            <div
+            <button
               key={i}
-              className={`h-1.5 rounded-full transition-all ${i === 0 ? 'w-5 bg-rose-500' : 'w-1.5 bg-gray-300'}`}
+              onClick={() => setCurrent(i)}
+              className={`h-2.5 rounded-full transition-all ${
+                i === current ? 'w-8 bg-pink-600' : 'w-2.5 bg-gray-300'
+              }`}
+              aria-label={`Go to news ${i + 1}`}
             />
           ))}
         </div>
 
-        <div className="mt-7 text-center">
-          <button className="rounded-full bg-rose-600 px-7 py-3 text-sm font-bold uppercase tracking-wide text-white shadow-sm transition hover:bg-rose-700">
-            See More News
+        {/* CTA */}
+        <div className="mt-10 text-center">
+          <button className="rounded-md bg-pink-600 px-8 py-3.5 text-sm font-bold uppercase tracking-wide text-white shadow-lg transition hover:bg-pink-700">
+            SEE MORE NEWS
           </button>
         </div>
       </div>
