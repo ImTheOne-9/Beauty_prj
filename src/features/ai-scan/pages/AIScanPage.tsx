@@ -19,6 +19,7 @@ import {
 } from '@/features/ai-scan/services/scan-usage-service'
 import type { MakeupEffect, MakeupVtoTaskStatus } from '@/features/ai-scan/types/makeup-vto'
 import type { ScanResult } from '@/shared/lib/types'
+import DarkFooter from '@/features/landing/components/DarkFooter'
 
 function cloneDefaultEffects(): MakeupEffect[] {
   return DEFAULT_MAKEUP_EFFECTS.map((effect) => ({
@@ -202,6 +203,11 @@ export default function AIScanPage() {
           </div>
         </div>
       </div>
+      <div className="mt-16">
+        <DarkFooter />
+      </div>
     </section>
+
+          
   )
 }
