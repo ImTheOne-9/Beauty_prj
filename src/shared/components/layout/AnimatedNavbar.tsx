@@ -292,16 +292,34 @@ export function AnimatedNavbar() {
           </button>
         </div>
 
-        {/* Mobile hamburger */}
-        <button
-          className="lg:hidden p-2 rounded-md text-gray-700"
-          aria-label="Open menu"
-          onClick={() => setMobileOpen(true)}
-        >
-          <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current">
-            <path d="M3 6h18v2H3zM3 11h18v2H3zM3 16h18v2H3z" />
-          </svg>
-        </button>
+        {/* Mobile right: Sign In + hamburger */}
+        <div className="lg:hidden flex items-center gap-2">
+          {user ? (
+            <UserAccountMenu />
+          ) : (
+            <button
+              onClick={() => navigate('/auth')}
+              className={cn(
+                'text-sm font-medium transition-colors px-2 py-1',
+                isTransparent ? 'text-gray-800' : 'text-gray-700',
+              )}
+            >
+              Sign In
+            </button>
+          )}
+          <button
+            className={cn(
+              'p-2 rounded-md transition-colors',
+              isTransparent ? 'text-gray-800' : 'text-gray-700',
+            )}
+            aria-label="Open menu"
+            onClick={() => setMobileOpen(true)}
+          >
+            <svg viewBox="0 0 24 24" className="h-5 w-5 fill-current">
+              <path d="M3 6h18v2H3zM3 11h18v2H3zM3 16h18v2H3z" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* ── Enterprise Mega Menu ─────────────────────────────────────────── */}
