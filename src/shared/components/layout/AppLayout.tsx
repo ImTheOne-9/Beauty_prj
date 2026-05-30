@@ -1,15 +1,21 @@
 import { motion } from 'framer-motion'
-import { Outlet } from 'react-router-dom'
+import { Outlet, useLocation } from 'react-router-dom'
 import { AnimatedNavbar } from '@/shared/components/layout/AnimatedNavbar'
 import { pageTransition } from '@/animations/motion'
 
 export function AppLayout() {
+  const location = useLocation()
+  // Landing page: navbar is transparent, hero extends to top → no padding needed
+  // All other pages: add top padding to clear the fixed 64px navbar
+  const isLanding = location.pathname === '/'
+
   return (
-    <div className="relative min-h-screen overflow-x-hidden bg-hero-gradient pb-16">
-      <div className="ambient-orb left-[-10rem] top-8 h-72 w-72 bg-cyan/30" />
-      <div className="ambient-orb right-[-7rem] top-40 h-64 w-64 bg-amber/20" />
+    <div className="relative min-h-screen overflow-x-hidden bg-white">
       <AnimatedNavbar />
-      <motion.main style={{ paddingTop: 'var(--app-header-height)' }} {...pageTransition}>
+      <motion.main
+        style={{ paddingTop: isLanding ? 0 : 'var(--app-header-height)' }}
+        {...pageTransition}
+      >
         <Outlet />
       </motion.main>
     </div>

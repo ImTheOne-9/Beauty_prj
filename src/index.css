@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -11,7 +11,7 @@
   --romantic-rose: #f8d9e0;
   --romantic-cream: #fff6f8;
   --text-strong: #342028;
-  --app-header-height: 96px;
+  --app-header-height: 64px;
 }
 
 * {
