@@ -5,6 +5,7 @@ import { ChevronDown, X, Search } from 'lucide-react'
 import { cn } from '@/shared/lib/cn'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { UserAccountMenu } from '@/shared/components/layout/UserAccountMenu'
+import { useCategories } from '@/features/ai-scan/hooks/useCategories'
 
 // ─── Enterprise Mega Menu Data ──────────────────────────────────────────────
 const enterpriseMenu = {
@@ -32,6 +33,32 @@ const enterpriseMenu = {
   ],
 }
 
+const productMenu = {
+  title: 'Product',
+  subtitle: 'Self-service AI & AR beauty solutions ready to use on any device, for brands of all sizes',
+  columns: [
+    {
+      heading: 'Makeup',
+      headingColor: '#e91e8c',
+      items: [
+        { label: 'AR Makeup Virtual Try-On', to: '/virtual-makeup-try-on' },
+      ],
+    },
+    {
+      heading: 'Nail',
+      headingColor: '#e91e8c',
+      items: [
+        { label: 'Virtual Try-On for Nails', to: '/ai-nail-color' },
+      ],
+    },
+  ],
+  footer: [
+    { label: 'CONTACT SALES', to: '/auth', isPrimary: true },
+    { label: 'TRY OUR DEMO', to: '/scan', isOutline: true },
+    { label: 'VIEW ALL PRODUCTS →', to: '/scan', isText: true },
+  ],
+}
+
 // ─── Simple dropdown items ───────────────────────────────────────────────────
 const simpleMenus: Record<string, { label: string; to: string }[]> = {
   Technologies: [
@@ -41,30 +68,44 @@ const simpleMenus: Record<string, { label: string; to: string }[]> = {
     { label: 'Skincare AR', to: '/scan' },
     { label: 'Face AI', to: '/scan' },
   ],
-  Resources: [
-    { label: 'Blog', to: '/scan' },
-    { label: 'Case Studies', to: '/scan' },
-    { label: 'Documentation', to: '/scan' },
-  ],
 }
 
 // ─── Top-level nav items ─────────────────────────────────────────────────────
 const topNavItems = [
   { label: 'Enterprise', hasMenu: 'enterprise' },
+  { label: 'Product', hasMenu: 'product', to: '/products'}, // 👈 thêm vào đây
   { label: 'Technologies', hasMenu: 'simple' },
-  { label: 'Resources', hasMenu: 'simple' },
   { label: 'Pricing', to: '/plans', requireAuth: true },
   { label: 'Blog', to: '/scan' },
 ]
 
 export function AnimatedNavbar() {
   const { user, signOut } = useAuth()
+  const { data: categories } = useCategories()
   const location = useLocation()
   const navigate = useNavigate()
   const [scrolled, setScrolled] = useState(false)
   const [activeMenu, setActiveMenu] = useState<string | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [mobileExpandedMenu, setMobileExpandedMenu] = useState<string | null>(null)
+
+  const dynamicProductMenu = {
+    ...productMenu,
+    columns: [
+      {
+        heading: 'Makeup',
+        headingColor: '#e91e8c',
+        items: categories && categories.length > 0
+          ? categories.map((cat) => ({
+              label: cat.name,
+              to: `/scan?category=${cat.api_category_key}`,
+            }))
+          : productMenu.columns[0].items,
+      },
+      productMenu.columns[1],
+    ],
+  }
+
   const navRef = useRef<HTMLDivElement>(null)
   const drawerRef = useRef<HTMLDivElement>(null)
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -182,18 +223,41 @@ export function AnimatedNavbar() {
                 onMouseLeave={handleMouseLeave}
               >
                 {item.to ? (
-                  <NavLink
-                    to={item.to}
-                    onClick={item.requireAuth && !user ? (e) => { e.preventDefault(); navigate('/auth') } : undefined}
-                    className={cn(
-                      'flex items-center gap-0.5 rounded px-3 py-1.5 text-sm font-medium transition-colors',
-                      isTransparent
-                        ? 'text-gray-800 hover:text-rose-600'
-                        : 'text-gray-700 hover:text-rose-600',
-                    )}
-                  >
-                    {item.label}
-                  </NavLink>
+                  // item có cả to lẫn hasMenu — dùng NavLink nhưng vẫn trigger dropdown khi hover
+                  item.hasMenu ? (
+                    <NavLink
+                      to={item.to}
+                      className={cn(
+                        'flex items-center gap-0.5 rounded px-3 py-1.5 text-sm font-medium transition-colors',
+                        isActive
+                          ? 'text-rose-600'
+                          : isTransparent
+                            ? 'text-gray-800 hover:text-rose-600'
+                            : 'text-gray-700 hover:text-rose-600',
+                      )}
+                    >
+                      {item.label}
+                      <ChevronDown
+                        className={cn(
+                          'ml-0.5 h-3.5 w-3.5 transition-transform duration-200',
+                          isActive ? 'rotate-180' : '',
+                        )}
+                      />
+                    </NavLink>
+                  ) : (
+                    <NavLink
+                      to={item.to}
+                      onClick={item.requireAuth && !user ? (e) => { e.preventDefault(); navigate('/auth') } : undefined}
+                      className={cn(
+                        'flex items-center gap-0.5 rounded px-3 py-1.5 text-sm font-medium transition-colors',
+                        isTransparent
+                          ? 'text-gray-800 hover:text-rose-600'
+                          : 'text-gray-700 hover:text-rose-600',
+                      )}
+                    >
+                      {item.label}
+                    </NavLink>
+                  )
                 ) : (
                   <button
                     className={cn(
@@ -388,6 +452,73 @@ export function AnimatedNavbar() {
             </div>
           </motion.div>
         )}
+        <AnimatePresence>
+        {activeMenu === 'Product' && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -8 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
+            className="absolute left-0 right-0 top-full bg-white shadow-[0_8px_40px_rgba(0,0,0,0.12)] border-t border-gray-100"
+            onMouseEnter={() => { if (closeTimer.current) clearTimeout(closeTimer.current) }}
+            onMouseLeave={handleMouseLeave}
+          >
+            <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8 py-8">
+              <div className="mb-6 pb-4 border-b border-gray-100">
+                <h3 className="text-base font-bold text-gray-900" style={{ fontFamily: 'DM Sans, sans-serif' }}>
+                  {dynamicProductMenu.title}
+                </h3>
+                <p className="mt-1 text-xs text-gray-500 max-w-3xl" style={{ fontFamily: 'DM Sans, sans-serif' }}>
+                  {dynamicProductMenu.subtitle}
+                </p>
+              </div>
+
+              <div className="flex gap-x-12 gap-y-6">
+                {dynamicProductMenu.columns.map((col) => (
+                  <div key={col.heading}>
+                    <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: col.headingColor, fontFamily: 'DM Sans, sans-serif' }}>
+                      {col.heading}
+                    </p>
+                    <ul className="space-y-1.5">
+                      {col.items.map((item) => (
+                        <li key={item.label}>
+                          <Link
+                            to={item.to}
+                            onClick={() => setActiveMenu(null)}
+                            className="text-xs text-gray-600 hover:text-rose-600 transition-colors leading-snug block"
+                            style={{ fontFamily: 'DM Sans, sans-serif' }}
+                          >
+                            {item.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-8 pt-5 border-t border-gray-100 flex items-center gap-4">
+                {dynamicProductMenu.footer.map((action) => (
+                  <Link
+                    key={action.label}
+                    to={action.to}
+                    onClick={() => setActiveMenu(null)}
+                    className={cn(
+                      'text-sm font-semibold transition-colors',
+                      action.isPrimary && 'rounded-md bg-rose-600 px-5 py-2 text-white hover:bg-rose-700',
+                      action.isOutline && 'rounded-md border border-gray-300 px-5 py-2 text-gray-700 hover:border-rose-400 hover:text-rose-600',
+                      action.isText && 'text-gray-700 hover:text-rose-600 px-2',
+                    )}
+                    style={{ fontFamily: 'DM Sans, sans-serif' }}
+                  >
+                    {action.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       </AnimatePresence>
 
       {/* ── Mobile drawer ────────────────────────────────────────────────── */}
@@ -435,7 +566,7 @@ export function AnimatedNavbar() {
                   const isExpanded = mobileExpandedMenu === item.label
                   const hasSimple = item.hasMenu === 'simple' && simpleMenus[item.label]
                   const hasEnterprise = item.hasMenu === 'enterprise'
-
+                  const hasProduct = item.hasMenu === 'product'
                   if (item.to) {
                     return (
                       <Link
@@ -486,6 +617,27 @@ export function AnimatedNavbar() {
                             {hasEnterprise && (
                               <div className="ml-3 border-l border-gray-100 pl-3 pb-1 flex flex-col gap-3 mt-1">
                                 {enterpriseMenu.columns.map((col) => (
+                                  <div key={col.heading}>
+                                    <p className="px-3 py-1 text-xs font-bold uppercase tracking-wide" style={{ color: col.headingColor }}>
+                                      {col.heading}
+                                    </p>
+                                    {col.items.map((menuItem) => (
+                                      <Link
+                                        key={menuItem.label}
+                                        to={menuItem.to}
+                                        onClick={() => setMobileOpen(false)}
+                                        className="block rounded-lg px-3 py-1.5 text-sm text-gray-600 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                                      >
+                                        {menuItem.label}
+                                      </Link>
+                                    ))}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            {hasProduct && (
+                              <div className="ml-3 border-l border-gray-100 pl-3 pb-1 flex flex-col gap-3 mt-1">
+                                {dynamicProductMenu.columns.map((col) => (
                                   <div key={col.heading}>
                                     <p className="px-3 py-1 text-xs font-bold uppercase tracking-wide" style={{ color: col.headingColor }}>
                                       {col.heading}
