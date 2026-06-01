@@ -57,7 +57,7 @@ export default function VmtoWhyChoose() {
           <div className="relative">
             <div className="overflow-hidden rounded-2xl border-8 border-gray-900 bg-gray-900 shadow-2xl">
               <img
-                src={VMTO_IMAGES.lookGrid}
+                src={VMTO_IMAGES.lookGrid2}
                 alt="AI makeup solution on multiple devices"
                 className="h-full w-full object-cover"
               />

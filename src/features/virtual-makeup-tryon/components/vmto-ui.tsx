@@ -12,7 +12,9 @@ export const VMTO_IMAGES = {
   storeBg:
     'https://d3ss46vukfdtpo.cloudfront.net/static/media/home_background@2x.5323f293.jpg',
   lookGrid:
-    'https://plugins-media.makeupar.com/smb/story/2022-05-29/2e9a07b0-3f48-4c81-bfcf-da351ac16e7d.png',
+    'https://bcw-media.s3.ap-northeast-1.amazonaws.com/multi_blush_8642169f9e.jpg',
+  lookGrid2: 'https://bcw-media.s3.ap-northeast-1.amazonaws.com/Makeup_Product_Page_Revamp_77a9a11441.png',
+  makeupBg: 'https://bcw-media.s3.ap-northeast-1.amazonaws.com/B2_B_virtual_Makeup_s2_bg_2c96300b8d.jpg'
 }
 
 // ─── Scroll-reveal wrapper ─────────────────────────────────────────────────────
