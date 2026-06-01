@@ -45,6 +45,7 @@ import { canAccessAdminSection, getAdminRoleLabel, type AdminSection, type Admin
 import { parseProductTags } from '@/shared/lib/product-tags'
 import { type OrderRecord } from '@/shared/lib/types'
 import { cn } from '@/shared/lib/cn'
+import { ProductWithConfigModal } from '../components/Productwithconfigmodal'
 
 const sidebarSections: Array<{
   id: AdminSection
@@ -138,7 +139,15 @@ const EMPTY_PLAN = {
   badge: null as string | null,
   is_active: true,
 }
+// Thêm state để track product đang edit + configs của nó
+const [editingProduct, setEditingProduct] = useState<AdminProductRecord | null>(null)
 
+const existingConfigs = useMemo(() => {
+  if (!editingProduct) return []
+  return (productConfigsQuery.data ?? []).filter(
+    c => c.product_id === editingProduct.id
+  )
+}, [editingProduct, productConfigsQuery.data])
 // const emptyScanForm: ScanFormState = {
 //   id: '',
 //   score: '',
@@ -1414,107 +1423,20 @@ export default function AdminPage() {
               </Card>
 
               {/* ─── Product Modal ─── */}
-              {productModalOpen && (
-                <div
-                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
-                  onClick={(e) => { if (e.target === e.currentTarget) setProductModalOpen(false) }}
-                >
-                  <div className="relative w-full max-w-lg overflow-y-auto max-h-[90vh] rounded-[2rem] border border-rose-100 bg-white p-6 shadow-xl space-y-4">
-                    <button
-                      onClick={() => setProductModalOpen(false)}
-                      className="absolute right-4 top-4 rounded-full p-1.5 text-mist hover:bg-rose-50 transition"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-
-                    <h2 className="font-display text-xl text-rose-950">
-                      {productForm.id ? 'Edit Product' : 'Add New Product'}
-                    </h2>
-
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Product Name</label>
-                        <Input
-                          placeholder="Product name (e.g. Cleanser)"
-                          value={productForm.name}
-                          onChange={(e) => setProductForm((s) => ({ ...s, name: e.target.value }))}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Description</label>
-                        <textarea
-                          className="min-h-[90px] w-full rounded-2xl border border-rose-200/80 bg-white/80 px-4 py-3 text-sm text-pearl placeholder:text-mist/70 focus:border-cyan focus:outline-none focus:ring-2 focus:ring-cyan/25"
-                          placeholder="Enter detailed product description..."
-                          value={productForm.description}
-                          onChange={(e) => setProductForm((s) => ({ ...s, description: e.target.value }))}
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Brand</label>
-                          <Input
-                            placeholder="e.g. L'Oréal"
-                            value={productForm.brand}
-                            onChange={(e) => setProductForm((s) => ({ ...s, brand: e.target.value }))}
-                          />
-                        </div>
-                        <div>
-                          <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Category *</label>
-                          <select
-                            className="w-full rounded-2xl border border-rose-200/80 bg-white/85 px-4 py-3 text-sm text-pearl focus:border-cyan focus:outline-none focus:ring-2 focus:ring-cyan/25"
-                            value={productForm.categoryId}
-                            onChange={(e) => setProductForm((s) => ({ ...s, categoryId: e.target.value }))}
-                          >
-                            <option value="">Select Category</option>
-                            {(categoriesQuery.data ?? []).map((cat) => (
-                              <option key={cat.id} value={cat.id}>{cat.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Image URL</label>
-                        <Input
-                          placeholder="https://images.unsplash.com/photo-..."
-                          value={productForm.imageUrl}
-                          onChange={(e) => setProductForm((s) => ({ ...s, imageUrl: e.target.value }))}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Partner URL (optional)</label>
-                        <Input
-                          placeholder="https://example.com/partner-item"
-                          value={productForm.externalUrl}
-                          onChange={(e) => setProductForm((s) => ({ ...s, externalUrl: e.target.value }))}
-                        />
-                      </div>
-
-                      {saveProductMutation.error && (
-                        <p className="text-sm text-rose-500">{saveProductMutation.error.message}</p>
-                      )}
-
-                      <div className="flex justify-end gap-2 pt-2">
-                        <Button variant="ghost" onClick={() => setProductModalOpen(false)}>Cancel</Button>
-                        <Button
-                          onClick={async () => {
-                            await saveProductMutation.mutateAsync()
-                            setProductModalOpen(false)
-                          }}
-                          disabled={saveProductMutation.isPending}
-                        >
-                          {saveProductMutation.isPending
-                            ? 'Saving...'
-                            : productForm.id ? 'Update Product' : 'Create Product'}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
+              <ProductWithConfigModal
+                open={productModalOpen}
+                onClose={() => { setProductModalOpen(false); setEditingProduct(null) }}
+                categories={categoriesQuery.data ?? []}
+                initial={editingProduct}
+                existingConfigs={existingConfigs}
+                onSaved={() => {
+                  queryClient.invalidateQueries({ queryKey: ['admin', 'products'] })
+                  queryClient.invalidateQueries({ queryKey: ['admin', 'product-configs'] })
+                  queryClient.invalidateQueries({ queryKey: ['catalog', 'products'] })
+                  setProductModalOpen(false)
+                  setEditingProduct(null)
+                }}
+              />
             </div>
           ) : null}
 
