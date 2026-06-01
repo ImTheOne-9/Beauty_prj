@@ -32,6 +32,7 @@ const heroSlides = [
     primaryBtn: { text: 'Try It Now', link: '/scan' },
     secondaryBtn: { text: 'TRY OUR API FOR FREE', link: '/scan' },
     video: 'https://bcw-media.s3.ap-northeast-1.amazonaws.com/strapi/assets/b2bhome_topbanner_hair_dt_1de2212a18.mp4',
+    videoMobile: 'https://bcw-media.s3.ap-northeast-1.amazonaws.com/strapi/assets/b2bhome_topbanner_hair_mb_503232b3c8.mp4',
     poster: 'https://bcw-media.s3.ap-northeast-1.amazonaws.com/strapi/assets/b2bhome_topbanner_hair_dt_e3b9f7f9d7.jpg',
   },
   {
@@ -50,7 +51,8 @@ const heroSlides = [
     description: 'Powerful 3D face modeling engine delivers accurate eyewear try-on that can be easily integrated by brands and retailers.',
     primaryBtn: { text: 'Learn More', link: '/scan' },
     secondaryBtn: { text: 'Try Web Demo', link: '/scan' },
-    image: 'https://plugins-media.makeupar.com/smb/story/2022-05-29/b4799dc8-a8e0-432c-ae07-ea1e009ce1a4.jpg',
+    image: 'https://d3ss46vukfdtpo.cloudfront.net/static/media/model2.5be1c80f.png',
+    bg: 'https://plugins-media.makeupar.com/smb/story/2022-05-29/b4799dc8-a8e0-432c-ae07-ea1e009ce1a4.jpg',
     hasEyewearDemo: true,
   },
   {
@@ -60,6 +62,7 @@ const heroSlides = [
     primaryBtn: { text: 'Learn More', link: '/scan' },
     secondaryBtn: { text: 'Try Web Demo', link: '/scan' },
     video: 'https://bcw-media.s3.ap-northeast-1.amazonaws.com/strapi/assets/b2bhome_topbanner_shade_finder_dt_10f3e0c9cb.mp4',
+    videoMobile: 'https://bcw-media.s3.ap-northeast-1.amazonaws.com/strapi/assets/b2bhome_topbanner_shade_finder_mb_8565e52fe7.mp4',
     poster: 'https://bcw-media.s3.ap-northeast-1.amazonaws.com/strapi/assets/b2bhome_topbanner_shade_finder_dt_75fa2f202e.jpg',
   },
 ]
@@ -67,7 +70,7 @@ const heroSlides = [
 // Thêm component này vào trước HeroSection
 
 // Component before/after - chỉ chiếm nửa phải
-function MakeupInteractiveDemo({ sliderDefault = 50 }: { sliderDefault?: number }) {
+function MakeupInteractiveDemo({ sliderDefault = 50, isMobile = false }: { sliderDefault?: number, isMobile?: boolean }) {
   const [sliderX, setSliderX] = useState(sliderDefault)
   const containerRef = useRef<HTMLDivElement>(null)
   const isDragging = useRef(false)
@@ -101,7 +104,7 @@ function MakeupInteractiveDemo({ sliderDefault = 50 }: { sliderDefault?: number 
   ]
 
   return (
-    <div className="absolute bottom-0 top-16 right-0 w-[55%] flex">
+    <div className={`absolute bottom-0 right-0 ${isMobile ? 'top-16 w-full' : 'top-20 w-[55%]'} flex`}>
       {/* Vùng kéo before/after */}
       <div
         ref={containerRef}
@@ -238,6 +241,14 @@ export default function HeroSection() {
                   className="absolute inset-0 h-full w-full object-cover"
                   style={{ objectPosition: 'center 20%' }}
                 />
+              ) : slide.id === 'makeup' ? (
+                <>
+                  <div
+                    className="absolute inset-0 h-full w-full bg-cover bg-center"
+                    style={{ backgroundImage: `url(${slide.image})` }}
+                  />
+                  <MakeupInteractiveDemo sliderDefault={50} isMobile={true}/>
+                </>
               ) : (
                 <div
                   className="absolute inset-0 h-full w-full bg-cover bg-center"
@@ -342,23 +353,6 @@ export default function HeroSection() {
             <ChevronRight className="h-5 w-5 text-gray-700" />
           </button>
         </div>
-
-        {/* Dots indicator */}
-        <div className="absolute bottom-4 left-0 right-0 z-20 flex justify-center gap-2">
-          {heroSlides.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => {
-                setIsAutoPlaying(false)
-                setCurrent(i)
-              }}
-              className={`h-2 rounded-full transition-all ${
-                i === current ? 'w-8 bg-rose-600' : 'w-2 bg-white/60'
-              }`}
-              aria-label={`Go to slide ${i + 1}`}
-            />
-          ))}
-        </div>
       </section>
 
       {/* ── DESKTOP HERO (≥ lg) ────────────── */}
@@ -395,13 +389,26 @@ export default function HeroSection() {
                   className="absolute inset-0 h-full w-full bg-cover bg-center"
                   style={{ backgroundImage: `url(${slide.image})` }}
                 />
-                <MakeupInteractiveDemo sliderDefault={50}/>  
+                <MakeupInteractiveDemo sliderDefault={50} isMobile={false} />  
               </>
             ): slide.id === 'jewelry' ? (
               <>
                 <div
                   className="absolute inset-0 h-full w-full bg-cover bg-center"
                   style={{ backgroundImage: `url(${(slide as any).bg || slide.image})` }}
+                />
+                <img
+                  src={slide.image}
+                  className="absolute inset-y-0 right-0 h-full w-auto object-contain object-right-bottom"
+                  alt=""
+                />
+              </>
+            ) 
+            : slide.id === 'eyewear' ? (
+              <>
+                <div
+                  className="absolute inset-0 h-full w-full bg-cover bg-center"
+                  style={{ backgroundImage: `url(${(slide as any).bg})` }}
                 />
                 <img
                   src={slide.image}
@@ -558,8 +565,10 @@ export default function HeroSection() {
                 setIsAutoPlaying(false)
                 setCurrent(i)
               }}
-              className={`h-2.5 rounded-full transition-all ${
-                i === current ? 'w-10 bg-rose-600' : 'w-2.5 bg-white/60 hover:bg-white/80'
+              className={`h-3 rounded-full transition-all duration-300 ${
+                i === current
+                  ? 'w-12 bg-rose-600 shadow-md shadow-rose-400/50'
+                  : 'w-3 bg-white shadow-md hover:bg-rose-200'
               }`}
               aria-label={`Go to slide ${i + 1}`}
             />
