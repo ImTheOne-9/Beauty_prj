@@ -17,81 +17,12 @@ const enterpriseMenu = {
       headingColor: '#e91e8c',
       items: [
         { label: 'AR Makeup Virtual Try-On', to: '/virtual-makeup-try-on' },
-        { label: 'YouCam Tutorial', to: '/scan' },
-        { label: 'AI Makeup Transfer', to: '/scan' },
-        { label: 'AI Skin Shade Finder', to: '/scan' },
-        { label: 'AI Virtual Background Changer', to: '/scan' },
-      ],
-    },
-    {
-      heading: 'Conversational AI Assistant',
-      headingColor: '#e91e8c',
-      items: [{ label: 'Perfect Beauty Agent', to: '/scan' }],
-    },
-    {
-      heading: 'Face Diagnostic',
-      headingColor: '#e91e8c',
-      items: [
-        { label: 'AI Skin Analysis', to: '/scan' },
-        { label: 'AI Skin Analysis Validator', to: '/scan' },
-        { label: 'AI Skin Simulation', to: '/scan' },
-        { label: 'AI Face Analyzer', to: '/scan' },
-        { label: 'AI Skin Shade Finder', to: '/scan' },
-        { label: 'AI Face Reshape Simulator', to: '/scan' },
-        { label: 'AI Fitzpatrick Skin Type Analysis', to: '/scan' },
-        { label: 'AI Personality Finder', to: '/scan' },
-      ],
-    },
-    {
-      heading: 'Hair',
-      headingColor: '#e91e8c',
-      items: [
-        { label: 'AI Virtual Hair Color Try-On', to: '/scan' },
-        { label: 'AR Hairstyle Virtual Try-On', to: '/scan' },
-        { label: 'AI Hair Type Analysis', to: '/scan' },
-        { label: 'AI Hair Length Analysis', to: '/scan' },
-        { label: 'AI Hair Frizziness Analysis', to: '/scan' },
-        { label: 'AI Hair Density Analysis', to: '/scan' },
       ],
     },
     {
       heading: 'Nail',
       headingColor: '#e91e8c',
       items: [{ label: 'Virtual Try-On for Nails', to: '/scan' }],
-    },
-    {
-      heading: 'Jewelry and Watches',
-      headingColor: '#e91e8c',
-      items: [
-        { label: '3D Viewer & 3D Authoring Tool', to: '/scan' },
-        { label: '3D VTO Format', to: '/scan' },
-        { label: 'AR Ring Virtual Try-On', to: '/scan' },
-        { label: 'AR Bracelet Virtual Try-On', to: '/scan' },
-        { label: 'AR Watch Virtual Try-On', to: '/scan' },
-        { label: 'AR Earring Virtual Try-On', to: '/scan' },
-        { label: 'AR Necklace Virtual Try-On', to: '/scan' },
-      ],
-    },
-    {
-      heading: 'Eyewear',
-      headingColor: '#e91e8c',
-      items: [{ label: 'AI Powered Virtual Try-On for Glasses', to: '/scan' }],
-    },
-    {
-      heading: 'Fashion and Accessories',
-      headingColor: '#e91e8c',
-      items: [
-        { label: 'AI Clothes Try On', to: '/scan' },
-        { label: 'AR Scarf Virtual Try-On', to: '/scan' },
-        { label: 'AR Bags Virtual Try-On', to: '/scan' },
-        { label: 'AR Shoes Virtual Try-On', to: '/scan' },
-        { label: 'Hat and Headband Virtual Try-On', to: '/scan' },
-      ],
-    },
-    {
-      heading: "Men's Grooming",
-      headingColor: '#e91e8c',
-      items: [{ label: 'AI Beard Dye and Beard Style Virtual Try-On', to: '/scan' }],
     },
   ],
   footer: [
@@ -103,15 +34,12 @@ const enterpriseMenu = {
 
 // ─── Simple dropdown items ───────────────────────────────────────────────────
 const simpleMenus: Record<string, { label: string; to: string }[]> = {
-  'Online Service': [
-    { label: 'YouCam Makeup', to: '/scan' },
-    { label: 'YouCam Perfect', to: '/scan' },
-    { label: 'YouCam Fun', to: '/scan' },
-  ],
   Technologies: [
-    { label: 'AR Technology', to: '/scan' },
-    { label: 'AI Skin Analysis', to: '/scan' },
-    { label: 'Computer Vision', to: '/scan' },
+    { label: 'AgileHand™', to: '/scan' },
+    { label: 'Makeup AR', to: '/scan' },
+    { label: 'Live 3D Face AR', to: '/scan' },
+    { label: 'Skincare AR', to: '/scan' },
+    { label: 'Face AI', to: '/scan' },
   ],
   Resources: [
     { label: 'Blog', to: '/scan' },
@@ -123,22 +51,34 @@ const simpleMenus: Record<string, { label: string; to: string }[]> = {
 // ─── Top-level nav items ─────────────────────────────────────────────────────
 const topNavItems = [
   { label: 'Enterprise', hasMenu: 'enterprise' },
-  { label: 'Online Service', hasMenu: 'simple' },
   { label: 'Technologies', hasMenu: 'simple' },
   { label: 'Resources', hasMenu: 'simple' },
-  { label: 'AI API', to: '/scan' },
+  { label: 'Pricing', to: '/plans', requireAuth: true },
   { label: 'Blog', to: '/scan' },
 ]
 
 export function AnimatedNavbar() {
-  const { user } = useAuth()
+  const { user, signOut } = useAuth()
   const location = useLocation()
   const navigate = useNavigate()
   const [scrolled, setScrolled] = useState(false)
   const [activeMenu, setActiveMenu] = useState<string | null>(null)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [mobileExpandedMenu, setMobileExpandedMenu] = useState<string | null>(null)
   const navRef = useRef<HTMLDivElement>(null)
+  const drawerRef = useRef<HTMLDivElement>(null)
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  // Forward mouse wheel events to drawer when it's open
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      if (!mobileOpen || !drawerRef.current) return
+      drawerRef.current.scrollTop += e.deltaY
+      e.preventDefault()
+    }
+    window.addEventListener('wheel', handleWheel, { passive: false })
+    return () => window.removeEventListener('wheel', handleWheel)
+  }, [mobileOpen])
 
   // Detect scroll — threshold 80px to stay transparent over the video hero
   useEffect(() => {
@@ -150,10 +90,33 @@ export function AnimatedNavbar() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  // Close menu on route change
+  // Lock body scroll when mobile drawer is open (works on iOS Safari)
+  useEffect(() => {
+    if (mobileOpen) {
+      const scrollY = window.scrollY
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollY}px`
+      document.body.style.width = '100%'
+      document.body.style.overflow = 'hidden'
+    } else {
+      const scrollY = document.body.style.top
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+      document.body.style.overflow = ''
+      if (scrollY) window.scrollTo(0, parseInt(scrollY || '0') * -1)
+    }
+    return () => {
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.width = ''
+      document.body.style.overflow = ''
+    }
+  }, [mobileOpen])
   useEffect(() => {
     setActiveMenu(null)
     setMobileOpen(false)
+    setMobileExpandedMenu(null)
   }, [location.pathname])
 
   // Close when clicking outside
@@ -221,6 +184,7 @@ export function AnimatedNavbar() {
                 {item.to ? (
                   <NavLink
                     to={item.to}
+                    onClick={item.requireAuth && !user ? (e) => { e.preventDefault(); navigate('/auth') } : undefined}
                     className={cn(
                       'flex items-center gap-0.5 rounded px-3 py-1.5 text-sm font-medium transition-colors',
                       isTransparent
@@ -251,6 +215,34 @@ export function AnimatedNavbar() {
                     />
                   </button>
                 )}
+
+                {/* Simple dropdown — vertical list, same top offset as Enterprise */}
+                <AnimatePresence>
+                  {isActive && item.hasMenu === 'simple' && simpleMenus[item.label] && (
+                    <motion.div
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      transition={{ duration: 0.18, ease: 'easeOut' }}
+                      className="fixed bg-white shadow-[0_8px_40px_rgba(0,0,0,0.12)] border border-gray-100 z-50 min-w-[200px] py-2"
+                      style={{ top: 64 }}
+                      onMouseEnter={() => { if (closeTimer.current) clearTimeout(closeTimer.current) }}
+                      onMouseLeave={handleMouseLeave}
+                    >
+                      {simpleMenus[item.label].map((menuItem) => (
+                        <Link
+                          key={menuItem.label}
+                          to={menuItem.to}
+                          onClick={() => setActiveMenu(null)}
+                          className="block px-5 py-2.5 text-sm text-gray-700 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                          style={{ fontFamily: 'DM Sans, sans-serif' }}
+                        >
+                          {menuItem.label}
+                        </Link>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             )
           })}
@@ -281,15 +273,14 @@ export function AnimatedNavbar() {
               >
                 Sign In
               </button>
+              <button
+                onClick={() => navigate('/scan')}
+                className="rounded-md bg-rose-600 px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-rose-700 shadow-sm"
+              >
+                Try For Free
+              </button>
             </>
           )}
-
-          <button
-            onClick={() => navigate('/scan')}
-            className="rounded-md bg-rose-600 px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-rose-700 shadow-sm"
-          >
-            Try For Free
-          </button>
         </div>
 
         {/* Mobile right: Sign In + hamburger */}
@@ -347,124 +338,29 @@ export function AnimatedNavbar() {
                 </p>
               </div>
 
-              {/* Columns grid — layout matches screenshot: 5 visible columns */}
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-x-6 gap-y-6">
-                {/* Col 1: Makeup + Conversational AI */}
-                <div className="flex flex-col gap-6">
-                  {[enterpriseMenu.columns[0], enterpriseMenu.columns[1]].map((col) => (
-                    <div key={col.heading}>
-                      <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: col.headingColor, fontFamily: 'DM Sans, sans-serif' }}>
-                        {col.heading}
-                      </p>
-                      <ul className="space-y-1.5">
-                        {col.items.map((item) => (
-                          <li key={item.label}>
-                            <Link
-                              to={item.to}
-                              onClick={() => setActiveMenu(null)}
-                              className="text-xs text-gray-600 hover:text-rose-600 transition-colors leading-snug block"
-                              style={{ fontFamily: 'DM Sans, sans-serif' }}
-                            >
-                              {item.label}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Col 2: Face Diagnostic */}
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: enterpriseMenu.columns[2].headingColor, fontFamily: 'DM Sans, sans-serif' }}>
-                    {enterpriseMenu.columns[2].heading}
-                  </p>
-                  <ul className="space-y-1.5">
-                    {enterpriseMenu.columns[2].items.map((item) => (
-                      <li key={item.label}>
-                        <Link
-                          to={item.to}
-                          onClick={() => setActiveMenu(null)}
-                          className="text-xs text-gray-600 hover:text-rose-600 transition-colors leading-snug block"
-                          style={{ fontFamily: 'DM Sans, sans-serif' }}
-                        >
-                          {item.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Col 3: Hair + Nail */}
-                <div className="flex flex-col gap-6">
-                  {[enterpriseMenu.columns[3], enterpriseMenu.columns[4]].map((col) => (
-                    <div key={col.heading}>
-                      <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: col.headingColor, fontFamily: 'DM Sans, sans-serif' }}>
-                        {col.heading}
-                      </p>
-                      <ul className="space-y-1.5">
-                        {col.items.map((item) => (
-                          <li key={item.label}>
-                            <Link
-                              to={item.to}
-                              onClick={() => setActiveMenu(null)}
-                              className="text-xs text-gray-600 hover:text-rose-600 transition-colors leading-snug block"
-                              style={{ fontFamily: 'DM Sans, sans-serif' }}
-                            >
-                              {item.label}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Col 4: Jewelry and Watches */}
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: enterpriseMenu.columns[5].headingColor, fontFamily: 'DM Sans, sans-serif' }}>
-                    {enterpriseMenu.columns[5].heading}
-                  </p>
-                  <ul className="space-y-1.5">
-                    {enterpriseMenu.columns[5].items.map((item) => (
-                      <li key={item.label}>
-                        <Link
-                          to={item.to}
-                          onClick={() => setActiveMenu(null)}
-                          className="text-xs text-gray-600 hover:text-rose-600 transition-colors leading-snug block"
-                          style={{ fontFamily: 'DM Sans, sans-serif' }}
-                        >
-                          {item.label}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {/* Col 5: Eyewear + Fashion + Men's Grooming */}
-                <div className="flex flex-col gap-6">
-                  {[enterpriseMenu.columns[6], enterpriseMenu.columns[7], enterpriseMenu.columns[8]].map((col) => (
-                    <div key={col.heading}>
-                      <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: col.headingColor, fontFamily: 'DM Sans, sans-serif' }}>
-                        {col.heading}
-                      </p>
-                      <ul className="space-y-1.5">
-                        {col.items.map((item) => (
-                          <li key={item.label}>
-                            <Link
-                              to={item.to}
-                              onClick={() => setActiveMenu(null)}
-                              className="text-xs text-gray-600 hover:text-rose-600 transition-colors leading-snug block"
-                              style={{ fontFamily: 'DM Sans, sans-serif' }}
-                            >
-                              {item.label}
-                            </Link>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
+              {/* Columns grid */}
+              <div className="flex gap-x-12 gap-y-6">
+                {enterpriseMenu.columns.map((col) => (
+                  <div key={col.heading}>
+                    <p className="text-xs font-bold uppercase tracking-wide mb-2" style={{ color: col.headingColor, fontFamily: 'DM Sans, sans-serif' }}>
+                      {col.heading}
+                    </p>
+                    <ul className="space-y-1.5">
+                      {col.items.map((item) => (
+                        <li key={item.label}>
+                          <Link
+                            to={item.to}
+                            onClick={() => setActiveMenu(null)}
+                            className="text-xs text-gray-600 hover:text-rose-600 transition-colors leading-snug block"
+                            style={{ fontFamily: 'DM Sans, sans-serif' }}
+                          >
+                            {item.label}
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ))}
               </div>
 
               {/* Footer actions */}
@@ -494,41 +390,6 @@ export function AnimatedNavbar() {
         )}
       </AnimatePresence>
 
-      {/* ── Simple dropdowns ─────────────────────────────────────────────── */}
-      <AnimatePresence>
-        {activeMenu && activeMenu !== 'Enterprise' && simpleMenus[activeMenu] && (
-          <motion.div
-            initial={{ opacity: 0, y: -6 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -6 }}
-            transition={{ duration: 0.15 }}
-            className="absolute bg-white rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.10)] border border-gray-100 py-2 min-w-[200px]"
-            style={{
-              top: '100%',
-              left: (() => {
-                const idx = topNavItems.findIndex((i) => i.label === activeMenu)
-                return `calc(${(idx / topNavItems.length) * 100}% - 20px)`
-              })(),
-            }}
-            onMouseEnter={() => {
-              if (closeTimer.current) clearTimeout(closeTimer.current)
-            }}
-            onMouseLeave={handleMouseLeave}
-          >
-            {simpleMenus[activeMenu]?.map((item) => (
-              <Link
-                key={item.label}
-                to={item.to}
-                onClick={() => setActiveMenu(null)}
-                className="block px-4 py-2 text-sm text-gray-700 hover:bg-rose-50 hover:text-rose-600 transition-colors"
-              >
-                {item.label}
-              </Link>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
       {/* ── Mobile drawer ────────────────────────────────────────────────── */}
       <AnimatePresence>
         {mobileOpen && (
@@ -538,14 +399,16 @@ export function AnimatedNavbar() {
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[60] lg:hidden"
           >
-            <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
+            <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} style={{ zIndex: 0 }} />
             <motion.div
-              initial={{ x: '-100%' }}
+              initial={{ x: '100%' }}
               animate={{ x: 0 }}
-              exit={{ x: '-100%' }}
+              exit={{ x: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="absolute left-0 top-0 h-full w-80 bg-white p-5 shadow-xl overflow-y-auto"
+              className="absolute right-0 top-0 h-full w-80 bg-white shadow-xl flex flex-col"
+              style={{ zIndex: 1 }}
             >
+              <div ref={drawerRef} className="flex-1 overflow-y-auto overscroll-contain p-5" style={{ WebkitOverflowScrolling: 'touch' }}>
               <div className="flex items-center justify-between mb-6">
                 <Link
                   to="/"
@@ -568,43 +431,115 @@ export function AnimatedNavbar() {
               )}
 
               <nav className="flex flex-col gap-1">
-                {topNavItems.map((item) => (
-                  <div key={item.label}>
-                    {item.to ? (
+                {topNavItems.map((item) => {
+                  const isExpanded = mobileExpandedMenu === item.label
+                  const hasSimple = item.hasMenu === 'simple' && simpleMenus[item.label]
+                  const hasEnterprise = item.hasMenu === 'enterprise'
+
+                  if (item.to) {
+                    return (
                       <Link
-                        to={item.to}
+                        key={item.label}
+                        to={item.requireAuth && !user ? '/auth' : item.to}
                         onClick={() => setMobileOpen(false)}
                         className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-rose-50 hover:text-rose-600 transition-colors"
                       >
                         {item.label}
                       </Link>
-                    ) : (
-                      <div className="rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800">
+                    )
+                  }
+
+                  return (
+                    <div key={item.label}>
+                      <button
+                        className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                        onClick={() => setMobileExpandedMenu(isExpanded ? null : item.label)}
+                      >
                         {item.label}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                        <ChevronDown className={cn('h-4 w-4 transition-transform duration-200', isExpanded ? 'rotate-180 text-rose-600' : '')} />
+                      </button>
+
+                      <AnimatePresence>
+                        {isExpanded && (
+                          <motion.div
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden"
+                          >
+                            {hasSimple && (
+                              <div className="ml-3 border-l border-gray-100 pl-3 pb-1">
+                                {simpleMenus[item.label].map((menuItem) => (
+                                  <Link
+                                    key={menuItem.label}
+                                    to={menuItem.to}
+                                    onClick={() => setMobileOpen(false)}
+                                    className="block rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                                  >
+                                    {menuItem.label}
+                                  </Link>
+                                ))}
+                              </div>
+                            )}
+
+                            {hasEnterprise && (
+                              <div className="ml-3 border-l border-gray-100 pl-3 pb-1 flex flex-col gap-3 mt-1">
+                                {enterpriseMenu.columns.map((col) => (
+                                  <div key={col.heading}>
+                                    <p className="px-3 py-1 text-xs font-bold uppercase tracking-wide" style={{ color: col.headingColor }}>
+                                      {col.heading}
+                                    </p>
+                                    {col.items.map((menuItem) => (
+                                      <Link
+                                        key={menuItem.label}
+                                        to={menuItem.to}
+                                        onClick={() => setMobileOpen(false)}
+                                        className="block rounded-lg px-3 py-1.5 text-sm text-gray-600 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                                      >
+                                        {menuItem.label}
+                                      </Link>
+                                    ))}
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  )
+                })}
 
                 <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-2">
-                  {!user && (
-                    <Link
-                      to="/auth"
-                      onClick={() => setMobileOpen(false)}
-                      className="block rounded-lg border border-gray-200 px-4 py-2.5 text-center text-sm font-medium text-gray-700 hover:border-rose-300 hover:text-rose-600 transition-colors"
+                  {!user ? (
+                    <>
+                      <Link
+                        to="/auth"
+                        onClick={() => setMobileOpen(false)}
+                        className="block rounded-lg border border-gray-200 px-4 py-2.5 text-center text-sm font-medium text-gray-700 hover:border-rose-300 hover:text-rose-600 transition-colors"
+                      >
+                        Sign In
+                      </Link>
+                      <Link
+                        to="/scan"
+                        onClick={() => setMobileOpen(false)}
+                        className="block rounded-lg bg-rose-600 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-rose-700 transition-colors"
+                      >
+                        Try For Free
+                      </Link>
+                    </>
+                  ) : (
+                    <button
+                      onClick={() => { signOut(); setMobileOpen(false) }}
+                      className="block w-full rounded-lg bg-rose-600 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-rose-700 transition-colors"
                     >
-                      Sign In
-                    </Link>
+                      Đăng xuất
+                    </button>
                   )}
-                  <Link
-                    to="/scan"
-                    onClick={() => setMobileOpen(false)}
-                    className="block rounded-lg bg-rose-600 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-rose-700 transition-colors"
-                  >
-                    Try For Free
-                  </Link>
                 </div>
               </nav>
+              </div>
             </motion.div>
           </motion.div>
         )}
