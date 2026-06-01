@@ -62,8 +62,8 @@ const productMenu = {
 // ─── Simple dropdown items ───────────────────────────────────────────────────
 const simpleMenus: Record<string, { label: string; to: string }[]> = {
   Technologies: [
-    { label: 'AgileHand™', to: '/scan' },
-    { label: 'Makeup AR', to: '/scan' },
+    { label: 'AgileHand™', to: '/agile-hand' },
+    { label: 'Makeup AR', to: '/makeup-ar' },
     { label: 'Live 3D Face AR', to: '/scan' },
     { label: 'Skincare AR', to: '/scan' },
     { label: 'Face AI', to: '/scan' },

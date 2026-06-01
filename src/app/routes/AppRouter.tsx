@@ -18,6 +18,8 @@ const CheckoutPage = lazy(() => import('@/features/checkout/pages/CheckoutPage')
 const ProfilePage = lazy(() => import('@/features/profile/pages/ProfilePage'))
 const VerifyEmailPage = lazy(() => import('@/features/auth/pages/VerifyEmailPage'))
 const ResetPasswordPage = lazy(() => import('@/features/auth/pages/ResetPasswordPage'))
+const AgileHandPage = lazy(() => import('@/features/agile-hand/pages/AgileHandPage'))
+const MakeupArPage = lazy(() => import('@/features/makeup-ar/pages/MakeupArPage'))
 
 const router = createBrowserRouter([
   {
@@ -27,6 +29,8 @@ const router = createBrowserRouter([
       { path: '/', element: <LandingPage /> },
       { path: '/virtual-makeup-try-on', element: <VirtualMakeupTryOnPage /> },
       { path: '/ai-nail-color', element: <AiNailColorPage /> },
+      { path: '/agile-hand', element: <AgileHandPage /> },
+      { path: '/makeup-ar', element: <MakeupArPage /> },
       { path: '/scan', element: <AIScanPage /> },
       { path: '/recommendations', element: <RecommendationsPage /> },
       { path: '/products', element: <ProductsPage /> },
