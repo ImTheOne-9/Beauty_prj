@@ -4,6 +4,7 @@ import { Loader } from '@/shared/components/ui/Loader'
 import { AppLayout } from '@/shared/components/layout/AppLayout'
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute'
 import PlanPage from '@/features/plans/pages/PlanPage'
+import AiNailColorPage from '@/features/ai-nail-color/pages/AiNailColorPage'
 
 const LandingPage = lazy(() => import('@/features/landing/pages/LandingPage'))
 const VirtualMakeupTryOnPage = lazy(() => import('@/features/virtual-makeup-tryon/pages/VirtualMakeupTryOnPage'))
@@ -25,6 +26,7 @@ const router = createBrowserRouter([
     children: [
       { path: '/', element: <LandingPage /> },
       { path: '/virtual-makeup-try-on', element: <VirtualMakeupTryOnPage /> },
+      { path: '/ai-nail-color', element: <AiNailColorPage /> },
       { path: '/scan', element: <AIScanPage /> },
       { path: '/recommendations', element: <RecommendationsPage /> },
       { path: '/products', element: <ProductsPage /> },

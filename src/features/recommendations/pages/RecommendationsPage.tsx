@@ -10,7 +10,6 @@ import { motion } from 'framer-motion'
 import { useQuery } from '@tanstack/react-query'
 import { databaseService } from '@/services/supabase/database-service'
 import { supabase } from '@/services/supabase/client'
-import DarkFooter from '@/features/landing/components/DarkFooter'
 
 function useScanRecommendations(scan: any) {
   const { data: catalogProducts } = useQuery({
@@ -555,9 +554,6 @@ export default function RecommendationsPage() {
       {selectedScan && (
         <ScanDetailModal scan={selectedScan} onClose={() => setSelectedScan(null)} />
       )}
-      <div className="mt-16">
-        <DarkFooter />
-      </div>
     </section>
   )
 }

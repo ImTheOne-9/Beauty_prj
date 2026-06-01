@@ -9,7 +9,6 @@ import { usePlans } from '@/features/plans/hooks/usePlans'
 import type { Plan } from '../services/plans-service'
 import { CheckoutModal } from './CheckoutModal'
 import { useActiveSubscription } from '../hooks/useActiveSubscription'
-import DarkFooter from '@/features/landing/components/DarkFooter'
 
 function formatPrice(price: number, interval: string): string {
   if (price === 0) return '$0'
@@ -198,9 +197,6 @@ export default function PlanPage() {
           }}
         />
       )}
-      <div className="mt-16">
-        <DarkFooter />
-      </div>
     </section>
   )
 }

@@ -11,7 +11,6 @@ import VmtoComparison from '@/features/virtual-makeup-tryon/components/VmtoCompa
 import VmtoRoi from '@/features/virtual-makeup-tryon/components/VmtoRoi'
 import VmtoFaceTech from '@/features/virtual-makeup-tryon/components/VmtoFaceTech'
 import VmtoFaq from '@/features/virtual-makeup-tryon/components/VmtoFaq'
-import DarkFooter from '@/features/landing/components/DarkFooter'
 
 export default function VirtualMakeupTryOnPage() {
   const pageRef = useRef<HTMLElement | null>(null)
@@ -48,7 +47,6 @@ export default function VirtualMakeupTryOnPage() {
       <VmtoRoi />
       <VmtoFaceTech />
       <VmtoFaq />
-      <DarkFooter />
     </main>
   )
 }

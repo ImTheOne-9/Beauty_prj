@@ -11,7 +11,6 @@ import SolutionsSection from '@/features/landing/components/SolutionsSection'
 import PartnerStoriesSection from '@/features/landing/components/PartnerStoriesSection'
 import NewsSection from '@/features/landing/components/NewsSection'
 import AwardsSection from '@/features/landing/components/AwardsSection'
-import DarkFooter from '@/features/landing/components/DarkFooter'
 
 // Kept existing sections
 import ProductRecommendations from '@/features/landing/components/ProductRecommendations'
@@ -178,9 +177,6 @@ export default function LandingPage() {
           </div>
         </section>
       </RevealSection>
-
-      {/* ── 10. DARK FOOTER ──────────────────────────────────────────────────── */}
-      <DarkFooter />
     </main>
   )
 }

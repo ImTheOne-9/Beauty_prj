@@ -22,7 +22,7 @@ const enterpriseMenu = {
     {
       heading: 'Nail',
       headingColor: '#e91e8c',
-      items: [{ label: 'Virtual Try-On for Nails', to: '/scan' }],
+      items: [{ label: 'Virtual Try-On for Nails', to: '/ai-nail-color' }],
     },
   ],
   footer: [

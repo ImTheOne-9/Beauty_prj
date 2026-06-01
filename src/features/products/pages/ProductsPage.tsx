@@ -7,7 +7,6 @@ import { type ProductRecommendation } from '@/shared/lib/types'
 import { parseProductTags } from '@/shared/lib/product-tags'
 import { Button } from '@/shared/components/ui/Button'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
-import DarkFooter from '@/features/landing/components/DarkFooter'
 
 export default function ProductsPage() {
   const { data, isLoading } = useQuery({
@@ -60,9 +59,6 @@ export default function ProductsPage() {
           )}
         </>
       )}
-      <div className="mt-16">
-        <DarkFooter />
-      </div>
     </section>
   )
 }
