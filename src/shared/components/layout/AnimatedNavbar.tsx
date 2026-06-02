@@ -18,6 +18,7 @@ const enterpriseMenu = {
       headingColor: '#e91e8c',
       items: [
         { label: 'AR Makeup Virtual Try-On', to: '/virtual-makeup-try-on' },
+        { label: 'Beauty Try On', to: '/beauty-try-on' },
       ],
     },
     {
@@ -42,6 +43,7 @@ const productMenu = {
       headingColor: '#e91e8c',
       items: [
         { label: 'AR Makeup Virtual Try-On', to: '/virtual-makeup-try-on' },
+        
       ],
     },
     {

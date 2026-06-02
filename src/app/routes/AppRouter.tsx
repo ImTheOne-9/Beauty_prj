@@ -5,6 +5,7 @@ import { AppLayout } from '@/shared/components/layout/AppLayout'
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute'
 import PlanPage from '@/features/plans/pages/PlanPage'
 import AiNailColorPage from '@/features/ai-nail-color/pages/AiNailColorPage'
+import BeautyTryOnPage from '@/features/beauty-try-on/pages/BeautyTryOnPage'
 
 const LandingPage = lazy(() => import('@/features/landing/pages/LandingPage'))
 const VirtualMakeupTryOnPage = lazy(() => import('@/features/virtual-makeup-tryon/pages/VirtualMakeupTryOnPage'))
@@ -28,6 +29,7 @@ const router = createBrowserRouter([
     children: [
       { path: '/', element: <LandingPage /> },
       { path: '/virtual-makeup-try-on', element: <VirtualMakeupTryOnPage /> },
+      { path: '/beauty-try-on', element: <BeautyTryOnPage /> },
       { path: '/ai-nail-color', element: <AiNailColorPage /> },
       { path: '/agile-hand', element: <AgileHandPage /> },
       { path: '/makeup-ar', element: <MakeupArPage /> },

@@ -69,8 +69,12 @@ export type AdminProductConfigRecord = {
   id: string;
   product_id: string;
   category_id: string;
+  hex_color?: string | null;
   primary_color: string | null;
+  color_intensity?: number | string | null;
+  pattern_name?: string | null;
   texture: string | null;
+  extra_params?: Json | null;
   created_at: string;
 };
 
@@ -105,6 +109,8 @@ export type MakeupCatalogRow = {
   categoryName: string;
   apiCategoryKey: string;
   primaryColor: string | null;
+  colorIntensity: number | null;
+  patternName: string | null;
   texture: string | null;
 };
 
@@ -205,7 +211,14 @@ export const databaseService = {
         categoryName: category?.name ?? "Uncategorized",
         apiCategoryKey: category?.api_category_key ?? "general",
         texture: firstConfig?.texture ?? null,
-        primaryColor: firstConfig?.primary_color ?? null,
+        primaryColor: firstConfig?.primary_color ?? firstConfig?.hex_color ?? null,
+        colorIntensity:
+          typeof firstConfig?.color_intensity === "number"
+            ? firstConfig.color_intensity
+            : typeof firstConfig?.color_intensity === "string"
+              ? Number(firstConfig.color_intensity) || null
+              : null,
+        patternName: firstConfig?.pattern_name ?? null,
       };
     });
   },

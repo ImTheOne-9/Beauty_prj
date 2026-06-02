@@ -63,6 +63,8 @@ export type MakeupCatalogItem = {
   categoryName: string;
   apiCategoryKey: string;
   primaryColor: string | null;
+  colorIntensity?: number | null;
+  patternName?: string | null;
   texture: string | null;
 };
 
