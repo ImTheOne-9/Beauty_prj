@@ -40,12 +40,10 @@ import { supabase, type Json } from '@/services/supabase/client'
 import {
   databaseService,
   type AdminProductRecord,
-  type AdminRecommendationRecord,
-  type AdminScanRecord,
 } from '@/services/supabase/database-service'
 import { canAccessAdminSection, getAdminRoleLabel, type AdminSection, type AdminRole } from '@/shared/lib/admin'
 import { parseProductTags } from '@/shared/lib/product-tags'
-import { type ScanResult, type OrderRecord } from '@/shared/lib/types'
+import { type OrderRecord } from '@/shared/lib/types'
 import { cn } from '@/shared/lib/cn'
 
 const sidebarSections: Array<{
@@ -67,13 +65,13 @@ const sidebarSections: Array<{
     { id: 'revenue', label: 'Revenue', description: 'Orders and sales', icon: DollarSign },
   ]
 
-type ApiKeyFormState = {
-  id: string
-  name: string
-  key_value: string
-  provider: string
-  is_active: boolean
-}
+// type ApiKeyFormState = {
+//   id: string
+//   name: string
+//   key_value: string
+//   provider: string
+//   is_active: boolean
+// }
 const EMPTY_FORM = { id: '', name: '', key_value: '', provider: 'virtual_makeup_ai', is_active: true }
 
 type ProductFormState = {
@@ -343,7 +341,6 @@ export default function AdminPage() {
   const [newUserEmail, setNewUserEmail] = useState('')
   const [newUserPassword, setNewUserPassword] = useState('')
   const [newUserRole, setNewUserRole] = useState<AdminRole | 'user'>('user')
-  const [newUserPlan, setNewUserPlan] = useState<'free' | 'premium' | 'pro'>('free')
 
   // Ping Check
   const [pingTime, setPingTime] = useState<number | null>(null)
@@ -355,7 +352,6 @@ export default function AdminPage() {
 
   const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false)
   const [apiKeyForm, setApiKeyForm] = useState(EMPTY_FORM)
-  const [visibleApiKeysIds, setVisibleApiKeysIds] = useState<Set<string>>(new Set())
 
   // Modal states — Products
   const [productModalOpen, setProductModalOpen] = useState(false)
@@ -394,7 +390,6 @@ export default function AdminPage() {
       setNewUserFirstName(user.first_name || '')
       setNewUserLastName(user.last_name || '')
       setNewUserRole(user.role ?? 'user')
-      setNewUserPlan(user.plan?.slug ?? 'free')
       setNewUserPlanId(user.plan_id ?? '')
       setNewUserPassword('')
     } else {
@@ -404,7 +399,6 @@ export default function AdminPage() {
       setNewUserFirstName('')
       setNewUserLastName('')
       setNewUserRole('user')
-      setNewUserPlan('free')
       setNewUserPlanId('')
     }
     setUserModalOpen(true)
@@ -505,9 +499,9 @@ export default function AdminPage() {
     return new Map((productsQuery.data ?? []).map((product) => [product.id, product]))
   }, [productsQuery.data])
 
-  const scanLookup = useMemo(() => {
-    return new Map((scansQuery.data ?? []).map((scan) => [scan.id, scan]))
-  }, [scansQuery.data])
+  // const scanLookup = useMemo(() => {
+  //   return new Map((scansQuery.data ?? []).map((scan) => [scan.id, scan]))
+  // }, [scansQuery.data])
 
   const filteredOrders = useMemo(() => {
     const list = ordersQuery.data ?? []
@@ -1883,7 +1877,7 @@ export default function AdminPage() {
                     </thead>
                     <tbody className="divide-y divide-rose-50">
                       {paginatedAdminScans.map((scan) => {
-                        const enabledEffects = (scan.effects ?? []).filter((e: any) => e.enabled)
+                        // const enabledEffects = (scan.effects ?? []).filter((e: any) => e.enabled)
                         const email = scan.user_id ? (userLookup.get(scan.user_id)?.email ?? scan.user_id.slice(0, 8) + '...') : 'Guest'
                         return (
                           <tr key={scan.id} className="hover:bg-rose-50/20 text-rose-950 align-middle">
@@ -2442,9 +2436,6 @@ export default function AdminPage() {
                           value={newUserPlanId}
                           onChange={(e) => {
                             setNewUserPlanId(e.target.value)
-                            // sync slug cho createUserRoleMutation nếu cần
-                            const plan = (plansQuery.data ?? []).find((p: any) => p.id === e.target.value)
-                            setNewUserPlan((plan?.slug ?? 'free') as any)
                           }}
                         >
                           <option value="">No Plan</option>

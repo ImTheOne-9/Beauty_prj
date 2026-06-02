@@ -4,7 +4,7 @@ import { storageService } from '@/services/supabase/storage-service'
 import { supabase } from '@/services/supabase/client'
 
 // ✅ Không còn API_KEY ở client nữa
-const API_BASE = import.meta.env.VITE_MAKEUP_API_BASE_URL ?? 'https://yce-api-01.makeupar.com'
+// const API_BASE = import.meta.env.VITE_MAKEUP_API_BASE_URL ?? 'https://yce-api-01.makeupar.com'
 
 type TaskResponse = {
   status?: number

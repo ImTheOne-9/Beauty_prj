@@ -12,7 +12,6 @@ import { useMakeupCatalog } from '@/features/ai-scan/hooks/useMakeupCatalog'
 import { useCategories } from '@/features/ai-scan/hooks/useCategories'
 import { runMakeupVirtualTryOn } from '@/features/ai-scan/services/makeup-vto-service'
 import { persistScan } from '@/features/ai-scan/services/scan-persistence-service'
-import { mockScanResult } from '@/shared/data/mock-scan'
 import {
   getScanQuotaForRole,
   getScanUsesThisMonth,

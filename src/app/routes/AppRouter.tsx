@@ -4,8 +4,10 @@ import { Loader } from '@/shared/components/ui/Loader'
 import { AppLayout } from '@/shared/components/layout/AppLayout'
 import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute'
 import PlanPage from '@/features/plans/pages/PlanPage'
+import AiNailColorPage from '@/features/ai-nail-color/pages/AiNailColorPage'
 
 const LandingPage = lazy(() => import('@/features/landing/pages/LandingPage'))
+const VirtualMakeupTryOnPage = lazy(() => import('@/features/virtual-makeup-tryon/pages/VirtualMakeupTryOnPage'))
 const AIScanPage = lazy(() => import('@/features/ai-scan/pages/AIScanPage'))
 const RecommendationsPage = lazy(() => import('@/features/recommendations/pages/RecommendationsPage'))
 const ProductsPage = lazy(() => import('@/features/products/pages/ProductsPage'))
@@ -16,6 +18,8 @@ const CheckoutPage = lazy(() => import('@/features/checkout/pages/CheckoutPage')
 const ProfilePage = lazy(() => import('@/features/profile/pages/ProfilePage'))
 const VerifyEmailPage = lazy(() => import('@/features/auth/pages/VerifyEmailPage'))
 const ResetPasswordPage = lazy(() => import('@/features/auth/pages/ResetPasswordPage'))
+const AgileHandPage = lazy(() => import('@/features/agile-hand/pages/AgileHandPage'))
+const MakeupArPage = lazy(() => import('@/features/makeup-ar/pages/MakeupArPage'))
 
 const router = createBrowserRouter([
   {
@@ -23,6 +27,10 @@ const router = createBrowserRouter([
     element: <AppLayout />,
     children: [
       { path: '/', element: <LandingPage /> },
+      { path: '/virtual-makeup-try-on', element: <VirtualMakeupTryOnPage /> },
+      { path: '/ai-nail-color', element: <AiNailColorPage /> },
+      { path: '/agile-hand', element: <AgileHandPage /> },
+      { path: '/makeup-ar', element: <MakeupArPage /> },
       { path: '/scan', element: <AIScanPage /> },
       { path: '/recommendations', element: <RecommendationsPage /> },
       { path: '/products', element: <ProductsPage /> },

@@ -209,7 +209,7 @@ export default function ProfilePage() {
                 </div>
                 <div className="rounded-2xl border border-rose-100 bg-rose-50/40 px-4 py-3">
                   <dt className="text-[10px] font-semibold uppercase tracking-wide text-rose-600">Plan</dt>
-                  <dd className="mt-1 text-sm text-rose-950">{profile?.plan.name ?? 0}</dd>
+                  <dd className="mt-1 text-sm text-rose-950">{profile?.plan?.name ?? null}</dd>
                 </div>
                 <div className="rounded-2xl border border-rose-100 bg-rose-50/40 px-4 py-3">
                   <dt className="text-[10px] font-semibold uppercase tracking-wide text-rose-600">Last sign in</dt>

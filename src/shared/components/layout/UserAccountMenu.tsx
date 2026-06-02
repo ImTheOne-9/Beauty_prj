@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, LogOut, UserRound } from 'lucide-react'
+import { LayoutDashboard, LogOut, UserRound, History } from 'lucide-react'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useToast } from '@/shared/hooks/useToast'
 import { getUserInitials } from '@/shared/lib/profile'
@@ -70,13 +70,11 @@ export function UserAccountMenu({ className, onNavigate }: UserAccountMenuProps)
             <p className="truncate text-xs font-semibold text-rose-950">{displayName}</p>
             <p className="truncate text-[10px] text-mist">{user.email}</p>
           </div>
+
           {isAdmin ? (
             <Link
               to="/admin"
-              onClick={() => {
-                setOpen(false)
-                onNavigate?.()
-              }}
+              onClick={() => { setOpen(false); onNavigate?.() }}
               className="flex w-full items-center gap-2 px-3 py-2.5 text-xs text-rose-900 transition hover:bg-rose-50"
             >
               <LayoutDashboard className="h-4 w-4 text-cyan" />
@@ -85,16 +83,23 @@ export function UserAccountMenu({ className, onNavigate }: UserAccountMenuProps)
           ) : (
             <Link
               to="/profile"
-              onClick={() => {
-                setOpen(false)
-                onNavigate?.()
-              }}
+              onClick={() => { setOpen(false); onNavigate?.() }}
               className="flex w-full items-center gap-2 px-3 py-2.5 text-xs text-rose-900 transition hover:bg-rose-50"
             >
               <UserRound className="h-4 w-4 text-cyan" />
               Profile
             </Link>
           )}
+
+          <Link
+            to="/recommendations"
+            onClick={() => { setOpen(false); onNavigate?.() }}
+            className="flex w-full items-center gap-2 px-3 py-2.5 text-xs text-rose-900 transition hover:bg-rose-50"
+          >
+            <History className="h-4 w-4 text-cyan" />
+            Scan History
+          </Link>
+
           <button
             type="button"
             onClick={() => void handleSignOut()}
