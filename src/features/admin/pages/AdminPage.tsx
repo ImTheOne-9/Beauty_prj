@@ -36,7 +36,7 @@ import { Input } from '@/shared/components/ui/Input'
 import { Loader } from '@/shared/components/ui/Loader'
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useAuthStore } from '@/features/auth/store/auth-store'
-import { supabase, type Json } from '@/services/supabase/client'
+import { supabase } from '@/services/supabase/client'
 import {
   databaseService,
   type AdminProductRecord,
@@ -75,15 +75,15 @@ const sidebarSections: Array<{
 // }
 const EMPTY_FORM = { id: '', name: '', key_value: '', provider: 'virtual_makeup_ai', is_active: true }
 
-type ProductFormState = {
-  id: string
-  name: string
-  description: string
-  imageUrl: string
-  externalUrl: string
-  categoryId: string
-  brand: string
-}
+// type ProductFormState = {
+//   id: string
+//   name: string
+//   description: string
+//   imageUrl: string
+//   externalUrl: string
+//   categoryId: string
+//   brand: string
+// }
 
 type CategoryFormState = {
   id: string
@@ -91,25 +91,25 @@ type CategoryFormState = {
   apiCategoryKey: string
 }
 
-type ProductConfigFormState = {
-  id: string
-  productId: string
-  hexColor: string
-  texture: string
-  colorIntensity: number
-  patternName: string
-  extraParams: string
-}
+// type ProductConfigFormState = {
+//   id: string
+//   productId: string
+//   hexColor: string
+//   texture: string
+//   colorIntensity: number
+//   patternName: string
+//   extraParams: string
+// }
 
-const emptyProductForm: ProductFormState = {
-  id: '',
-  name: '',
-  description: '',
-  imageUrl: '',
-  externalUrl: '',
-  categoryId: '',
-  brand: '',
-}
+// const emptyProductForm: ProductFormState = {
+//   id: '',
+//   name: '',
+//   description: '',
+//   imageUrl: '',
+//   externalUrl: '',
+//   categoryId: '',
+//   brand: '',
+// }
 
 const emptyCategoryForm: CategoryFormState = {
   id: '',
@@ -117,15 +117,15 @@ const emptyCategoryForm: CategoryFormState = {
   apiCategoryKey: '',
 }
 
-const emptyProductConfigForm: ProductConfigFormState = {
-  id: '',
-  productId: '',
-  hexColor: '#ffffff',
-  texture: 'Smooth',
-  colorIntensity: 50,
-  patternName: '',
-  extraParams: '{}',
-}
+// const emptyProductConfigForm: ProductConfigFormState = {
+//   id: '',
+//   productId: '',
+//   hexColor: '#ffffff',
+//   texture: 'Smooth',
+//   colorIntensity: 50,
+//   patternName: '',
+//   extraParams: '{}',
+// }
 
 const EMPTY_PLAN = {
   name: '',
@@ -140,14 +140,7 @@ const EMPTY_PLAN = {
   is_active: true,
 }
 // Thêm state để track product đang edit + configs của nó
-const [editingProduct, setEditingProduct] = useState<AdminProductRecord | null>(null)
 
-const existingConfigs = useMemo(() => {
-  if (!editingProduct) return []
-  return (productConfigsQuery.data ?? []).filter(
-    c => c.product_id === editingProduct.id
-  )
-}, [editingProduct, productConfigsQuery.data])
 // const emptyScanForm: ScanFormState = {
 //   id: '',
 //   score: '',
@@ -173,17 +166,17 @@ function formatDate(value: string) {
   })
 }
 
-function mapProductForm(product: AdminProductRecord): ProductFormState {
-  return {
-    id: product.id,
-    name: product.name,
-    description: product.description ?? '',
-    imageUrl: product.image_url ?? '',
-    externalUrl: product.external_url ?? '',
-    categoryId: product.category_id,
-    brand: product.brand ?? '',
-  }
-}
+// function mapProductForm(product: AdminProductRecord): ProductFormState {
+//   return {
+//     id: product.id,
+//     name: product.name,
+//     description: product.description ?? '',
+//     imageUrl: product.image_url ?? '',
+//     externalUrl: product.external_url ?? '',
+//     categoryId: product.category_id,
+//     brand: product.brand ?? '',
+//   }
+// }
 
 // function mapScanForm(scan: AdminScanRecord): ScanFormState {
 //   return {
@@ -319,11 +312,10 @@ export default function AdminPage() {
   const [activeSection, setActiveSection] = useState<AdminSection>('overview')
 
   // Forms
-  const [productForm, setProductForm] = useState<ProductFormState>(emptyProductForm)
+  // const [productForm, setProductForm] = useState<ProductFormState>(emptyProductForm)
   // const [scanForm, setScanForm] = useState<ScanFormState>(emptyScanForm)
   // const [recommendationForm, setRecommendationForm] = useState<RecommendationFormState>(emptyRecommendationForm)
   const [categoryForm, setCategoryForm] = useState<CategoryFormState>(emptyCategoryForm)
-  const [productConfigForm, setProductConfigForm] = useState<ProductConfigFormState>(emptyProductConfigForm)
 
   // Filters & Search
   const [productSearch, setProductSearch] = useState('')
@@ -378,10 +370,26 @@ export default function AdminPage() {
   const [userRoleFilter, setUserRoleFilter] = useState('all')
   const [userPlanFilter, setUserPlanFilter] = useState('all')
 
+  const [editingProduct, setEditingProduct] = useState<AdminProductRecord | null>(null)
+  const [configOnlyMode, setConfigOnlyMode] = useState(false)
   
-  const openProductModal = (product?: AdminProductRecord) => {
-    setProductForm(product ? mapProductForm(product) : emptyProductForm)
-    setProductModalOpen(true)
+  // ✅ GIỮ NGUYÊN khai báo này:
+  const productConfigsQuery = useQuery({
+    queryKey: ['admin', 'product-configs'],
+    queryFn: () => databaseService.getAdminProductConfigs(),
+  })
+
+  // ✅ THÊM existingConfigs ngay đây:
+  const existingConfigs = useMemo(() => {
+    if (!editingProduct) return []
+    return (productConfigsQuery.data ?? []).filter(
+      c => c.product_id === editingProduct.id
+    )
+  }, [editingProduct, productConfigsQuery.data])
+    const openProductModal = (product?: AdminProductRecord) => {
+      setEditingProduct(product ?? null)
+      setConfigOnlyMode(false)  // ← reset chế độ
+      setProductModalOpen(true)
   }
 
   const openCategoryModal = (category?: { id: string; name: string; api_category_key: string }) => {
@@ -453,10 +461,6 @@ export default function AdminPage() {
     queryFn: () => databaseService.getAdminCategories(),
   })
 
-  const productConfigsQuery = useQuery({
-    queryKey: ['admin', 'product-configs'],
-    queryFn: () => databaseService.getAdminProductConfigs(),
-  })
 
   const usersQuery = useQuery({
   queryKey: ['admin', 'profiles'],
@@ -507,6 +511,10 @@ export default function AdminPage() {
   const productLookup = useMemo(() => {
     return new Map((productsQuery.data ?? []).map((product) => [product.id, product]))
   }, [productsQuery.data])
+
+  const categoryLookup = useMemo(() => {
+    return new Map((categoriesQuery.data ?? []).map((category) => [category.id, category]))
+  }, [categoriesQuery.data])
 
   // const scanLookup = useMemo(() => {
   //   return new Map((scansQuery.data ?? []).map((scan) => [scan.id, scan]))
@@ -717,38 +725,6 @@ export default function AdminPage() {
     },
   })
 
-  const saveProductMutation = useMutation({
-    mutationFn: async () => {
-      const payload = {
-        name: productForm.name.trim(),
-        description: productForm.description.trim() || null,
-        image_url: productForm.imageUrl.trim() || null,
-        external_url: productForm.externalUrl.trim() || null,
-        brand: productForm.brand.trim() || null,
-        category_id: productForm.categoryId,
-      }
-
-      if (!payload.name) {
-        throw new Error('Please provide a product name before saving.')
-      }
-
-      if (!payload.category_id) {
-        throw new Error('Please select a category for the product.')
-      }
-
-      if (productForm.id) {
-        return databaseService.updateProduct(productForm.id, payload)
-      }
-
-      return databaseService.createProduct(payload)
-    },
-    onSuccess: async () => {
-      setProductForm(emptyProductForm)
-      await queryClient.invalidateQueries({ queryKey: ['admin', 'products'] })
-      await queryClient.invalidateQueries({ queryKey: ['catalog', 'products'] })
-      await queryClient.invalidateQueries({ queryKey: ['landing', 'products'] })
-    },
-  })
 
   const deleteProductMutation = useMutation({
     mutationFn: async (id: string) => databaseService.deleteProduct(id),
@@ -789,44 +765,7 @@ export default function AdminPage() {
     },
   })
 
-  const saveProductConfigMutation = useMutation({
-    mutationFn: async () => {
-      let extraParams: Json | null = null
-      if (productConfigForm.extraParams.trim()) {
-        try {
-          extraParams = JSON.parse(productConfigForm.extraParams) as Json
-        } catch {
-          throw new Error('Extra params must be valid JSON.')
-        }
-        if (extraParams !== null && typeof extraParams !== 'object') {
-          throw new Error('Extra params must be a JSON object or array.')
-        }
-      }
-
-      const payload = {
-        product_id: productConfigForm.productId,
-        hex_color: productConfigForm.hexColor.trim() || null,
-        texture: productConfigForm.texture.trim() || null,
-        color_intensity: productConfigForm.colorIntensity,
-        pattern_name: productConfigForm.patternName.trim() || null,
-        extra_params: extraParams,
-      }
-
-      if (!payload.product_id) {
-        throw new Error('Select a product to attach AI config.')
-      }
-
-      if (productConfigForm.id) {
-        return databaseService.updateProductConfig(productConfigForm.id, payload)
-      }
-
-      return databaseService.createProductConfig(payload)
-    },
-    onSuccess: async () => {
-      setProductConfigForm(emptyProductConfigForm)
-      await queryClient.invalidateQueries({ queryKey: ['admin', 'product-configs'] })
-    },
-  })
+  
 
   const deleteProductConfigMutation = useMutation({
     mutationFn: async (id: string) => databaseService.deleteProductConfig(id),
@@ -1422,10 +1361,17 @@ export default function AdminPage() {
                 )}
               </Card>
 
-              {/* ─── Product Modal ─── */}
+              
+            </div>
+          ) : null}
+          {/* ─── Product Modal ─── */}
               <ProductWithConfigModal
+                configOnly={configOnlyMode}
                 open={productModalOpen}
-                onClose={() => { setProductModalOpen(false); setEditingProduct(null) }}
+                onClose={() => { 
+                  setConfigOnlyMode(false)  // ← quan trọng: reset mode khi close
+                  setProductModalOpen(false)
+                  setEditingProduct(null) }}
                 categories={categoriesQuery.data ?? []}
                 initial={editingProduct}
                 existingConfigs={existingConfigs}
@@ -1437,9 +1383,6 @@ export default function AdminPage() {
                   setEditingProduct(null)
                 }}
               />
-            </div>
-          ) : null}
-
           {/* CATEGORIES TAB */}
           {activeSection === 'categories' ? (
             <div className="space-y-4">
@@ -1594,136 +1537,74 @@ export default function AdminPage() {
           {/* PRODUCT CONFIGS TAB */}
           {activeSection === 'product-configs' ? (
             <div className="space-y-4">
+              {/* Bảng xem nhanh tất cả configs */}
               <Card className="border border-rose-100 p-6 bg-white shadow-sm">
                 <AdminSectionTitle
-                  eyebrow="AI Config"
-                  title={productConfigForm.id ? 'Edit Product Config' : 'Create New Product Config'}
-                  description="Link a product to AI parameters like color, texture, and pattern."
-                />
-                <div className="mt-5 space-y-4">
-                  <div>
-                    <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Product</label>
-                    <select
-                      className="w-full rounded-2xl border border-rose-200/80 bg-white/85 px-4 py-3 text-sm text-pearl focus:border-cyan focus:outline-none focus:ring-2 focus:ring-cyan/25"
-                      value={productConfigForm.productId}
-                      onChange={(event) => setProductConfigForm((state) => ({ ...state, productId: event.target.value }))}
-                    >
-                      <option value="">Select Product</option>
-                      {(productsQuery.data ?? []).map((product) => (
-                        <option key={product.id} value={product.id}>
-                          {product.name}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="grid gap-3 lg:grid-cols-2">
-                    <div>
-                      <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Color Code</label>
-                      <Input
-                        placeholder="#F3D6E8"
-                        value={productConfigForm.hexColor}
-                        onChange={(event) => setProductConfigForm((state) => ({ ...state, hexColor: event.target.value }))}
-                      />
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Texture</label>
-                      <Input
-                        placeholder="e.g. Smooth"
-                        value={productConfigForm.texture}
-                        onChange={(event) => setProductConfigForm((state) => ({ ...state, texture: event.target.value }))}
-                      />
-                    </div>
-                  </div>
-                  <div className="grid gap-3 lg:grid-cols-2">
-                    <div>
-                      <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Color Intensity (0-100)</label>
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          value={productConfigForm.colorIntensity}
-                          onChange={(event) => setProductConfigForm((state) => ({ ...state, colorIntensity: Number(event.target.value) }))}
-                          className="flex-1 accent-rose-500"
-                        />
-                        <span className="text-sm font-semibold text-rose-950 min-w-[40px] text-right">{productConfigForm.colorIntensity}</span>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Pattern Name</label>
-                      <Input
-                        placeholder="e.g. Satin Glow"
-                        value={productConfigForm.patternName}
-                        onChange={(event) => setProductConfigForm((state) => ({ ...state, patternName: event.target.value }))}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Extra params (JSON)</label>
-                    <textarea
-                      className="min-h-[90px] w-full rounded-2xl border border-rose-200/80 bg-white/80 px-4 py-3 text-sm text-pearl placeholder:text-mist/70 focus:border-cyan focus:outline-none focus:ring-2 focus:ring-cyan/25"
-                      value={productConfigForm.extraParams}
-                      onChange={(event) => setProductConfigForm((state) => ({ ...state, extraParams: event.target.value }))}
-                    />
-                  </div>
-                  {saveProductConfigMutation.error ? (
-                    <p className="text-sm text-rose-500">{saveProductConfigMutation.error.message}</p>
-                  ) : null}
-                  <div className="flex flex-wrap gap-3 pt-2">
-                    <Button onClick={() => saveProductConfigMutation.mutate()} disabled={saveProductConfigMutation.isPending}>
-                      {saveProductConfigMutation.isPending ? 'Saving...' : productConfigForm.id ? 'Update Config' : 'Create Config'}
-                    </Button>
-                    <Button variant="ghost" onClick={() => setProductConfigForm(emptyProductConfigForm)}>
-                      Reset
-                    </Button>
-                  </div>
-                </div>
-              </Card>
-
-              <Card className="border border-rose-100 p-6 bg-white shadow-sm overflow-x-auto">
-                <AdminSectionTitle
                   eyebrow="Config List"
-                  title="AI Config Detail Table"
-                  description="View all configs linked to products and edit parameters quickly."
+                  title="All AI Effect Configs"
+                  description={`${productConfigsQuery.data?.length ?? 0} config(s) — one row per product effect.`}
                 />
                 <div className="mt-6 overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
                       <tr className="border-b border-rose-100 text-rose-950 font-bold uppercase tracking-wider">
                         <th className="pb-3 pr-3">Product</th>
-                        <th className="pb-3 px-3">Color Code</th>
-                        <th className="pb-3 px-3">Texture</th>
-                        <th className="pb-3 px-3">Intensity</th>
-                        <th className="pb-3 px-3">Pattern</th>
-                        <th className="pb-3 px-3">Extra params</th>
+                        <th className="pb-3 px-3">Category</th>
+                        <th className="pb-3 px-3">Primary Color</th>
+                        <th className="pb-3 px-3 min-w-[280px]">Texture</th>
                         <th className="pb-3 pl-3 text-right">Actions</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-rose-50">
                       {(productConfigsQuery.data ?? []).map((config) => (
                         <tr key={config.id} className="hover:bg-rose-50/20 text-rose-950 align-top">
-                          <td className="py-3 pr-3 font-medium">{productLookup.get(config.product_id)?.name ?? 'Unknown'}</td>
-                          <td className="py-3 px-3 text-mist">{config.hex_color || '—'}</td>
-                          <td className="py-3 px-3 text-mist">{config.texture || '—'}</td>
-                          <td className="py-3 px-3 text-mist">{config.color_intensity || '—'}</td>
-                          <td className="py-3 px-3 text-mist">{config.pattern_name || '—'}</td>
-                          <td className="py-3 px-3 text-mist break-words max-w-[220px]">{config.extra_params ? JSON.stringify(config.extra_params) : '{}'}</td>
+                          <td className="py-3 pr-3 font-medium">
+                            {productLookup.get(config.product_id)?.name ?? 'Unknown'}
+                          </td>
+                          <td className="py-3 px-3">
+                            <span className="rounded-full bg-rose-50 border border-rose-100 px-2 py-0.5 text-[11px] font-medium text-rose-700 capitalize">
+                              {categoryLookup.get(config.category_id)?.name ?? 'Unknown'}
+                            </span>
+                          </td>
+                          <td className="py-3 px-3">
+                            {config.primary_color ? (
+                              <div className="flex items-center gap-2">
+                                <span
+                                  className="h-4 w-4 rounded-full border border-white shadow-sm shrink-0"
+                                  style={{ backgroundColor: config.primary_color }}
+                                />
+                                <span className="font-mono text-[11px] text-mist uppercase">
+                                  {config.primary_color}
+                                </span>
+                              </div>
+                            ) : (
+                              <span className="text-mist">—</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-3">
+                            {config.texture ? (
+                              <span className="font-mono text-[11px] text-mist capitalize">
+                                {config.texture}
+                              </span>
+                            ) : (
+                              <span className="text-mist">—</span>
+                            )}
+                          </td>
                           <td className="py-3 pl-3 text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button 
-                                size="sm" 
-                                variant="ghost" 
-                                onClick={() => setProductConfigForm({
-                                  id: config.id,
-                                  productId: config.product_id,
-                                  hexColor: config.hex_color ?? '#ffffff',
-                                  texture: config.texture ?? 'Smooth',
-                                  colorIntensity: config.color_intensity ?? 50,
-                                  patternName: config.pattern_name ?? '',
-                                  extraParams: config.extra_params ? JSON.stringify(config.extra_params, null, 2) : '{}',
-                                })}
+                            <div className="flex justify-end gap-1">
+                              <Button
+                                size="sm"
+                                variant="ghost"
+                                onClick={() => {
+                                  const product = productLookup.get(config.product_id)
+                                  if (product) {
+                                    setEditingProduct(product)
+                                    setConfigOnlyMode(true)
+                                    setProductModalOpen(true)
+                                  }
+                                }}
                               >
-                                Edit
+                                <PencilLine className="h-4 w-4" />
                               </Button>
                               <Button
                                 size="sm"
@@ -1743,9 +1624,11 @@ export default function AdminPage() {
                       ))}
                     </tbody>
                   </table>
-                  {(productConfigsQuery.data?.length ?? 0) === 0 ? (
-                    <p className="mt-4 text-sm text-mist">No AI configs yet. Create a new config to link with products.</p>
-                  ) : null}
+                  {(productConfigsQuery.data?.length ?? 0) === 0 && (
+                    <div className="text-center py-12 text-mist text-sm">
+                      No configs yet. Add an effect from the Products tab.
+                    </div>
+                  )}
                 </div>
               </Card>
             </div>

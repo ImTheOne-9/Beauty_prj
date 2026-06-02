@@ -68,9 +68,9 @@ export type AdminCategoryRecord = {
 export type AdminProductConfigRecord = {
   id: string;
   product_id: string;
-  effect_category: string;
+  category_id: string;
   primary_color: string | null;
-  effect_data: Record<string, unknown>;
+  texture: string | null;
   created_at: string;
 };
 
@@ -104,10 +104,8 @@ export type MakeupCatalogRow = {
   categoryId: string;
   categoryName: string;
   apiCategoryKey: string;
-  /** Tất cả effect objects của product này — dùng để build API payload */
-  effects: Record<string, unknown>[];
-  /** Màu palette đầu tiên của effect đầu tiên — dùng để hiển thị swatch trên catalog */
   primaryColor: string | null;
+  texture: string | null;
 };
 
 export type Plan = {
@@ -206,7 +204,7 @@ export const databaseService = {
         categoryId: product.category_id,
         categoryName: category?.name ?? "Uncategorized",
         apiCategoryKey: category?.api_category_key ?? "general",
-        effects: productConfigs.map((c) => c.effect_data),
+        texture: firstConfig?.texture ?? null,
         primaryColor: firstConfig?.primary_color ?? null,
       };
     });
@@ -283,9 +281,9 @@ export const databaseService = {
   async createProductConfig(input: ProductConfigInput) {
     const payload = {
       product_id: input.product_id,
-      effect_category: input.effect_category,
-      primary_color: input.primary_color ?? extractPrimaryColor(input.effect_data),
-      effect_data: input.effect_data as Json,
+      category_id: input.category_id,
+      primary_color: input.primary_color,
+      texture: input.texture,
     };
     const { data, error } = await supabase
       .from("product_configs")
@@ -298,13 +296,9 @@ export const databaseService = {
 
   async updateProductConfig(id: string, input: Partial<ProductConfigInput>) {
     const payload: Record<string, unknown> = {};
-    if (input.effect_category !== undefined) payload.effect_category = input.effect_category;
-    if (input.effect_data !== undefined) {
-      payload.effect_data = input.effect_data as Json;
-      // Tự động sync primary_color nếu effect_data thay đổi
-      payload.primary_color = input.primary_color ?? extractPrimaryColor(input.effect_data);
-    }
+    if (input.category_id !== undefined) payload.category_id = input.category_id;
     if (input.primary_color !== undefined) payload.primary_color = input.primary_color;
+    if (input.texture !== undefined) payload.texture = input.texture;
 
     const { data, error } = await supabase
       .from("product_configs")
