@@ -58,14 +58,12 @@ export type MakeupCatalogItem = {
   description: string | null;
   image: string;
   externalLink: string;
-  brand: string | null;
+  brand: string | null; 
   categoryId: string;
   categoryName: string;
   apiCategoryKey: string;
-  hexColor: string | null;
+  primaryColor: string | null;
   texture: string | null;
-  colorIntensity: number | null;
-  patternName: string | null;
 };
 
 export type MatchedMakeupProduct = MakeupCatalogItem & {
