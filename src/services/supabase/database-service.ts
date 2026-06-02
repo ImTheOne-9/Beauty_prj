@@ -110,7 +110,6 @@ export type MakeupCatalogRow = {
   apiCategoryKey: string;
   primaryColor: string | null;
   colorIntensity: number | null;
-  patternName: string | null;
   texture: string | null;
 };
 
@@ -218,7 +217,6 @@ export const databaseService = {
             : typeof firstConfig?.color_intensity === "string"
               ? Number(firstConfig.color_intensity) || null
               : null,
-        patternName: firstConfig?.pattern_name ?? null,
       };
     });
   },

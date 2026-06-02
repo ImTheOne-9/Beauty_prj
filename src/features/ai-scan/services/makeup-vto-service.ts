@@ -58,6 +58,7 @@ export async function runMakeupVirtualTryOn(input: {
   imageSource: string
   effects: MakeupEffect[]
   userId?: string
+  allowColorOnly?: boolean
 }) {
   const originalPublicUrl = await ensurePublicImageUrl(
     input.imageSource,
@@ -66,7 +67,9 @@ export async function runMakeupVirtualTryOn(input: {
 
   const payload: MakeupVtoPayload = {
     src_file_url: originalPublicUrl,
-    effects: buildApiEffects(input.effects),
+    effects: buildApiEffects(input.effects, {
+      allowColorOnly: input.allowColorOnly,
+    }),
     version: '1.0',
   }
 

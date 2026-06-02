@@ -6,80 +6,16 @@ import BeautyAppliedProducts from '@/features/beauty-try-on/components/BeautyApp
 import BeautyProductGrid from '@/features/beauty-try-on/components/BeautyProductGrid'
 import BeautyProductTabs from '@/features/beauty-try-on/components/BeautyProductTabs'
 import BeautyVirtualMirror from '@/features/beauty-try-on/components/BeautyVirtualMirror'
-import { buildApiEffects, DEFAULT_MAKEUP_EFFECTS } from '@/features/ai-scan/lib/makeup-defaults'
-import { categoryNeedsPatternFirst } from '@/features/ai-scan/lib/makeup-patterns'
 import { runMakeupVirtualTryOn } from '@/features/ai-scan/services/makeup-vto-service'
 import { useFaceValidation } from '@/features/ai-scan/hooks/useFaceValidation'
-import type { MakeupEffect, MakeupTexture, MakeupVtoTaskStatus } from '@/features/ai-scan/types/makeup-vto'
+import type { MakeupVtoTaskStatus } from '@/features/ai-scan/types/makeup-vto'
+import {
+  buildBeautyMakeupEffects,
+  hasBeautyMakeupPayload,
+} from '@/features/beauty-try-on/lib/beauty-makeup-adapter'
 import { Loader } from '@/shared/components/ui/Loader'
-import { databaseService, type MakeupCatalogRow } from '@/services/supabase/database-service'
+import { databaseService } from '@/services/supabase/database-service'
 import { useToast } from '@/shared/hooks/useToast'
-
-const MAKEUP_TEXTURES = new Set<MakeupTexture>([
-  'matte',
-  'satin',
-  'shimmer',
-  'gloss',
-  'metallic',
-])
-
-function isMakeupTexture(value: string | null): value is MakeupTexture {
-  return Boolean(value && MAKEUP_TEXTURES.has(value as MakeupTexture))
-}
-
-function cloneDefaultEffect(category: string) {
-  const template = DEFAULT_MAKEUP_EFFECTS.find((effect) => effect.category === category)
-  if (!template) return { category }
-
-  return {
-    ...template,
-    palettes: template.palettes?.map((palette) => ({ ...palette })),
-    pattern: template.pattern ? { ...template.pattern } : undefined,
-    shape: template.shape ? { ...template.shape } : undefined,
-    style: template.style ? { ...template.style } : undefined,
-    morphology: template.morphology ? { ...template.morphology } : undefined,
-  }
-}
-
-function buildEffectsFromProducts(productIds: string[], catalog: MakeupCatalogRow[]): MakeupEffect[] {
-  return productIds
-    .map((productId) => catalog.find((item) => item.productId === productId))
-    .filter((item): item is MakeupCatalogRow => Boolean(item))
-    .map((item) => {
-      const category = item.apiCategoryKey
-      const effect: MakeupEffect = {
-        ...cloneDefaultEffect(category),
-        category,
-        enabled: true,
-      }
-
-      const color = item.primaryColor?.trim()
-      if (color) {
-        effect.palettes = [
-          {
-            ...(effect.palettes?.[0] ?? {}),
-            color,
-            colorIntensity: item.colorIntensity ?? effect.palettes?.[0]?.colorIntensity ?? 50,
-            ...(isMakeupTexture(item.texture) ? { texture: item.texture } : {}),
-          },
-        ]
-      }
-
-      if (item.patternName?.trim()) {
-        if (category === 'lip_color') {
-          effect.shape = { name: item.patternName }
-        } else {
-          effect.pattern = { ...effect.pattern, name: item.patternName }
-        }
-      }
-
-      if (categoryNeedsPatternFirst(category) && !item.patternName?.trim()) {
-        effect.palettes = undefined
-      }
-
-      return effect
-    })
-}
 
 export default function BeautyTryOnPage() {
   const toast = useToast()
@@ -178,8 +114,7 @@ export default function BeautyTryOnPage() {
 
   const processMutation = useMutation({
     mutationFn: async () => {
-      const effects = buildEffectsFromProducts(appliedProducts, makeupCatalog)
-      const apiEffects = buildApiEffects(effects)
+      const effects = buildBeautyMakeupEffects(appliedProducts, makeupCatalog)
 
       if (!imageSource) {
         throw new Error('Please upload a photo or select a model first.')
@@ -189,14 +124,15 @@ export default function BeautyTryOnPage() {
         throw new Error('Please apply at least one product first.')
       }
 
-      if (apiEffects.length === 0) {
-        throw new Error('Selected products need makeup config in Admin, including color and pattern when required.')
+      if (!hasBeautyMakeupPayload(effects)) {
+        throw new Error('Selected products need a color value before they can be applied.')
       }
 
       setTaskStatus('running')
       return runMakeupVirtualTryOn({
         imageSource,
         effects,
+        allowColorOnly: true,
       })
     },
     onSuccess: (result) => {

@@ -192,13 +192,17 @@ export function stripEffectForApi(effect: MakeupEffect): MakeupEffect {
   return rest;
 }
 
-export function buildApiEffects(effects: MakeupEffect[]): MakeupEffect[] {
+export function buildApiEffects(
+  effects: MakeupEffect[],
+  options: { allowColorOnly?: boolean } = {},
+): MakeupEffect[] {
   return effects
     .filter((effect) => effect.enabled === true)
     .map(stripEffectForApi)
     .filter((effect) => {
       if (effect.category === "skin_smooth") return true;
       if (
+        !options.allowColorOnly &&
         categoryNeedsPatternFirst(effect.category) &&
         !isPatternChosen(effect)
       )
