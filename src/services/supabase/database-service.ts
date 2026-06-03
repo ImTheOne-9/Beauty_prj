@@ -81,6 +81,24 @@ export type AdminProductConfigRecord = {
 /** Input khi create/update config — không cần id và created_at */
 export type ProductConfigInput = Omit<AdminProductConfigRecord, "id" | "created_at">;
 
+export type AdminProductVariantRecord = {
+  id: string;
+  product_id: string;
+  name: string | null;
+  color_hex: string;
+  texture: string | null;
+  image_url: string | null;
+  sku: string | null;
+  sort_order: number;
+  is_active: boolean;
+  created_at: string;
+};
+
+export type ProductVariantInput = Omit<
+  AdminProductVariantRecord,
+  "id" | "created_at"
+>;
+
 export type AdminUserProfileRecord = {
   id: string;
   email: string;
@@ -264,6 +282,55 @@ export const databaseService = {
 
   async deleteProduct(id: string) {
     const { error } = await supabase.from("products").delete().eq("id", id);
+    if (error) throw error;
+  },
+
+  async getAdminProductVariants() {
+    const { data, error } = await (supabase as any)
+      .from("product_variants")
+      .select("*")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true });
+    if (error) throw error;
+    return (data ?? []) as AdminProductVariantRecord[];
+  },
+
+  async replaceProductVariants(
+    productId: string,
+    variants: Omit<ProductVariantInput, "product_id">[],
+  ) {
+    const { error: deleteError } = await (supabase as any)
+      .from("product_variants")
+      .delete()
+      .eq("product_id", productId);
+    if (deleteError) throw deleteError;
+
+    if (variants.length === 0) return [];
+
+    const rows = variants.map((variant, index) => ({
+      product_id: productId,
+      name: variant.name?.trim() || null,
+      color_hex: variant.color_hex,
+      texture: variant.texture?.trim() || null,
+      image_url: variant.image_url?.trim() || null,
+      sku: variant.sku?.trim() || null,
+      sort_order: variant.sort_order ?? index,
+      is_active: variant.is_active ?? true,
+    }));
+
+    const { data, error } = await (supabase as any)
+      .from("product_variants")
+      .insert(rows)
+      .select("*");
+    if (error) throw error;
+    return (data ?? []) as AdminProductVariantRecord[];
+  },
+
+  async deleteProductVariant(id: string) {
+    const { error } = await (supabase as any)
+      .from("product_variants")
+      .delete()
+      .eq("id", id);
     if (error) throw error;
   },
 

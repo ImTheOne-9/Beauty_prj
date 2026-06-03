@@ -40,6 +40,7 @@ import { supabase } from '@/services/supabase/client'
 import {
   databaseService,
   type AdminProductRecord,
+  type AdminProductVariantRecord,
 } from '@/services/supabase/database-service'
 import { canAccessAdminSection, getAdminRoleLabel, type AdminSection, type AdminRole } from '@/shared/lib/admin'
 import { parseProductTags } from '@/shared/lib/product-tags'
@@ -56,7 +57,7 @@ const sidebarSections: Array<{
     { id: 'overview', label: 'Overview', description: 'System status and metrics', icon: LayoutGrid },
     { id: 'products', label: 'Products', description: 'Manage goods and catalog', icon: Store },
     { id: 'categories', label: 'Categories', description: 'Manage product categories', icon: ListChecks },
-    { id: 'product-configs', label: 'AI Configs', description: 'Manage AI product configurations', icon: Sparkles },
+    { id: 'product-configs', label: 'Variants', description: 'Manage product shades and textures', icon: Sparkles },
     { id: 'scans', label: 'Scans', description: 'View scan history and simulation', icon: Camera },
     { id: 'access', label: 'Access', description: 'Roles and permissions', icon: Users },
     { id: 'plans', label: 'Plans', description: 'Manage subscription plans', icon: CreditCard },
@@ -376,7 +377,7 @@ export default function AdminPage() {
   // ✅ GIỮ NGUYÊN khai báo này:
   const productConfigsQuery = useQuery({
     queryKey: ['admin', 'product-configs'],
-    queryFn: () => databaseService.getAdminProductConfigs(),
+    queryFn: () => databaseService.getAdminProductVariants(),
   })
 
   // ✅ THÊM existingConfigs ngay đây:
@@ -384,7 +385,7 @@ export default function AdminPage() {
     if (!editingProduct) return []
     return (productConfigsQuery.data ?? []).filter(
       c => c.product_id === editingProduct.id
-    )
+    ) as AdminProductVariantRecord[]
   }, [editingProduct, productConfigsQuery.data])
     const openProductModal = (product?: AdminProductRecord) => {
       setEditingProduct(product ?? null)
@@ -511,10 +512,6 @@ export default function AdminPage() {
   const productLookup = useMemo(() => {
     return new Map((productsQuery.data ?? []).map((product) => [product.id, product]))
   }, [productsQuery.data])
-
-  const categoryLookup = useMemo(() => {
-    return new Map((categoriesQuery.data ?? []).map((category) => [category.id, category]))
-  }, [categoriesQuery.data])
 
   // const scanLookup = useMemo(() => {
   //   return new Map((scansQuery.data ?? []).map((scan) => [scan.id, scan]))
@@ -768,7 +765,7 @@ export default function AdminPage() {
   
 
   const deleteProductConfigMutation = useMutation({
-    mutationFn: async (id: string) => databaseService.deleteProductConfig(id),
+    mutationFn: async (id: string) => databaseService.deleteProductVariant(id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['admin', 'product-configs'] })
     },
@@ -1379,6 +1376,7 @@ export default function AdminPage() {
                   queryClient.invalidateQueries({ queryKey: ['admin', 'products'] })
                   queryClient.invalidateQueries({ queryKey: ['admin', 'product-configs'] })
                   queryClient.invalidateQueries({ queryKey: ['catalog', 'products'] })
+                  queryClient.invalidateQueries({ queryKey: ['makeup', 'catalog'] })
                   setProductModalOpen(false)
                   setEditingProduct(null)
                 }}
@@ -1541,17 +1539,17 @@ export default function AdminPage() {
               <Card className="border border-rose-100 p-6 bg-white shadow-sm">
                 <AdminSectionTitle
                   eyebrow="Config List"
-                  title="All AI Effect Configs"
-                  description={`${productConfigsQuery.data?.length ?? 0} config(s) — one row per product effect.`}
+                  title="All Product Variants"
+                  description={`${productConfigsQuery.data?.length ?? 0} variant(s) - one row per shade or texture.`}
                 />
                 <div className="mt-6 overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
                       <tr className="border-b border-rose-100 text-rose-950 font-bold uppercase tracking-wider">
                         <th className="pb-3 pr-3">Product</th>
-                        <th className="pb-3 px-3">Category</th>
-                        <th className="pb-3 px-3">Primary Color</th>
-                        <th className="pb-3 px-3 min-w-[280px]">Texture</th>
+                        <th className="pb-3 px-3">Variant</th>
+                        <th className="pb-3 px-3">Color</th>
+                        <th className="pb-3 px-3 min-w-[180px]">Texture</th>
                         <th className="pb-3 pl-3 text-right">Actions</th>
                       </tr>
                     </thead>
@@ -1563,18 +1561,18 @@ export default function AdminPage() {
                           </td>
                           <td className="py-3 px-3">
                             <span className="rounded-full bg-rose-50 border border-rose-100 px-2 py-0.5 text-[11px] font-medium text-rose-700 capitalize">
-                              {categoryLookup.get(config.category_id)?.name ?? 'Unknown'}
+                              {config.name || 'Default shade'}
                             </span>
                           </td>
                           <td className="py-3 px-3">
-                            {config.primary_color ? (
+                            {config.color_hex ? (
                               <div className="flex items-center gap-2">
                                 <span
                                   className="h-4 w-4 rounded-full border border-white shadow-sm shrink-0"
-                                  style={{ backgroundColor: config.primary_color }}
+                                  style={{ backgroundColor: config.color_hex }}
                                 />
                                 <span className="font-mono text-[11px] text-mist uppercase">
-                                  {config.primary_color}
+                                  {config.color_hex}
                                 </span>
                               </div>
                             ) : (
@@ -1610,7 +1608,7 @@ export default function AdminPage() {
                                 size="sm"
                                 variant="ghost"
                                 onClick={() => {
-                                  if (confirm('Delete this config?')) {
+                                  if (confirm('Delete this variant?')) {
                                     deleteProductConfigMutation.mutate(config.id)
                                   }
                                 }}
@@ -1626,7 +1624,7 @@ export default function AdminPage() {
                   </table>
                   {(productConfigsQuery.data?.length ?? 0) === 0 && (
                     <div className="text-center py-12 text-mist text-sm">
-                      No configs yet. Add an effect from the Products tab.
+                      No variants yet. Add variants from the Products tab.
                     </div>
                   )}
                 </div>
