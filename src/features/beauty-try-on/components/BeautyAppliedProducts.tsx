@@ -1,25 +1,35 @@
 import {
   ChevronDown,
   ChevronUp,
-  X,
+  Eye,
+  EyeOff,
+  ShoppingBag,
 } from 'lucide-react'
-import type { AdminProductRecord } from '@/services/supabase/database-service'
+import type {
+  AdminProductRecord,
+  MakeupCatalogRow,
+} from '@/services/supabase/database-service'
 
 interface Props {
   mobile?: boolean
-
   expanded: boolean
-
-  setExpanded: React.Dispatch<
-    React.SetStateAction<boolean>
-  >
-
+  setExpanded: React.Dispatch<React.SetStateAction<boolean>>
   appliedProducts: string[]
+  hiddenProducts: string[]
   products: AdminProductRecord[]
-  onToggle: (id: string) => void
+  makeupCatalog: MakeupCatalogRow[]
+  onToggleVisibility: (id: string) => void
+  onAddToCart: (id: string) => void
   onClear: () => void
-
   onClose?: () => void
+}
+
+function getProductImage(product?: AdminProductRecord) {
+  return product?.image_url ?? ''
+}
+
+function getProductColor(productId: string, catalog: MakeupCatalogRow[]) {
+  return catalog.find((item) => item.productId === productId)?.primaryColor ?? null
 }
 
 export default function BeautyAppliedProducts({
@@ -27,8 +37,11 @@ export default function BeautyAppliedProducts({
   expanded,
   setExpanded,
   appliedProducts,
+  hiddenProducts,
   products,
-  onToggle,
+  makeupCatalog,
+  onToggleVisibility,
+  onAddToCart,
   onClear,
   onClose,
 }: Props) {
@@ -38,15 +51,105 @@ export default function BeautyAppliedProducts({
       id,
       brand: product?.brand ?? 'Product',
       name: product?.name ?? `Product ${id}`,
-      imageUrl: product?.image_url ?? '',
+      imageUrl: getProductImage(product),
+      color: getProductColor(id, makeupCatalog),
+      hidden: hiddenProducts.includes(id),
     }
   })
 
-  // MOBILE DRAWER
+  const content = (
+    <>
+      <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
+        {appliedProductDetails.length === 0 ? (
+          <div className="py-4 text-sm text-neutral-500">
+            No products applied
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {appliedProductDetails.map((product) => (
+              <div
+                key={product.id}
+                className={`grid grid-cols-[44px_32px_minmax(0,1fr)_32px_32px] items-center gap-3 rounded-lg px-1 py-1.5 ${
+                  product.hidden ? 'opacity-50' : ''
+                }`}
+              >
+                <div className="flex h-11 w-11 items-center justify-center overflow-hidden bg-neutral-100">
+                  {product.imageUrl ? (
+                    <img
+                      src={product.imageUrl}
+                      alt={product.name}
+                      className="h-full w-full object-contain"
+                    />
+                  ) : (
+                    <ShoppingBag className="h-5 w-5 text-neutral-400" />
+                  )}
+                </div>
+
+                <span
+                  className="h-8 w-8 rounded-full border border-neutral-200"
+                  style={{ backgroundColor: product.color ?? '#d4d4d4' }}
+                  aria-label={product.color ? `Color ${product.color}` : 'No color configured'}
+                  title={product.color ?? 'No color configured'}
+                />
+
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-neutral-900">
+                    {product.brand} {product.name}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => onToggleVisibility(product.id)}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-neutral-100"
+                  aria-label={product.hidden ? 'Show product effect' : 'Hide product effect'}
+                  title={product.hidden ? 'Show product effect' : 'Hide product effect'}
+                >
+                  {product.hidden ? (
+                    <EyeOff size={20} />
+                  ) : (
+                    <Eye size={20} />
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => onAddToCart(product.id)}
+                  className="relative inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-neutral-100"
+                  aria-label="Add to cart"
+                  title="Add to cart"
+                >
+                  <ShoppingBag size={20} />
+                  <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border border-white bg-white text-[13px] font-semibold leading-none">
+                    +
+                  </span>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <div className="shrink-0 border-t p-4">
+        <button className="w-full rounded-full bg-black py-3 text-sm font-semibold text-white">
+          Add to cart ({appliedProducts.length})
+        </button>
+
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="mt-3 w-full text-sm"
+          >
+            Close
+          </button>
+        )}
+      </div>
+    </>
+  )
+
   if (mobile) {
     return (
       <div className="flex h-full min-h-0 flex-col">
-        {/* Header */}
         <div className="shrink-0 border-b px-5 py-4">
           <div className="flex items-center justify-between">
             <h3 className="font-semibold">
@@ -62,71 +165,11 @@ export default function BeautyAppliedProducts({
           </div>
         </div>
 
-        {/* Scroll List */}
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-4">
-          {appliedProducts.length === 0 ? (
-            <div className="text-sm text-neutral-500">
-              No products applied
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {appliedProductDetails.map((product) => (
-                <div
-                  key={product.id}
-                  className="flex items-center gap-3 rounded-xl border p-3"
-                >
-                  {product.imageUrl && (
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      className="h-12 w-12 rounded-lg border object-contain"
-                    />
-                  )}
-
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold">
-                      {product.brand}
-                    </p>
-                    <p className="truncate text-xs text-neutral-500">
-                      {product.name}
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={() =>
-                      onToggle(product.id)
-                    }
-                    className="rounded-md p-1 hover:bg-neutral-100"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Footer */}
-        <div className="shrink-0 border-t p-4">
-          <button className="w-full rounded-full bg-black py-3 font-semibold text-white">
-            Add to cart (
-            {appliedProducts.length})
-          </button>
-
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="mt-3 w-full text-sm"
-            >
-              Close
-            </button>
-          )}
-        </div>
+        {content}
       </div>
     )
   }
 
-  // DESKTOP
   return (
     <div
       className={`flex min-h-0 flex-col overflow-hidden border-t bg-white transition-all duration-300 ${
@@ -135,17 +178,13 @@ export default function BeautyAppliedProducts({
           : 'h-[72px]'
       }`}
     >
-      {/* Header */}
-      <div className="shrink-0 px-5 py-4">
+      <div className="shrink-0 px-4 py-4">
         <div className="flex items-center justify-between">
           <button
-            onClick={() =>
-              setExpanded(!expanded)
-            }
+            onClick={() => setExpanded(!expanded)}
             className="flex items-center gap-2 font-semibold"
           >
             Applied products
-
             {expanded ? (
               <ChevronDown size={18} />
             ) : (
@@ -155,66 +194,14 @@ export default function BeautyAppliedProducts({
 
           <button
             onClick={onClear}
-            className="text-sm font-medium text-neutral-500 hover:text-black"
+            className="text-sm font-semibold text-neutral-900 hover:text-neutral-500"
           >
             Clear all
           </button>
         </div>
       </div>
 
-      {/* Scroll List */}
-      {expanded && (
-        <div className="min-h-0 flex-1 overflow-y-auto px-5">
-          {appliedProducts.length === 0 ? (
-            <div className="py-4 text-sm text-neutral-500">
-              No products applied
-            </div>
-          ) : (
-            <div className="space-y-3 pb-4">
-              {appliedProductDetails.map((product) => (
-                <div
-                  key={product.id}
-                  className="flex items-center gap-3 rounded-xl border p-3"
-                >
-                  {product.imageUrl && (
-                    <img
-                      src={product.imageUrl}
-                      alt={product.name}
-                      className="h-12 w-12 rounded-lg border object-contain"
-                    />
-                  )}
-
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold">
-                      {product.brand}
-                    </p>
-                    <p className="truncate text-xs text-neutral-500">
-                      {product.name}
-                    </p>
-                  </div>
-
-                  <button
-                    onClick={() =>
-                      onToggle(product.id)
-                    }
-                    className="rounded-md p-1 hover:bg-neutral-100"
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {/* Footer */}
-      <div className="shrink-0 border-t p-4">
-        <button className="w-full rounded-full bg-black py-3 text-sm font-semibold text-white">
-          Add to cart (
-          {appliedProducts.length})
-        </button>
-      </div>
+      {expanded && content}
     </div>
   )
 }

@@ -45,6 +45,7 @@ export default function BeautyTryOnPage() {
   const [expanded, setExpanded] = useState(true)
   const [mobileAppliedOpen, setMobileAppliedOpen] = useState(false)
   const [appliedProducts, setAppliedProducts] = useState<string[]>([])
+  const [hiddenAppliedProducts, setHiddenAppliedProducts] = useState<string[]>([])
   const [imageSource, setImageSource] = useState('')
   const [resultUrl, setResultUrl] = useState<string | null>(null)
   const [taskStatus, setTaskStatus] = useState<MakeupVtoTaskStatus>('idle')
@@ -62,15 +63,38 @@ export default function BeautyTryOnPage() {
   }, [activeTab, products])
 
   const toggleProduct = (id: string) => {
+    const selectedProduct = products.find((product) => product.id === id)
+
     setAppliedProducts((current) =>
+      current.includes(id)
+        ? current.filter((productId) => productId !== id)
+        : [
+            ...current.filter((productId) => {
+              const currentProduct = products.find((product) => product.id === productId)
+              return currentProduct?.category_id !== selectedProduct?.category_id
+            }),
+            id,
+          ],
+    )
+    setHiddenAppliedProducts((current) => current.filter((productId) => productId !== id))
+  }
+
+  const clearAppliedProducts = () => {
+    setAppliedProducts([])
+    setHiddenAppliedProducts([])
+  }
+
+  const toggleAppliedProductVisibility = (id: string) => {
+    setHiddenAppliedProducts((current) =>
       current.includes(id)
         ? current.filter((productId) => productId !== id)
         : [...current, id],
     )
   }
 
-  const clearAppliedProducts = () => {
-    setAppliedProducts([])
+  const addProductToCart = (id: string) => {
+    const product = products.find((item) => item.id === id)
+    toast.success(`${product?.name ?? 'Product'} added to cart`)
   }
 
   const handleSelectModel = (imageUrl: string) => {
@@ -114,14 +138,17 @@ export default function BeautyTryOnPage() {
 
   const processMutation = useMutation({
     mutationFn: async () => {
-      const effects = buildBeautyMakeupEffects(appliedProducts, makeupCatalog)
+      const visibleAppliedProducts = appliedProducts.filter(
+        (id) => !hiddenAppliedProducts.includes(id),
+      )
+      const effects = buildBeautyMakeupEffects(visibleAppliedProducts, makeupCatalog)
 
       if (!imageSource) {
         throw new Error('Please upload a photo or select a model first.')
       }
 
-      if (appliedProducts.length === 0) {
-        throw new Error('Please apply at least one product first.')
+      if (visibleAppliedProducts.length === 0) {
+        throw new Error('Please show at least one applied product first.')
       }
 
       if (!hasBeautyMakeupPayload(effects)) {
@@ -148,7 +175,7 @@ export default function BeautyTryOnPage() {
 
   const canApply =
     Boolean(imageSource) &&
-    appliedProducts.length > 0 &&
+    appliedProducts.some((id) => !hiddenAppliedProducts.includes(id)) &&
     validationState !== 'checking' &&
     !processMutation.isPending
 
@@ -199,8 +226,11 @@ export default function BeautyTryOnPage() {
               expanded={expanded}
               setExpanded={setExpanded}
               appliedProducts={appliedProducts}
+              hiddenProducts={hiddenAppliedProducts}
               products={products}
-              onToggle={toggleProduct}
+              makeupCatalog={makeupCatalog}
+              onToggleVisibility={toggleAppliedProductVisibility}
+              onAddToCart={addProductToCart}
               onClear={clearAppliedProducts}
             />
           </div>
@@ -270,8 +300,11 @@ export default function BeautyTryOnPage() {
               expanded={expanded}
               setExpanded={setExpanded}
               appliedProducts={appliedProducts}
+              hiddenProducts={hiddenAppliedProducts}
               products={products}
-              onToggle={toggleProduct}
+              makeupCatalog={makeupCatalog}
+              onToggleVisibility={toggleAppliedProductVisibility}
+              onAddToCart={addProductToCart}
               onClear={clearAppliedProducts}
               onClose={() => setMobileAppliedOpen(false)}
             />
