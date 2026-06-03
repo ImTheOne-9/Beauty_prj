@@ -6,7 +6,7 @@ import type { PatternCatalogItem } from '@/features/ai-scan/lib/makeup-patterns'
 import { getPatternTabGroups, isColorPatternCategory } from '@/features/ai-scan/lib/makeup-patterns'
 import { cn } from '@/shared/lib/cn'
 
-const COLOR_TAB_LABELS = ['1 color', '2 colors', '3 colors'] as const
+const COLOR_TAB_LABELS = ['1 color', '2 colors', '3 colors', '4 colors', '5 colors'] as const
 
 type PatternPickerModalProps = {
   open: boolean

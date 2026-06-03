@@ -2,7 +2,7 @@ import type {
   AdminProductRecord,
   AdminProductVariantRecord,
 } from '@/services/supabase/database-service'
-import type { BeautyAppliedSelection } from '@/features/beauty-try-on/lib/beauty-makeup-adapter'
+import type { BeautyAppliedSelection } from '@/features/beauty-try-on/lib/beauty-selection'
 
 interface Props {
   mobile?: boolean
@@ -10,6 +10,21 @@ interface Props {
   variants: AdminProductVariantRecord[]
   appliedProducts: BeautyAppliedSelection[]
   onToggle: (productId: string, variantId: string) => void
+}
+
+function isDualColorTexture(texture?: string | null) {
+  return texture === 'shimmer' || texture === 'holographic'
+}
+
+function getVariantSwatchStyle(variant: AdminProductVariantRecord) {
+  if (isDualColorTexture(variant.texture)) {
+    const shimmerColor = variant.shimmer_color ?? '#FFFFFF'
+    return {
+      background: `linear-gradient(135deg, ${variant.color_hex} 0 50%, ${shimmerColor} 50% 100%)`,
+    }
+  }
+
+  return { backgroundColor: variant.color_hex }
 }
 
 export default function BeautyProductGrid({
@@ -133,7 +148,7 @@ export default function BeautyProductGrid({
                             ? 'border-black'
                             : 'border-white shadow-sm ring-1 ring-neutral-200'
                         }`}
-                        style={{ backgroundColor: variant.color_hex }}
+                        style={getVariantSwatchStyle(variant)}
                         aria-label={variant.name ?? variant.color_hex}
                         title={`${variant.name ?? variant.color_hex}${variant.texture ? ` - ${variant.texture}` : ''}`}
                       />

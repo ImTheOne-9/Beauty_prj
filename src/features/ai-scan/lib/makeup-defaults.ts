@@ -160,6 +160,15 @@ export const DEFAULT_MAKEUP_EFFECTS: MakeupEffect[] = [
     enabled: false,
     style: { type: "full" },
     morphology: { fullness: 0, wrinkless: 0 },
+    palettes: [
+      {
+        color: "#FF0000",
+        texture: "gloss",
+        colorIntensity: 50,
+        gloss: 50,
+        transparencyIntensity: 0,
+      },
+    ],
   },
   {
     category: "lip_liner",

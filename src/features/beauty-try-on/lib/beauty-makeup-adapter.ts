@@ -5,7 +5,6 @@ import {
 import {
   applyPaletteTextureDefaults,
   ensurePaletteCount,
-  getPatternColorCount,
 } from '@/features/ai-scan/lib/makeup-patterns'
 import type {
   MakeupEffect,
@@ -15,13 +14,10 @@ import type {
   AdminProductVariantRecord,
   MakeupCatalogRow,
 } from '@/services/supabase/database-service'
-
-export type BeautyAppliedSelection = {
-  productId: string
-  variantId: string
-  colorVariantIds?: string[]
-  patternName?: string
-}
+import {
+  type BeautyAppliedSelection,
+  getBeautySelectionColorCount,
+} from '@/features/beauty-try-on/lib/beauty-selection'
 
 const MAKEUP_TEXTURES = new Set<MakeupTexture>([
   'matte',
@@ -29,10 +25,25 @@ const MAKEUP_TEXTURES = new Set<MakeupTexture>([
   'shimmer',
   'gloss',
   'metallic',
+  'sheer',
+  'holographic',
+])
+
+const TEXTURE_CATEGORIES = new Set([
+  'blush',
+  'eye_liner',
+  'eye_shadow',
+  'eyebrows',
+  'lip_color',
+  'lip_liner',
 ])
 
 function isMakeupTexture(value: string | null): value is MakeupTexture {
   return Boolean(value && MAKEUP_TEXTURES.has(value as MakeupTexture))
+}
+
+function supportsTexture(category: string) {
+  return TEXTURE_CATEGORIES.has(category)
 }
 
 function cloneDefaultEffect(category: string): MakeupEffect {
@@ -73,10 +84,18 @@ function buildColorTextureEffect(
 
   const category = item.apiCategoryKey
   const base = cloneDefaultEffect(category)
+  if (category === 'skin_smooth') {
+    return {
+      ...base,
+      category,
+      enabled: true,
+      skinSmoothStrength: base.skinSmoothStrength ?? 50,
+      skinSmoothColorIntensity: base.skinSmoothColorIntensity ?? 50,
+    }
+  }
+
   const patternName = selection.patternName?.trim()
-  const colorCount = patternName && category !== 'lip_color'
-    ? getPatternColorCount(patternName)
-    : 1
+  const colorCount = getBeautySelectionColorCount(category, patternName)
   const paletteTemplates = ensurePaletteCount(base.palettes, colorCount, category)
 
   return {
@@ -84,7 +103,15 @@ function buildColorTextureEffect(
     category,
     enabled: true,
     pattern:
-      patternName && category !== 'lip_color'
+      patternName && category === 'eyebrows'
+        ? {
+            type: 'shape',
+            name: patternName,
+            curvature: base.pattern?.curvature ?? 50,
+            thickness: base.pattern?.thickness ?? 50,
+            definition: base.pattern?.definition ?? 50,
+          }
+        : patternName && category !== 'lip_color'
         ? {
             ...base.pattern,
             name: patternName,
@@ -97,6 +124,10 @@ function buildColorTextureEffect(
             name: patternName,
           }
         : base.shape,
+    style:
+      category === 'lip_color'
+        ? { type: 'full' }
+        : base.style,
     palettes: paletteTemplates.map((template, index) => {
       const selectedVariant = selectedVariants[index] ?? variant
       const color = selectedVariant.color_hex.trim()
@@ -104,7 +135,12 @@ function buildColorTextureEffect(
         ...template,
         color,
         colorIntensity: item.colorIntensity ?? template.colorIntensity ?? 50,
-        ...(isMakeupTexture(selectedVariant.texture) ? { texture: selectedVariant.texture } : {}),
+        ...(selectedVariant.shimmer_color?.trim()
+          ? { shimmerColor: selectedVariant.shimmer_color.trim() }
+          : {}),
+        ...(supportsTexture(category) && isMakeupTexture(selectedVariant.texture)
+          ? { texture: selectedVariant.texture }
+          : {}),
       }
       return applyPaletteTextureDefaults(category, palette)
     }),

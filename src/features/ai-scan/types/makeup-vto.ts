@@ -3,7 +3,9 @@ export type MakeupTexture =
   | "satin"
   | "shimmer"
   | "gloss"
-  | "metallic";
+  | "metallic"
+  | "sheer"
+  | "holographic";
 
 export type MakeupPalette = {
   color: string;
@@ -20,6 +22,9 @@ export type MakeupPalette = {
   shimmerIntensity?: number;
   shimmerSize?: number;
   metallicIntensity?: number;
+  glowStrength?: number;
+  gloss?: number;
+  transparencyIntensity?: number;
 };
 
 export type MakeupEffect = {
@@ -33,7 +38,13 @@ export type MakeupEffect = {
     definition?: number;
   };
   shape?: { name?: string };
-  style?: { type?: string; innerRatio?: number; featherStrength?: number };
+  style?: {
+    type?: string;
+    innerRatio?: number;
+    featherStrength?: number;
+    innerColorRatio?: number;
+    blendStrength?: number;
+  };
   morphology?: { fullness?: number; wrinkless?: number };
   palettes?: MakeupPalette[];
   skinSmoothStrength?: number;

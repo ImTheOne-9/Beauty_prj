@@ -45,7 +45,7 @@ export function inferColorCountFromLabel(label?: string): number {
 }
 
 function clampColorCount(value: number) {
-  return Math.min(3, Math.max(1, value))
+  return Math.min(5, Math.max(1, value))
 }
 
 export function getPatternColorCount(label?: string, item?: PatternCatalogItem): number {
@@ -71,18 +71,18 @@ const catalogCache = new Map<string, { version: number; data: PatternCatalogItem
 
 export const COLOR_PATTERN_CATEGORIES = new Set([
   'blush',
-  'bronzer',
   'eye_shadow',
   'eye_liner',
-  'eyelashes',
 ])
 
-const COLOR_TAB_ORDER = ['1 color', '2 colors', '3 colors'] as const
+const COLOR_TAB_ORDER = ['1 color', '2 colors', '3 colors', '4 colors', '5 colors'] as const
 
 const COLOR_TAB_BY_NUM: Record<number, string> = {
   1: '1 color',
   2: '2 colors',
   3: '3 colors',
+  4: '4 colors',
+  5: '5 colors',
 }
 
 export function hasPatternCatalog(category: string) {
@@ -127,6 +127,8 @@ function getColorPatternTabGroups(catalog: PatternCatalogItem[]) {
     '1 color': [],
     '2 colors': [],
     '3 colors': [],
+    '4 colors': [],
+    '5 colors': [],
   }
 
   for (const item of catalog) {
@@ -158,34 +160,99 @@ export function getPatternTabGroups(catalog: PatternCatalogItem[], effectCategor
 
 const DEFAULT_PALETTE: MakeupPalette = {
   color: '#FF0000',
-  texture: 'matte',
   colorIntensity: 50,
 }
 
-const DEFAULT_SHIMMER_COLOR = '#484848'
+const DEFAULT_SHIMMER_COLOR = '#FFFFFF'
+const TEXTURE_CATEGORIES = new Set([
+  'blush',
+  'eye_liner',
+  'eye_shadow',
+  'eyebrows',
+  'lip_color',
+  'lip_liner',
+])
 
 export function applyPaletteTextureDefaults(
   category: string,
   palette: MakeupPalette,
 ): MakeupPalette {
-  if (category !== 'eye_shadow') return palette
-
   const {
     shimmerColor: _shimmerColor,
     shimmerIntensity: _shimmerIntensity,
+    shimmerDensity: _shimmerDensity,
+    shimmerSize: _shimmerSize,
     metallicIntensity: _metallicIntensity,
+    glowStrength: _glowStrength,
+    gloss: _gloss,
+    transparencyIntensity: _transparencyIntensity,
     ...base
   } = palette
 
-  if (palette.texture === 'shimmer') {
+  if (category === 'lip_color' && palette.texture === 'gloss') {
+    return {
+      ...base,
+      gloss: palette.gloss ?? 50,
+      transparencyIntensity: palette.transparencyIntensity ?? 0,
+    }
+  }
+
+  if (category === 'lip_color' && palette.texture === 'sheer') {
+    return {
+      ...base,
+      gloss: palette.gloss ?? 50,
+      transparencyIntensity: palette.transparencyIntensity ?? 0,
+    }
+  }
+
+  if (category === 'lip_color' && palette.texture === 'shimmer') {
+    return {
+      ...base,
+      gloss: palette.gloss ?? 50,
+      shimmerColor: palette.shimmerColor ?? DEFAULT_SHIMMER_COLOR,
+      shimmerIntensity: palette.shimmerIntensity ?? 50,
+      shimmerDensity: palette.shimmerDensity ?? 50,
+      shimmerSize: palette.shimmerSize ?? 50,
+      transparencyIntensity: palette.transparencyIntensity ?? 0,
+    }
+  }
+
+  if (category === 'lip_color' && ['holographic', 'metallic'].includes(palette.texture ?? '')) {
+    return {
+      ...base,
+      gloss: palette.gloss ?? 50,
+      shimmerColor: palette.shimmerColor ?? DEFAULT_SHIMMER_COLOR,
+      shimmerIntensity: palette.shimmerIntensity ?? 50,
+      shimmerDensity: palette.shimmerDensity ?? 50,
+      shimmerSize: palette.shimmerSize ?? 50,
+    }
+  }
+
+  if (category === 'blush' && palette.texture === 'satin') {
+    return {
+      ...base,
+      glowStrength: palette.glowStrength ?? 50,
+    }
+  }
+
+  if (
+    ['blush', 'eye_liner', 'eye_shadow'].includes(category) &&
+    ['shimmer', 'holographic'].includes(palette.texture ?? '')
+  ) {
     return {
       ...base,
       shimmerColor: palette.shimmerColor ?? DEFAULT_SHIMMER_COLOR,
       shimmerIntensity: palette.shimmerIntensity ?? 50,
+      ...(category === 'blush'
+        ? {
+            shimmerDensity: palette.shimmerDensity ?? 50,
+            glowStrength: palette.glowStrength ?? 50,
+          }
+        : {}),
     }
   }
 
-  if (palette.texture === 'metallic') {
+  if (['eye_liner', 'eye_shadow'].includes(category) && palette.texture === 'metallic') {
     return {
       ...base,
       shimmerColor: palette.shimmerColor ?? DEFAULT_SHIMMER_COLOR,
@@ -203,8 +270,13 @@ export function ensurePaletteCount(
   category?: string,
 ): MakeupPalette[] {
   const next = [...(palettes ?? [])]
+  const defaultColors = ['#FF0000', '#F2A53E', '#AB7EF7', '#E75957', '#D9F5F9']
   while (next.length < count) {
     const extra: Partial<MakeupPalette> = {}
+    if (category && TEXTURE_CATEGORIES.has(category)) {
+      extra.texture = 'matte'
+    }
+
     if (category === 'highlighter') {
       extra.glowIntensity = 50
       extra.shimmerDensity = 50
@@ -219,12 +291,14 @@ export function ensurePaletteCount(
     } else if (category === 'concealer') {
       extra.colorUnderEyeIntensity = 50
       extra.coverageLevel = 50
+    } else if (category === 'eyebrows') {
+      extra.texture = 'matte'
     }
 
     next.push({
       ...DEFAULT_PALETTE,
       ...extra,
-      color: count > 1 && next.length === 1 ? '#F2A53E' : DEFAULT_PALETTE.color,
+      color: defaultColors[next.length] ?? DEFAULT_PALETTE.color,
     })
   }
   return next.slice(0, count).map((palette) => applyPaletteTextureDefaults(category ?? '', palette))

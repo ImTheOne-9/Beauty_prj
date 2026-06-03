@@ -85,7 +85,7 @@ function ColorPaletteFields({
             value={palette.texture ?? 'matte'}
             onChange={(event) => onChange({ texture: event.target.value as MakeupTexture })}
           >
-            {['matte', 'satin', 'shimmer', 'gloss', 'metallic'].map((texture) => (
+            {['matte', 'satin', 'shimmer', 'gloss', 'metallic', 'sheer', 'holographic'].map((texture) => (
               <option key={texture} value={texture}>
                 {texture}
               </option>

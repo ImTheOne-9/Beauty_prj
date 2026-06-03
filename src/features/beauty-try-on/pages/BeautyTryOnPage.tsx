@@ -13,10 +13,13 @@ import { runMakeupVirtualTryOn } from '@/features/ai-scan/services/makeup-vto-se
 import { useFaceValidation } from '@/features/ai-scan/hooks/useFaceValidation'
 import type { MakeupVtoTaskStatus } from '@/features/ai-scan/types/makeup-vto'
 import {
-  type BeautyAppliedSelection,
   buildBeautyMakeupEffects,
   hasBeautyMakeupPayload,
 } from '@/features/beauty-try-on/lib/beauty-makeup-adapter'
+import {
+  type BeautyAppliedSelection,
+  getBeautySelectionColorCount,
+} from '@/features/beauty-try-on/lib/beauty-selection'
 import { Loader } from '@/shared/components/ui/Loader'
 import { databaseService } from '@/services/supabase/database-service'
 import { useToast } from '@/shared/hooks/useToast'
@@ -87,6 +90,8 @@ export default function BeautyTryOnPage() {
 
   const toggleProduct = (productId: string, variantId: string) => {
     const selectedProduct = products.find((product) => product.id === productId)
+    const category = makeupCatalog.find((item) => item.productId === productId)?.apiCategoryKey
+    const colorCount = getBeautySelectionColorCount(category)
 
     setAppliedProducts((current) =>
       current.some((item) => item.variantId === variantId)
@@ -96,7 +101,11 @@ export default function BeautyTryOnPage() {
               const currentProduct = products.find((product) => product.id === item.productId)
               return currentProduct?.category_id !== selectedProduct?.category_id
             }),
-            { productId, variantId, colorVariantIds: [variantId] },
+            {
+              productId,
+              variantId,
+              colorVariantIds: getDefaultColorVariantIds(productId, [variantId], colorCount),
+            },
           ],
     )
     setHiddenAppliedProducts((current) => current.filter((id) => id !== variantId))
@@ -163,19 +172,20 @@ export default function BeautyTryOnPage() {
     if (!patternPickerSelection) return
 
     setAppliedProducts((current) =>
-      current.map((selection) =>
-        selection.productId === patternPickerSelection.productId
-          ? {
-              ...selection,
-              patternName,
-              colorVariantIds: getDefaultColorVariantIds(
-                selection.productId,
-                selection.colorVariantIds ?? [selection.variantId],
-                colorCount,
-              ),
-            }
-          : selection,
-      ),
+      current.map((selection) => {
+        if (selection.productId !== patternPickerSelection.productId) return selection
+        const category = makeupCatalog.find((item) => item.productId === selection.productId)?.apiCategoryKey
+        const requiredColorCount = getBeautySelectionColorCount(category, patternName) || colorCount
+        return {
+          ...selection,
+          patternName,
+          colorVariantIds: getDefaultColorVariantIds(
+            selection.productId,
+            selection.colorVariantIds ?? [selection.variantId],
+            requiredColorCount,
+          ),
+        }
+      }),
     )
     setPatternPickerSelection(null)
   }
@@ -188,7 +198,8 @@ export default function BeautyTryOnPage() {
     setAppliedProducts((current) =>
       current.map((item) => {
         if (item.productId !== selection.productId) return item
-        const colorCount = item.patternName ? getPatternColorCount(item.patternName) : 1
+        const category = makeupCatalog.find((entry) => entry.productId === item.productId)?.apiCategoryKey
+        const colorCount = getBeautySelectionColorCount(category, item.patternName)
         const nextColorVariantIds = preserveColorVariantSlots(
           item.productId,
           item.colorVariantIds ?? [item.variantId],
@@ -272,10 +283,7 @@ export default function BeautyTryOnPage() {
 
       const missingColors = visibleAppliedProducts.find((selection) => {
         const category = makeupCatalog.find((item) => item.productId === selection.productId)?.apiCategoryKey
-        const requiredColorCount =
-          category && selection.patternName && category !== 'lip_color'
-            ? getPatternColorCount(selection.patternName)
-            : 1
+        const requiredColorCount = getBeautySelectionColorCount(category, selection.patternName)
         const selectedColorCount = (selection.colorVariantIds ?? [selection.variantId]).filter((variantId) => {
           const variant = variants.find((item) => item.id === variantId)
           return Boolean(variant?.color_hex?.trim())
@@ -284,7 +292,8 @@ export default function BeautyTryOnPage() {
       })
       if (missingColors) {
         const product = products.find((item) => item.id === missingColors.productId)
-        const requiredColorCount = getPatternColorCount(missingColors.patternName)
+        const category = makeupCatalog.find((item) => item.productId === missingColors.productId)?.apiCategoryKey
+        const requiredColorCount = getBeautySelectionColorCount(category, missingColors.patternName)
         throw new Error(
           `${product?.name ?? 'The selected product'} needs ${requiredColorCount} selected colors for this pattern.`,
         )

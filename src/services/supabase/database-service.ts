@@ -87,6 +87,7 @@ export type AdminProductVariantRecord = {
   name: string | null;
   color_hex: string;
   texture: string | null;
+  shimmer_color: string | null;
   image_url: string | null;
   sku: string | null;
   sort_order: number;
@@ -312,6 +313,7 @@ export const databaseService = {
       name: variant.name?.trim() || null,
       color_hex: variant.color_hex,
       texture: variant.texture?.trim() || null,
+      shimmer_color: variant.shimmer_color?.trim() || null,
       image_url: variant.image_url?.trim() || null,
       sku: variant.sku?.trim() || null,
       sort_order: variant.sort_order ?? index,

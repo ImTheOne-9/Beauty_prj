@@ -12,9 +12,11 @@ import type {
   AdminProductVariantRecord,
   MakeupCatalogRow,
 } from '@/services/supabase/database-service'
-import type { BeautyAppliedSelection } from '@/features/beauty-try-on/lib/beauty-makeup-adapter'
 import {
-  getPatternColorCount,
+  type BeautyAppliedSelection,
+  getBeautySelectionColorCount,
+} from '@/features/beauty-try-on/lib/beauty-selection'
+import {
   hasPatternCatalog,
   isColorPatternCategory,
 } from '@/features/ai-scan/lib/makeup-patterns'
@@ -38,6 +40,23 @@ interface Props {
 
 function getProductImage(product?: AdminProductRecord) {
   return product?.image_url ?? ''
+}
+
+function isDualColorTexture(texture?: string | null) {
+  return texture === 'shimmer' || texture === 'holographic'
+}
+
+function getVariantSwatchStyle(variant?: AdminProductVariantRecord | null) {
+  if (!variant) return { backgroundColor: '#d4d4d4' }
+
+  if (isDualColorTexture(variant.texture)) {
+    const shimmerColor = variant.shimmer_color ?? '#FFFFFF'
+    return {
+      background: `linear-gradient(135deg, ${variant.color_hex} 0 50%, ${shimmerColor} 50% 100%)`,
+    }
+  }
+
+  return { backgroundColor: variant.color_hex }
 }
 
 export default function BeautyAppliedProducts({
@@ -79,10 +98,12 @@ export default function BeautyAppliedProducts({
     const canChoosePatternColors = Boolean(
       catalogItem?.apiCategoryKey && isColorPatternCategory(catalogItem.apiCategoryKey),
     )
-    const requiredColorCount =
-      selection.patternName && canChoosePatternColors
-        ? getPatternColorCount(selection.patternName)
-        : 1
+    const isLipColor = catalogItem?.apiCategoryKey === 'lip_color'
+    const requiredColorCount = getBeautySelectionColorCount(
+      catalogItem?.apiCategoryKey,
+      selection.patternName,
+    )
+    const canChoosePaletteColors = canChoosePatternColors || requiredColorCount > 1
     const colorVariantIds = selection.colorVariantIds?.length
       ? selection.colorVariantIds
       : [selection.variantId]
@@ -90,6 +111,7 @@ export default function BeautyAppliedProducts({
       const selectedVariant = variants.find((item) => item.id === colorVariantIds[index])
       return {
         index,
+        variant: selectedVariant ?? null,
         variantId: selectedVariant?.id ?? null,
         color: selectedVariant?.color_hex ?? null,
         label: selectedVariant?.name ?? selectedVariant?.color_hex ?? 'Not selected',
@@ -104,8 +126,9 @@ export default function BeautyAppliedProducts({
       variantName: variant?.name ?? null,
       texture: variant?.texture ?? null,
       patternName: selection.patternName ?? null,
+      isLipColor,
       canChoosePattern,
-      canChoosePatternColors,
+      canChoosePaletteColors,
       productVariants,
       colorSlots,
       colorsOpen: openColorPickers.includes(selection.variantId),
@@ -142,10 +165,10 @@ export default function BeautyAppliedProducts({
                 </div>
 
                 <div className="flex h-8 w-8 items-center justify-center">
-                  {!product.canChoosePatternColors && (
+                  {!product.canChoosePaletteColors && (
                     <span
                       className="h-8 w-8 rounded-full border border-neutral-200"
-                      style={{ backgroundColor: product.color ?? '#d4d4d4' }}
+                      style={getVariantSwatchStyle(product.colorSlots[0]?.variant)}
                       aria-label={product.color ? `Color ${product.color}` : 'No color configured'}
                       title={product.color ?? 'No color configured'}
                     />
@@ -161,7 +184,7 @@ export default function BeautyAppliedProducts({
                       {[product.variantName, product.texture, product.patternName].filter(Boolean).join(' / ')}
                     </p>
                   )}
-                  {product.canChoosePatternColors && product.productVariants.length > 0 && (
+                  {product.canChoosePaletteColors && product.productVariants.length > 0 && (
                     <div className="mt-2 rounded-md bg-neutral-50">
                       <button
                         type="button"
@@ -177,7 +200,7 @@ export default function BeautyAppliedProducts({
                             <span
                               key={slot.index}
                               className="h-4 w-4 rounded-full border border-white ring-1 ring-neutral-200"
-                              style={{ backgroundColor: slot.color ?? '#d4d4d4' }}
+                              style={getVariantSwatchStyle(slot.variant)}
                               title={slot.label}
                             />
                           ))}
@@ -214,7 +237,7 @@ export default function BeautyAppliedProducts({
                                           ? 'border-black ring-2 ring-black/10'
                                           : 'border-white shadow-sm ring-1 ring-neutral-200 hover:ring-neutral-400'
                                       }`}
-                                      style={{ backgroundColor: variant.color_hex }}
+                                      style={getVariantSwatchStyle(variant)}
                                       aria-label={`Use ${variant.name ?? variant.color_hex} for color ${slot.index + 1}`}
                                       title={`${variant.name ?? variant.color_hex}${variant.texture ? ` - ${variant.texture}` : ''}`}
                                     />

@@ -35,6 +35,7 @@ type VariantForm = {
   name: string
   colorHex: string
   texture: string
+  shimmerColor: string
   imageUrl: string
   sku: string
   sortOrder: number
@@ -54,11 +55,16 @@ const TEXTURES = [
   'holographic',
 ]
 
+function textureNeedsShimmerColor(texture: string) {
+  return texture === 'shimmer' || texture === 'holographic'
+}
+
 function emptyVariant(sortOrder = 0): VariantForm {
   return {
     name: '',
     colorHex: DEFAULT_COLOR,
     texture: DEFAULT_TEXTURE,
+    shimmerColor: '#FFFFFF',
     imageUrl: '',
     sku: '',
     sortOrder,
@@ -72,6 +78,7 @@ function mapVariant(variant: AdminProductVariantRecord): VariantForm {
     name: variant.name ?? '',
     colorHex: variant.color_hex,
     texture: variant.texture ?? DEFAULT_TEXTURE,
+    shimmerColor: variant.shimmer_color ?? '#FFFFFF',
     imageUrl: variant.image_url ?? '',
     sku: variant.sku ?? '',
     sortOrder: variant.sort_order,
@@ -243,6 +250,9 @@ export function ProductWithConfigModal({
         name: variant.name.trim() || null,
         color_hex: variant.colorHex.trim(),
         texture: variant.texture.trim() || null,
+        shimmer_color: textureNeedsShimmerColor(variant.texture)
+          ? variant.shimmerColor.trim()
+          : null,
         image_url: variant.imageUrl.trim() || null,
         sku: variant.sku.trim() || null,
         sort_order: variant.sortOrder || index,
@@ -258,6 +268,15 @@ export function ProductWithConfigModal({
       )
       if (invalidVariant) {
         throw new Error('Variant color must be a valid hex value like #FF8BA7.')
+      }
+
+      const invalidShimmerVariant = normalizedVariants.find(
+        (variant) =>
+          textureNeedsShimmerColor(variant.texture ?? '') &&
+          !/^#[0-9A-Fa-f]{6}$/.test(variant.shimmer_color ?? ''),
+      )
+      if (invalidShimmerVariant) {
+        throw new Error('Shimmer color must be a valid hex value like #FFFFFF.')
       }
 
       await databaseService.replaceProductVariants(productId, normalizedVariants)
@@ -492,6 +511,29 @@ export function ProductWithConfigModal({
                           </option>
                         ))}
                       </select>
+                      {textureNeedsShimmerColor(variant.texture) && (
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="color"
+                            value={variant.shimmerColor}
+                            onChange={(event) =>
+                              updateVariant(index, { shimmerColor: event.target.value })
+                            }
+                            className="h-10 w-10 cursor-pointer rounded-xl border border-rose-100 bg-white p-0.5"
+                            aria-label="Shimmer color"
+                          />
+                          <input
+                            type="text"
+                            value={variant.shimmerColor.toUpperCase()}
+                            onChange={(event) =>
+                              updateVariant(index, { shimmerColor: event.target.value })
+                            }
+                            className="flex-1 rounded-xl border border-rose-100 bg-white px-3 py-2 text-xs font-mono uppercase text-rose-950 focus:outline-none focus:ring-1 focus:ring-rose-300"
+                            maxLength={7}
+                            placeholder="#FFFFFF"
+                          />
+                        </div>
+                      )}
                       <Input
                         placeholder="Variant image URL"
                         value={variant.imageUrl}
