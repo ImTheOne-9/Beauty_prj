@@ -162,6 +162,41 @@ const DEFAULT_PALETTE: MakeupPalette = {
   colorIntensity: 50,
 }
 
+const DEFAULT_SHIMMER_COLOR = '#484848'
+
+export function applyPaletteTextureDefaults(
+  category: string,
+  palette: MakeupPalette,
+): MakeupPalette {
+  if (category !== 'eye_shadow') return palette
+
+  const {
+    shimmerColor: _shimmerColor,
+    shimmerIntensity: _shimmerIntensity,
+    metallicIntensity: _metallicIntensity,
+    ...base
+  } = palette
+
+  if (palette.texture === 'shimmer') {
+    return {
+      ...base,
+      shimmerColor: palette.shimmerColor ?? DEFAULT_SHIMMER_COLOR,
+      shimmerIntensity: palette.shimmerIntensity ?? 50,
+    }
+  }
+
+  if (palette.texture === 'metallic') {
+    return {
+      ...base,
+      shimmerColor: palette.shimmerColor ?? DEFAULT_SHIMMER_COLOR,
+      shimmerIntensity: palette.shimmerIntensity ?? 50,
+      metallicIntensity: palette.metallicIntensity ?? 50,
+    }
+  }
+
+  return base
+}
+
 export function ensurePaletteCount(
   palettes: MakeupPalette[] | undefined,
   count: number,
@@ -192,7 +227,7 @@ export function ensurePaletteCount(
       color: count > 1 && next.length === 1 ? '#F2A53E' : DEFAULT_PALETTE.color,
     })
   }
-  return next.slice(0, count)
+  return next.slice(0, count).map((palette) => applyPaletteTextureDefaults(category ?? '', palette))
 }
 
 export function applyPatternSelection(effect: MakeupEffect, pattern: PatternCatalogItem): MakeupEffect {

@@ -16,8 +16,10 @@ export type MakeupPalette = {
   thickness?: number;
   smoothness?: number;
   shimmerDensity?: number;
+  shimmerColor?: string;
   shimmerIntensity?: number;
   shimmerSize?: number;
+  metallicIntensity?: number;
 };
 
 export type MakeupEffect = {

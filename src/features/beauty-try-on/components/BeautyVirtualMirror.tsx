@@ -48,7 +48,7 @@ export default function BeautyVirtualMirror({
   const previewUrl =
     showOriginal && imageSource
       ? imageSource
-      : resultUrl || imageSource || '/images/model.png'
+      : resultUrl || imageSource
   const isProcessing = status === 'running' || status === 'processing' || status === 'queued'
 
   useEffect(() => {
@@ -217,12 +217,14 @@ export default function BeautyVirtualMirror({
         </div>
       )}
 
-      <div className="flex min-h-0 flex-1 items-center justify-center">
-        <img
-          src={previewUrl}
-          alt="Virtual try-on preview"
-          className="h-full w-full object-contain"
-        />
+      <div className="flex min-h-0 flex-1 items-center justify-center bg-neutral-200">
+        {previewUrl ? (
+          <img
+            src={previewUrl}
+            alt="Virtual try-on preview"
+            className="h-full w-full object-contain"
+          />
+        ) : null}
       </div>
     </div>
   )

@@ -8,6 +8,7 @@ import type { MakeupEffect, MakeupPalette, MakeupTexture } from '@/features/ai-s
 import { MAKEUP_CATEGORY_META } from '@/features/ai-scan/lib/makeup-defaults'
 import {
   applyPatternSelection,
+  applyPaletteTextureDefaults,
   categoryNeedsPatternFirst,
   findPatternItem,
   getActivePatternLabel,
@@ -130,7 +131,7 @@ export function CategoryEffectEditor({
 
   const updatePalette = (index: number, patch: Partial<MakeupPalette>) => {
     const palettes = [...(effect.palettes ?? [{ color: '#FF0000', colorIntensity: 50 }])]
-    palettes[index] = { ...palettes[index], ...patch }
+    palettes[index] = applyPaletteTextureDefaults(effect.category, { ...palettes[index], ...patch })
     onChange({ ...effect, palettes })
   }
 

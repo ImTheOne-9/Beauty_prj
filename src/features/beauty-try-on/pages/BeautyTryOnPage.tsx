@@ -6,6 +6,9 @@ import BeautyAppliedProducts from '@/features/beauty-try-on/components/BeautyApp
 import BeautyProductGrid from '@/features/beauty-try-on/components/BeautyProductGrid'
 import BeautyProductTabs from '@/features/beauty-try-on/components/BeautyProductTabs'
 import BeautyVirtualMirror from '@/features/beauty-try-on/components/BeautyVirtualMirror'
+import { PatternPickerModal } from '@/features/ai-scan/components/PatternPickerModal'
+import { usePatternCatalog } from '@/features/ai-scan/hooks/usePatternCatalog'
+import { getPatternColorCount, hasPatternCatalog } from '@/features/ai-scan/lib/makeup-patterns'
 import { runMakeupVirtualTryOn } from '@/features/ai-scan/services/makeup-vto-service'
 import { useFaceValidation } from '@/features/ai-scan/hooks/useFaceValidation'
 import type { MakeupVtoTaskStatus } from '@/features/ai-scan/types/makeup-vto'
@@ -56,10 +59,20 @@ export default function BeautyTryOnPage() {
   const [mobileAppliedOpen, setMobileAppliedOpen] = useState(false)
   const [appliedProducts, setAppliedProducts] = useState<BeautyAppliedSelection[]>([])
   const [hiddenAppliedProducts, setHiddenAppliedProducts] = useState<string[]>([])
+  const [patternPickerSelection, setPatternPickerSelection] =
+    useState<BeautyAppliedSelection | null>(null)
   const [imageSource, setImageSource] = useState('')
   const [resultUrl, setResultUrl] = useState<string | null>(null)
   const [taskStatus, setTaskStatus] = useState<MakeupVtoTaskStatus>('idle')
   const { validationState, validationError, validateAndSetImage, resetValidation } = useFaceValidation()
+
+  const patternPickerCategory = patternPickerSelection
+    ? makeupCatalog.find((item) => item.productId === patternPickerSelection.productId)?.apiCategoryKey ?? null
+    : null
+  const patternCatalogQuery = usePatternCatalog(
+    patternPickerCategory,
+    Boolean(patternPickerSelection),
+  )
 
   useEffect(() => {
     if (!activeTab && categories.length > 0) {
@@ -83,7 +96,7 @@ export default function BeautyTryOnPage() {
               const currentProduct = products.find((product) => product.id === item.productId)
               return currentProduct?.category_id !== selectedProduct?.category_id
             }),
-            { productId, variantId },
+            { productId, variantId, colorVariantIds: [variantId] },
           ],
     )
     setHiddenAppliedProducts((current) => current.filter((id) => id !== variantId))
@@ -108,6 +121,85 @@ export default function BeautyTryOnPage() {
     const variant = variants.find((item) => item.id === id)
     toast.success(
       `${product?.name ?? 'Product'}${variant?.name ? ` - ${variant.name}` : ''} added to cart`,
+    )
+  }
+
+  const getDefaultColorVariantIds = (
+    productId: string,
+    preferredVariantIds: string[],
+    colorCount: number,
+  ) => {
+    const productVariants = variants.filter(
+      (variant) => variant.product_id === productId && variant.is_active && variant.color_hex?.trim(),
+    )
+    const orderedIds = [
+      ...preferredVariantIds,
+      ...productVariants.map((variant) => variant.id),
+    ].filter((variantId, index, ids) => ids.indexOf(variantId) === index)
+
+    return orderedIds.slice(0, colorCount)
+  }
+
+  const preserveColorVariantSlots = (
+    productId: string,
+    currentVariantIds: string[],
+    colorCount: number,
+  ) => {
+    const productVariants = variants.filter(
+      (variant) => variant.product_id === productId && variant.is_active && variant.color_hex?.trim(),
+    )
+    const next = currentVariantIds.slice(0, colorCount)
+
+    while (next.length < colorCount) {
+      const fallback = productVariants.find((variant) => !next.includes(variant.id)) ?? productVariants[0]
+      if (!fallback) break
+      next.push(fallback.id)
+    }
+
+    return next
+  }
+
+  const updateAppliedProductPattern = (patternName: string, colorCount: number) => {
+    if (!patternPickerSelection) return
+
+    setAppliedProducts((current) =>
+      current.map((selection) =>
+        selection.productId === patternPickerSelection.productId
+          ? {
+              ...selection,
+              patternName,
+              colorVariantIds: getDefaultColorVariantIds(
+                selection.productId,
+                selection.colorVariantIds ?? [selection.variantId],
+                colorCount,
+              ),
+            }
+          : selection,
+      ),
+    )
+    setPatternPickerSelection(null)
+  }
+
+  const updateAppliedProductColor = (
+    selection: BeautyAppliedSelection,
+    colorIndex: number,
+    variantId: string,
+  ) => {
+    setAppliedProducts((current) =>
+      current.map((item) => {
+        if (item.productId !== selection.productId) return item
+        const colorCount = item.patternName ? getPatternColorCount(item.patternName) : 1
+        const nextColorVariantIds = preserveColorVariantSlots(
+          item.productId,
+          item.colorVariantIds ?? [item.variantId],
+          colorCount,
+        )
+        nextColorVariantIds[colorIndex] = variantId
+        return {
+          ...item,
+          colorVariantIds: nextColorVariantIds,
+        }
+      }),
     )
   }
 
@@ -167,6 +259,35 @@ export default function BeautyTryOnPage() {
 
       if (visibleAppliedProducts.length === 0) {
         throw new Error('Please show at least one applied product first.')
+      }
+
+      const missingPattern = visibleAppliedProducts.find((selection) => {
+        const category = makeupCatalog.find((item) => item.productId === selection.productId)?.apiCategoryKey
+        return Boolean(category && hasPatternCatalog(category) && !selection.patternName)
+      })
+      if (missingPattern) {
+        const product = products.find((item) => item.id === missingPattern.productId)
+        throw new Error(`Please choose a pattern for ${product?.name ?? 'the selected product'} first.`)
+      }
+
+      const missingColors = visibleAppliedProducts.find((selection) => {
+        const category = makeupCatalog.find((item) => item.productId === selection.productId)?.apiCategoryKey
+        const requiredColorCount =
+          category && selection.patternName && category !== 'lip_color'
+            ? getPatternColorCount(selection.patternName)
+            : 1
+        const selectedColorCount = (selection.colorVariantIds ?? [selection.variantId]).filter((variantId) => {
+          const variant = variants.find((item) => item.id === variantId)
+          return Boolean(variant?.color_hex?.trim())
+        }).length
+        return selectedColorCount < requiredColorCount
+      })
+      if (missingColors) {
+        const product = products.find((item) => item.id === missingColors.productId)
+        const requiredColorCount = getPatternColorCount(missingColors.patternName)
+        throw new Error(
+          `${product?.name ?? 'The selected product'} needs ${requiredColorCount} selected colors for this pattern.`,
+        )
       }
 
       if (!hasBeautyMakeupPayload(effects)) {
@@ -248,7 +369,10 @@ export default function BeautyTryOnPage() {
               hiddenProducts={hiddenAppliedProducts}
               products={products}
               variants={variants}
+              makeupCatalog={makeupCatalog}
               onToggleVisibility={toggleAppliedProductVisibility}
+              onOpenPatternPicker={setPatternPickerSelection}
+              onChangeColor={updateAppliedProductColor}
               onAddToCart={addProductToCart}
               onClear={clearAppliedProducts}
             />
@@ -259,9 +383,6 @@ export default function BeautyTryOnPage() {
           <div className="shrink-0 px-5 py-4">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <p className="text-xs font-semibold uppercase text-neutral-500">
-                  Virtual try on
-                </p>
                 <h1 className="mt-1 text-xl font-bold">
                   Beauty Studio
                 </h1>
@@ -323,7 +444,10 @@ export default function BeautyTryOnPage() {
               hiddenProducts={hiddenAppliedProducts}
               products={products}
               variants={variants}
+              makeupCatalog={makeupCatalog}
               onToggleVisibility={toggleAppliedProductVisibility}
+              onOpenPatternPicker={setPatternPickerSelection}
+              onChangeColor={updateAppliedProductColor}
               onAddToCart={addProductToCart}
               onClear={clearAppliedProducts}
               onClose={() => setMobileAppliedOpen(false)}
@@ -331,6 +455,17 @@ export default function BeautyTryOnPage() {
           </div>
         </div>
       )}
+
+      <PatternPickerModal
+        open={Boolean(patternPickerSelection)}
+        title="Choose product pattern"
+        effectCategory={patternPickerCategory ?? undefined}
+        catalog={patternCatalogQuery.data ?? []}
+        isLoading={patternCatalogQuery.isLoading}
+        selectedLabel={patternPickerSelection?.patternName}
+        onClose={() => setPatternPickerSelection(null)}
+        onChoose={(pattern) => updateAppliedProductPattern(pattern.label, getPatternColorCount(pattern.label, pattern))}
+      />
     </main>
   )
 }
