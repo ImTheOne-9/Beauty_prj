@@ -150,9 +150,9 @@ export default function BeautyAppliedProducts({
           </div>
         ) : (
           <div className="space-y-2">
-            {appliedProductDetails.map((product) => (
+            {appliedProductDetails.map((product, productIndex) => (
               <div
-                key={product.id}
+                key={product.id || `${product.productId || 'applied'}-${productIndex}`}
                 className={`grid grid-cols-[44px_32px_minmax(0,1fr)_32px_32px_32px] items-start gap-3 rounded-lg px-1 py-2 ${
                   product.hidden ? 'opacity-50' : ''
                 }`}
@@ -228,11 +228,11 @@ export default function BeautyAppliedProducts({
                                 </span>
                               </div>
                               <div className="flex min-w-0 flex-wrap gap-2">
-                                {product.productVariants.map((variant) => {
+                                {product.productVariants.map((variant, variantIndex) => {
                                   const selected = slot.variantId === variant.id
                                   return (
                                     <button
-                                      key={`${slot.index}-${variant.id}`}
+                                      key={`${slot.index}-${variant.id || variantIndex}`}
                                       type="button"
                                       onClick={() => onChangeColor(product.selection, slot.index, variant.id)}
                                       className={`h-6 w-6 rounded-full border-2 transition ${

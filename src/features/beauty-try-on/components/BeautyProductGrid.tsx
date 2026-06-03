@@ -52,7 +52,7 @@ export default function BeautyProductGrid({
   return (
     <div className="h-full overflow-y-auto">
       <div className="space-y-4 p-4">
-        {products.map((product) => {
+        {products.map((product, productIndex) => {
           const productVariants = variants.filter(
             (variant) => variant.product_id === product.id && variant.is_active,
           )
@@ -63,14 +63,18 @@ export default function BeautyProductGrid({
 
           return (
             <article
-              key={product.id}
+              key={product.id || `mobile-product-${productIndex}`}
               className="flex items-center gap-3 border-b pb-4"
             >
-              <img
-                src={product.image_url ?? ''}
-                alt={product.name}
-                className="h-20 w-20 rounded-lg border object-contain"
-              />
+              <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-lg border bg-neutral-100">
+                {product.image_url ? (
+                  <img
+                    src={product.image_url}
+                    alt={product.name}
+                    className="h-full w-full object-contain"
+                  />
+                ) : null}
+              </div>
 
               <div className="flex-1">
                 <h3 className="font-bold">
@@ -120,7 +124,7 @@ export default function BeautyProductGrid({
   return (
     <div className="h-full overflow-y-auto pr-2">
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-        {products.map((product) => {
+        {products.map((product, productIndex) => {
           const productVariants = variants.filter(
             (variant) => variant.product_id === product.id && variant.is_active,
           )
@@ -132,15 +136,19 @@ export default function BeautyProductGrid({
 
           return (
             <article
-              key={product.id}
+              key={product.id || `product-${productIndex}`}
               className="group rounded-2xl border bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
             >
               <div className="overflow-hidden rounded-xl bg-neutral-50">
-                <img
-                  src={product.image_url ?? ''}
-                  alt={product.name}
-                  className="aspect-square w-full object-contain p-4"
-                />
+                <div className="flex aspect-square w-full items-center justify-center p-4">
+                  {product.image_url ? (
+                    <img
+                      src={product.image_url}
+                      alt={product.name}
+                      className="h-full w-full object-contain"
+                    />
+                  ) : null}
+                </div>
               </div>
 
               <div className="mt-4">
@@ -157,11 +165,11 @@ export default function BeautyProductGrid({
                 {productVariants.length === 0 ? (
                   null
                 ) : (
-                  productVariants.map((variant) => {
+                  productVariants.map((variant, variantIndex) => {
                     const selectedVariant = selected?.variantId === variant.id
                     return (
                       <button
-                        key={variant.id}
+                        key={variant.id || `${product.id || productIndex}-variant-${variantIndex}`}
                         type="button"
                         onClick={() => onToggle(product.id, variant.id)}
                         className={`h-7 w-7 rounded-full border-2 ${

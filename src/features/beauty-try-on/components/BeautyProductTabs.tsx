@@ -15,9 +15,9 @@ export default function BeautyProductTabs({
 }: Props) {
   return (
     <div className="flex gap-6 overflow-x-auto border-b">
-      {categories.map((category) => (
+      {categories.map((category, index) => (
         <button
-          key={category.id}
+          key={category.id || `category-${index}`}
           onClick={() =>
             onChange(category.id)
           }
