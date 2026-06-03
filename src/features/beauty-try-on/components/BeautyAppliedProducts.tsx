@@ -3,8 +3,8 @@ import {
   ChevronUp,
   Eye,
   EyeOff,
+  ExternalLink,
   Shapes,
-  ShoppingBag,
 } from 'lucide-react'
 import { useState } from 'react'
 import type {
@@ -33,7 +33,7 @@ interface Props {
   onToggleVisibility: (id: string) => void
   onOpenPatternPicker: (selection: BeautyAppliedSelection) => void
   onChangeColor: (selection: BeautyAppliedSelection, colorIndex: number, variantId: string) => void
-  onAddToCart: (id: string) => void
+  onOpenExternal: (url?: string | null) => void
   onClear: () => void
   onClose?: () => void
 }
@@ -71,7 +71,7 @@ export default function BeautyAppliedProducts({
   onToggleVisibility,
   onOpenPatternPicker,
   onChangeColor,
-  onAddToCart,
+  onOpenExternal,
   onClear,
   onClose,
 }: Props) {
@@ -99,6 +99,7 @@ export default function BeautyAppliedProducts({
       catalogItem?.apiCategoryKey && isColorPatternCategory(catalogItem.apiCategoryKey),
     )
     const isLipColor = catalogItem?.apiCategoryKey === 'lip_color'
+    const isSkinSmooth = catalogItem?.apiCategoryKey === 'skin_smooth'
     const requiredColorCount = getBeautySelectionColorCount(
       catalogItem?.apiCategoryKey,
       selection.patternName,
@@ -123,10 +124,12 @@ export default function BeautyAppliedProducts({
       productId: selection.productId,
       brand: product?.brand ?? 'Product',
       name: product?.name ?? `Product ${selection.productId}`,
+      externalUrl: product?.external_url ?? null,
       variantName: variant?.name ?? null,
       texture: variant?.texture ?? null,
       patternName: selection.patternName ?? null,
       isLipColor,
+      isSkinSmooth,
       canChoosePattern,
       canChoosePaletteColors,
       productVariants,
@@ -165,7 +168,7 @@ export default function BeautyAppliedProducts({
                 </div>
 
                 <div className="flex h-8 w-8 items-center justify-center">
-                  {!product.canChoosePaletteColors && (
+                  {!product.isSkinSmooth && !product.canChoosePaletteColors && (
                     <span
                       className="h-8 w-8 rounded-full border border-neutral-200"
                       style={getVariantSwatchStyle(product.colorSlots[0]?.variant)}
@@ -281,15 +284,13 @@ export default function BeautyAppliedProducts({
 
                 <button
                   type="button"
-                  onClick={() => onAddToCart(product.id)}
-                  className="relative inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-neutral-100"
-                  aria-label="Add to cart"
-                  title="Add to cart"
+                  onClick={() => onOpenExternal(product.externalUrl)}
+                  disabled={!product.externalUrl}
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-30"
+                  aria-label="Open product link"
+                  title="Open product link"
                 >
-                  <ShoppingBag size={20} />
-                  <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full border border-white bg-white text-[13px] font-semibold leading-none">
-                    +
-                  </span>
+                  <ExternalLink size={19} />
                 </button>
               </div>
             ))}

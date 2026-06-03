@@ -59,6 +59,24 @@ function textureNeedsShimmerColor(texture: string) {
   return texture === 'shimmer' || texture === 'holographic'
 }
 
+function categorySupportsTexture(apiCategoryKey?: string) {
+  return Boolean(
+    apiCategoryKey &&
+      [
+        'blush',
+        'eye_liner',
+        'eye_shadow',
+        'eyebrows',
+        'lip_color',
+        'lip_liner',
+      ].includes(apiCategoryKey),
+  )
+}
+
+function categoryUsesVariants(apiCategoryKey?: string) {
+  return apiCategoryKey !== 'skin_smooth'
+}
+
 function emptyVariant(sortOrder = 0): VariantForm {
   return {
     name: '',
@@ -207,6 +225,10 @@ export function ProductWithConfigModal({
     )
   }
 
+  const selectedCategory = categories.find((category) => category.id === form.categoryId)
+  const supportsTexture = categorySupportsTexture(selectedCategory?.api_category_key)
+  const usesVariants = categoryUsesVariants(selectedCategory?.api_category_key)
+
   const removeVariant = (index: number) => {
     setVariants((current) =>
       current.length === 1
@@ -246,11 +268,18 @@ export function ProductWithConfigModal({
         throw new Error('Please save product details before editing variants.')
       }
 
+      if (!usesVariants) {
+        await databaseService.replaceProductVariants(productId, [])
+        onSaved()
+        onClose()
+        return
+      }
+
       const normalizedVariants = variants.map((variant, index) => ({
         name: variant.name.trim() || null,
         color_hex: variant.colorHex.trim(),
-        texture: variant.texture.trim() || null,
-        shimmer_color: textureNeedsShimmerColor(variant.texture)
+        texture: supportsTexture ? variant.texture.trim() || null : null,
+        shimmer_color: supportsTexture && textureNeedsShimmerColor(variant.texture)
           ? variant.shimmerColor.trim()
           : null,
         image_url: variant.imageUrl.trim() || null,
@@ -272,6 +301,7 @@ export function ProductWithConfigModal({
 
       const invalidShimmerVariant = normalizedVariants.find(
         (variant) =>
+          supportsTexture &&
           textureNeedsShimmerColor(variant.texture ?? '') &&
           !/^#[0-9A-Fa-f]{6}$/.test(variant.shimmer_color ?? ''),
       )
@@ -414,7 +444,7 @@ export function ProductWithConfigModal({
             </div>
           )}
 
-          {(configOnly || step === 2) && (
+          {(configOnly || step === 2) && usesVariants && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
@@ -498,42 +528,46 @@ export function ProductWithConfigModal({
                           maxLength={7}
                         />
                       </div>
-                      <select
-                        className={inputCls}
-                        value={variant.texture}
-                        onChange={(event) =>
-                          updateVariant(index, { texture: event.target.value })
-                        }
-                      >
-                        {TEXTURES.map((texture) => (
-                          <option key={texture} value={texture}>
-                            {texture}
-                          </option>
-                        ))}
-                      </select>
-                      {textureNeedsShimmerColor(variant.texture) && (
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="color"
-                            value={variant.shimmerColor}
+                      {supportsTexture ? (
+                        <>
+                          <select
+                            className={inputCls}
+                            value={variant.texture}
                             onChange={(event) =>
-                              updateVariant(index, { shimmerColor: event.target.value })
+                              updateVariant(index, { texture: event.target.value })
                             }
-                            className="h-10 w-10 cursor-pointer rounded-xl border border-rose-100 bg-white p-0.5"
-                            aria-label="Shimmer color"
-                          />
-                          <input
-                            type="text"
-                            value={variant.shimmerColor.toUpperCase()}
-                            onChange={(event) =>
-                              updateVariant(index, { shimmerColor: event.target.value })
-                            }
-                            className="flex-1 rounded-xl border border-rose-100 bg-white px-3 py-2 text-xs font-mono uppercase text-rose-950 focus:outline-none focus:ring-1 focus:ring-rose-300"
-                            maxLength={7}
-                            placeholder="#FFFFFF"
-                          />
-                        </div>
-                      )}
+                          >
+                            {TEXTURES.map((texture) => (
+                              <option key={texture} value={texture}>
+                                {texture}
+                              </option>
+                            ))}
+                          </select>
+                          {textureNeedsShimmerColor(variant.texture) && (
+                            <div className="flex items-center gap-2">
+                              <input
+                                type="color"
+                                value={variant.shimmerColor}
+                                onChange={(event) =>
+                                  updateVariant(index, { shimmerColor: event.target.value })
+                                }
+                                className="h-10 w-10 cursor-pointer rounded-xl border border-rose-100 bg-white p-0.5"
+                                aria-label="Shimmer color"
+                              />
+                              <input
+                                type="text"
+                                value={variant.shimmerColor.toUpperCase()}
+                                onChange={(event) =>
+                                  updateVariant(index, { shimmerColor: event.target.value })
+                                }
+                                className="flex-1 rounded-xl border border-rose-100 bg-white px-3 py-2 text-xs font-mono uppercase text-rose-950 focus:outline-none focus:ring-1 focus:ring-rose-300"
+                                maxLength={7}
+                                placeholder="#FFFFFF"
+                              />
+                            </div>
+                          )}
+                        </>
+                      ) : null}
                       <Input
                         placeholder="Variant image URL"
                         value={variant.imageUrl}
@@ -588,6 +622,11 @@ export function ProductWithConfigModal({
                   }
                   if (!form.categoryId) {
                     setError('Please select a category.')
+                    return
+                  }
+                  const nextCategory = categories.find((category) => category.id === form.categoryId)
+                  if (!categoryUsesVariants(nextCategory?.api_category_key)) {
+                    handleSave()
                     return
                   }
                   setError(null)

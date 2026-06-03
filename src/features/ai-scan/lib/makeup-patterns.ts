@@ -228,6 +228,16 @@ export function applyPaletteTextureDefaults(
     }
   }
 
+  if (category === 'highlighter') {
+    return {
+      ...base,
+      glowIntensity: palette.glowIntensity ?? 50,
+      shimmerIntensity: palette.shimmerIntensity ?? 50,
+      shimmerDensity: palette.shimmerDensity ?? 50,
+      shimmerSize: palette.shimmerSize ?? 50,
+    }
+  }
+
   if (category === 'blush' && palette.texture === 'satin') {
     return {
       ...base,
@@ -318,7 +328,10 @@ export function applyPatternSelection(effect: MakeupEffect, pattern: PatternCata
 
   return {
     ...effect,
-    pattern: { ...effect.pattern, name: pattern.label },
+    pattern: {
+      ...effect.pattern,
+      name: pattern.label,
+    },
     palettes: ensurePaletteCount(effect.palettes, colorNum, effect.category),
   }
 }

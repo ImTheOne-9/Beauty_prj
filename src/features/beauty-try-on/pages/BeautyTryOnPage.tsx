@@ -88,14 +88,16 @@ export default function BeautyTryOnPage() {
     return products.filter((product) => product.category_id === activeTab)
   }, [activeTab, products])
 
-  const toggleProduct = (productId: string, variantId: string) => {
+  const toggleProduct = (productId: string, variantId?: string) => {
     const selectedProduct = products.find((product) => product.id === productId)
     const category = makeupCatalog.find((item) => item.productId === productId)?.apiCategoryKey
+    const resolvedVariantId = variantId ?? (category === 'skin_smooth' ? `skin:${productId}` : '')
+    if (!resolvedVariantId) return
     const colorCount = getBeautySelectionColorCount(category)
 
     setAppliedProducts((current) =>
-      current.some((item) => item.variantId === variantId)
-        ? current.filter((item) => item.variantId !== variantId)
+      current.some((item) => item.variantId === resolvedVariantId)
+        ? current.filter((item) => item.variantId !== resolvedVariantId)
         : [
             ...current.filter((item) => {
               const currentProduct = products.find((product) => product.id === item.productId)
@@ -103,12 +105,15 @@ export default function BeautyTryOnPage() {
             }),
             {
               productId,
-              variantId,
-              colorVariantIds: getDefaultColorVariantIds(productId, [variantId], colorCount),
+              variantId: resolvedVariantId,
+              colorVariantIds:
+                category === 'skin_smooth'
+                  ? []
+                  : getDefaultColorVariantIds(productId, [resolvedVariantId], colorCount),
             },
           ],
     )
-    setHiddenAppliedProducts((current) => current.filter((id) => id !== variantId))
+    setHiddenAppliedProducts((current) => current.filter((id) => id !== resolvedVariantId))
   }
 
   const clearAppliedProducts = () => {
@@ -124,13 +129,12 @@ export default function BeautyTryOnPage() {
     )
   }
 
-  const addProductToCart = (id: string) => {
-    const selection = appliedProducts.find((item) => item.variantId === id)
-    const product = products.find((item) => item.id === selection?.productId)
-    const variant = variants.find((item) => item.id === id)
-    toast.success(
-      `${product?.name ?? 'Product'}${variant?.name ? ` - ${variant.name}` : ''} added to cart`,
-    )
+  const openProductExternalUrl = (url?: string | null) => {
+    if (!url) {
+      toast.error('This product does not have an external link.')
+      return
+    }
+    window.open(url, '_blank', 'noopener,noreferrer')
   }
 
   const getDefaultColorVariantIds = (
@@ -283,6 +287,7 @@ export default function BeautyTryOnPage() {
 
       const missingColors = visibleAppliedProducts.find((selection) => {
         const category = makeupCatalog.find((item) => item.productId === selection.productId)?.apiCategoryKey
+        if (category === 'skin_smooth') return false
         const requiredColorCount = getBeautySelectionColorCount(category, selection.patternName)
         const selectedColorCount = (selection.colorVariantIds ?? [selection.variantId]).filter((variantId) => {
           const variant = variants.find((item) => item.id === variantId)
@@ -382,7 +387,7 @@ export default function BeautyTryOnPage() {
               onToggleVisibility={toggleAppliedProductVisibility}
               onOpenPatternPicker={setPatternPickerSelection}
               onChangeColor={updateAppliedProductColor}
-              onAddToCart={addProductToCart}
+              onOpenExternal={openProductExternalUrl}
               onClear={clearAppliedProducts}
             />
           </div>
@@ -426,8 +431,10 @@ export default function BeautyTryOnPage() {
               mobile={false}
               products={visibleProducts}
               variants={variants}
+              makeupCatalog={makeupCatalog}
               appliedProducts={appliedProducts}
               onToggle={toggleProduct}
+              onOpenExternal={openProductExternalUrl}
             />
           </div>
         </aside>
@@ -457,7 +464,7 @@ export default function BeautyTryOnPage() {
               onToggleVisibility={toggleAppliedProductVisibility}
               onOpenPatternPicker={setPatternPickerSelection}
               onChangeColor={updateAppliedProductColor}
-              onAddToCart={addProductToCart}
+              onOpenExternal={openProductExternalUrl}
               onClear={clearAppliedProducts}
               onClose={() => setMobileAppliedOpen(false)}
             />

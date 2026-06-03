@@ -67,21 +67,10 @@ function cloneDefaultEffect(category: string): MakeupEffect {
 
 function buildColorTextureEffect(
   item: MakeupCatalogRow,
-  variant: AdminProductVariantRecord,
+  variant: AdminProductVariantRecord | undefined,
   variants: AdminProductVariantRecord[],
   selection: BeautyAppliedSelection,
 ): MakeupEffect | null {
-  const selectedVariantIds = selection.colorVariantIds?.length
-    ? selection.colorVariantIds
-    : [selection.variantId]
-  const selectedVariants = selectedVariantIds
-    .map((variantId) => variants.find((entry) => entry.id === variantId))
-    .filter((entry): entry is AdminProductVariantRecord => Boolean(entry?.color_hex?.trim()))
-
-  if (selectedVariants.length === 0) {
-    return null
-  }
-
   const category = item.apiCategoryKey
   const base = cloneDefaultEffect(category)
   if (category === 'skin_smooth') {
@@ -92,6 +81,19 @@ function buildColorTextureEffect(
       skinSmoothStrength: base.skinSmoothStrength ?? 50,
       skinSmoothColorIntensity: base.skinSmoothColorIntensity ?? 50,
     }
+  }
+
+  if (!variant) return null
+
+  const selectedVariantIds = selection.colorVariantIds?.length
+    ? selection.colorVariantIds
+    : [selection.variantId]
+  const selectedVariants = selectedVariantIds
+    .map((variantId) => variants.find((entry) => entry.id === variantId))
+    .filter((entry): entry is AdminProductVariantRecord => Boolean(entry?.color_hex?.trim()))
+
+  if (selectedVariants.length === 0) {
+    return null
   }
 
   const patternName = selection.patternName?.trim()
@@ -156,7 +158,7 @@ export function buildBeautyMakeupEffects(
     .map((selection) => {
       const item = catalog.find((catalogItem) => catalogItem.productId === selection.productId)
       const variant = variants.find((entry) => entry.id === selection.variantId)
-      return item && variant ? buildColorTextureEffect(item, variant, variants, selection) : null
+      return item ? buildColorTextureEffect(item, variant, variants, selection) : null
     })
     .filter((effect): effect is MakeupEffect => Boolean(effect))
 }

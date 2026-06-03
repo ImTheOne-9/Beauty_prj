@@ -1,6 +1,8 @@
+import { ExternalLink } from 'lucide-react'
 import type {
   AdminProductRecord,
   AdminProductVariantRecord,
+  MakeupCatalogRow,
 } from '@/services/supabase/database-service'
 import type { BeautyAppliedSelection } from '@/features/beauty-try-on/lib/beauty-selection'
 
@@ -8,8 +10,10 @@ interface Props {
   mobile?: boolean
   products: AdminProductRecord[]
   variants: AdminProductVariantRecord[]
+  makeupCatalog: MakeupCatalogRow[]
   appliedProducts: BeautyAppliedSelection[]
-  onToggle: (productId: string, variantId: string) => void
+  onToggle: (productId: string, variantId?: string) => void
+  onOpenExternal: (url?: string | null) => void
 }
 
 function isDualColorTexture(texture?: string | null) {
@@ -31,8 +35,10 @@ export default function BeautyProductGrid({
   mobile = false,
   products,
   variants,
+  makeupCatalog,
   appliedProducts,
   onToggle,
+  onOpenExternal,
 }: Props) {
   if (products.length === 0) {
     return (
@@ -50,6 +56,8 @@ export default function BeautyProductGrid({
           const productVariants = variants.filter(
             (variant) => variant.product_id === product.id && variant.is_active,
           )
+          const canApplyWithoutVariant =
+            makeupCatalog.find((item) => item.productId === product.id)?.apiCategoryKey === 'skin_smooth'
           const selected = appliedProducts.find((item) => item.productId === product.id)
           const active = Boolean(selected)
 
@@ -74,21 +82,33 @@ export default function BeautyProductGrid({
                 </p>
               </div>
 
-              <button
-                onClick={() =>
-                  productVariants[0] && onToggle(product.id, productVariants[0].id)
-                }
-                disabled={productVariants.length === 0}
-                className={`rounded-full px-5 py-2 text-sm font-medium ${
-                  active
-                    ? 'bg-black text-white'
-                    : 'border'
-                }`}
-              >
-                {active
-                  ? 'Applied'
-                  : 'Apply'}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() =>
+                    onToggle(product.id, productVariants[0]?.id)
+                  }
+                  disabled={!canApplyWithoutVariant && productVariants.length === 0}
+                  className={`rounded-full px-5 py-2 text-sm font-medium ${
+                    active
+                      ? 'bg-black text-white'
+                      : 'border'
+                  }`}
+                >
+                  {active
+                    ? 'Applied'
+                    : 'Apply'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onOpenExternal(product.external_url)}
+                  disabled={!product.external_url}
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border disabled:cursor-not-allowed disabled:opacity-40"
+                  aria-label="Open product link"
+                  title="Open product link"
+                >
+                  <ExternalLink size={16} />
+                </button>
+              </div>
             </article>
           )
         })}
@@ -104,8 +124,11 @@ export default function BeautyProductGrid({
           const productVariants = variants.filter(
             (variant) => variant.product_id === product.id && variant.is_active,
           )
+          const canApplyWithoutVariant =
+            makeupCatalog.find((item) => item.productId === product.id)?.apiCategoryKey === 'skin_smooth'
           const selected = appliedProducts.find((item) => item.productId === product.id)
           const active = Boolean(selected)
+          const canApplyProduct = productVariants.length > 0 || canApplyWithoutVariant
 
           return (
             <article
@@ -132,9 +155,7 @@ export default function BeautyProductGrid({
 
               <div className="mt-4 flex flex-wrap justify-center gap-2">
                 {productVariants.length === 0 ? (
-                  <span className="text-xs text-neutral-400">
-                    No variants
-                  </span>
+                  null
                 ) : (
                   productVariants.map((variant) => {
                     const selectedVariant = selected?.variantId === variant.id
@@ -157,21 +178,33 @@ export default function BeautyProductGrid({
                 )}
               </div>
 
-              <button
-                onClick={() =>
-                  productVariants[0] && onToggle(product.id, selected?.variantId ?? productVariants[0].id)
-                }
-                disabled={productVariants.length === 0}
-                className={`mt-5 w-full rounded-xl py-3 ${
-                  active
-                    ? 'bg-black text-white'
-                    : 'border disabled:cursor-not-allowed disabled:opacity-50'
-                }`}
-              >
-                {active
-                  ? 'Applied'
-                  : 'Try On'}
-              </button>
+              <div className="mt-5 grid grid-cols-[1fr_44px] gap-2">
+                <button
+                  onClick={() =>
+                    onToggle(product.id, selected?.variantId ?? productVariants[0]?.id)
+                  }
+                  disabled={!canApplyProduct}
+                  className={`rounded-xl py-3 ${
+                    active
+                      ? 'bg-black text-white'
+                      : 'border disabled:cursor-not-allowed disabled:opacity-50'
+                  }`}
+                >
+                  {active
+                    ? 'Applied'
+                    : 'Try On'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onOpenExternal(product.external_url)}
+                  disabled={!product.external_url}
+                  className="inline-flex h-12 items-center justify-center rounded-xl border disabled:cursor-not-allowed disabled:opacity-40"
+                  aria-label="Open product link"
+                  title="Open product link"
+                >
+                  <ExternalLink size={17} />
+                </button>
+              </div>
             </article>
           )
         })}
