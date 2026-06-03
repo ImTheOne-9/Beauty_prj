@@ -10,15 +10,18 @@ import { runMakeupVirtualTryOn } from '@/features/ai-scan/services/makeup-vto-se
 import { useFaceValidation } from '@/features/ai-scan/hooks/useFaceValidation'
 import type { MakeupVtoTaskStatus } from '@/features/ai-scan/types/makeup-vto'
 import {
+  type BeautyAppliedSelection,
   buildBeautyMakeupEffects,
   hasBeautyMakeupPayload,
 } from '@/features/beauty-try-on/lib/beauty-makeup-adapter'
 import { Loader } from '@/shared/components/ui/Loader'
 import { databaseService } from '@/services/supabase/database-service'
 import { useToast } from '@/shared/hooks/useToast'
+import { useAuth } from '@/features/auth/hooks/useAuth'
 
 export default function BeautyTryOnPage() {
   const toast = useToast()
+  const { user } = useAuth()
   const categoriesQuery = useQuery({
     queryKey: ['categories'],
     queryFn: () => databaseService.getCategories(),
@@ -37,14 +40,21 @@ export default function BeautyTryOnPage() {
     staleTime: 1000 * 60 * 5,
   })
 
+  const variantsQuery = useQuery({
+    queryKey: ['admin', 'product-configs'],
+    queryFn: () => databaseService.getAdminProductVariants(),
+    staleTime: 1000 * 60 * 5,
+  })
+
   const categories = categoriesQuery.data ?? []
   const products = productsQuery.data ?? []
   const makeupCatalog = makeupCatalogQuery.data ?? []
+  const variants = variantsQuery.data ?? []
 
   const [activeTab, setActiveTab] = useState('')
   const [expanded, setExpanded] = useState(true)
   const [mobileAppliedOpen, setMobileAppliedOpen] = useState(false)
-  const [appliedProducts, setAppliedProducts] = useState<string[]>([])
+  const [appliedProducts, setAppliedProducts] = useState<BeautyAppliedSelection[]>([])
   const [hiddenAppliedProducts, setHiddenAppliedProducts] = useState<string[]>([])
   const [imageSource, setImageSource] = useState('')
   const [resultUrl, setResultUrl] = useState<string | null>(null)
@@ -62,21 +72,21 @@ export default function BeautyTryOnPage() {
     return products.filter((product) => product.category_id === activeTab)
   }, [activeTab, products])
 
-  const toggleProduct = (id: string) => {
-    const selectedProduct = products.find((product) => product.id === id)
+  const toggleProduct = (productId: string, variantId: string) => {
+    const selectedProduct = products.find((product) => product.id === productId)
 
     setAppliedProducts((current) =>
-      current.includes(id)
-        ? current.filter((productId) => productId !== id)
+      current.some((item) => item.variantId === variantId)
+        ? current.filter((item) => item.variantId !== variantId)
         : [
-            ...current.filter((productId) => {
-              const currentProduct = products.find((product) => product.id === productId)
+            ...current.filter((item) => {
+              const currentProduct = products.find((product) => product.id === item.productId)
               return currentProduct?.category_id !== selectedProduct?.category_id
             }),
-            id,
+            { productId, variantId },
           ],
     )
-    setHiddenAppliedProducts((current) => current.filter((productId) => productId !== id))
+    setHiddenAppliedProducts((current) => current.filter((id) => id !== variantId))
   }
 
   const clearAppliedProducts = () => {
@@ -93,8 +103,12 @@ export default function BeautyTryOnPage() {
   }
 
   const addProductToCart = (id: string) => {
-    const product = products.find((item) => item.id === id)
-    toast.success(`${product?.name ?? 'Product'} added to cart`)
+    const selection = appliedProducts.find((item) => item.variantId === id)
+    const product = products.find((item) => item.id === selection?.productId)
+    const variant = variants.find((item) => item.id === id)
+    toast.success(
+      `${product?.name ?? 'Product'}${variant?.name ? ` - ${variant.name}` : ''} added to cart`,
+    )
   }
 
   const handleSelectModel = (imageUrl: string) => {
@@ -139,12 +153,16 @@ export default function BeautyTryOnPage() {
   const processMutation = useMutation({
     mutationFn: async () => {
       const visibleAppliedProducts = appliedProducts.filter(
-        (id) => !hiddenAppliedProducts.includes(id),
+        (selection) => !hiddenAppliedProducts.includes(selection.variantId),
       )
-      const effects = buildBeautyMakeupEffects(visibleAppliedProducts, makeupCatalog)
+      const effects = buildBeautyMakeupEffects(visibleAppliedProducts, makeupCatalog, variants)
 
       if (!imageSource) {
         throw new Error('Please upload a photo or select a model first.')
+      }
+
+      if (imageSource.startsWith('blob:') && !user?.id) {
+        throw new Error('Please sign in before processing an uploaded photo.')
       }
 
       if (visibleAppliedProducts.length === 0) {
@@ -159,6 +177,7 @@ export default function BeautyTryOnPage() {
       return runMakeupVirtualTryOn({
         imageSource,
         effects,
+        userId: user?.id,
         allowColorOnly: true,
       })
     },
@@ -175,15 +194,15 @@ export default function BeautyTryOnPage() {
 
   const canApply =
     Boolean(imageSource) &&
-    appliedProducts.some((id) => !hiddenAppliedProducts.includes(id)) &&
+    appliedProducts.some((selection) => !hiddenAppliedProducts.includes(selection.variantId)) &&
     validationState !== 'checking' &&
     !processMutation.isPending
 
-  if (categoriesQuery.isLoading || productsQuery.isLoading || makeupCatalogQuery.isLoading) {
+  if (categoriesQuery.isLoading || productsQuery.isLoading || makeupCatalogQuery.isLoading || variantsQuery.isLoading) {
     return <Loader fullScreen label="Loading beauty catalog" />
   }
 
-  if (categoriesQuery.error || productsQuery.error || makeupCatalogQuery.error) {
+  if (categoriesQuery.error || productsQuery.error || makeupCatalogQuery.error || variantsQuery.error) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-white px-6 text-center">
         <div>
@@ -228,7 +247,7 @@ export default function BeautyTryOnPage() {
               appliedProducts={appliedProducts}
               hiddenProducts={hiddenAppliedProducts}
               products={products}
-              makeupCatalog={makeupCatalog}
+              variants={variants}
               onToggleVisibility={toggleAppliedProductVisibility}
               onAddToCart={addProductToCart}
               onClear={clearAppliedProducts}
@@ -276,6 +295,7 @@ export default function BeautyTryOnPage() {
             <BeautyProductGrid
               mobile={false}
               products={visibleProducts}
+              variants={variants}
               appliedProducts={appliedProducts}
               onToggle={toggleProduct}
             />
@@ -302,7 +322,7 @@ export default function BeautyTryOnPage() {
               appliedProducts={appliedProducts}
               hiddenProducts={hiddenAppliedProducts}
               products={products}
-              makeupCatalog={makeupCatalog}
+              variants={variants}
               onToggleVisibility={toggleAppliedProductVisibility}
               onAddToCart={addProductToCart}
               onClear={clearAppliedProducts}

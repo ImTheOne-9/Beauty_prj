@@ -7,17 +7,18 @@ import {
 } from 'lucide-react'
 import type {
   AdminProductRecord,
-  MakeupCatalogRow,
+  AdminProductVariantRecord,
 } from '@/services/supabase/database-service'
+import type { BeautyAppliedSelection } from '@/features/beauty-try-on/lib/beauty-makeup-adapter'
 
 interface Props {
   mobile?: boolean
   expanded: boolean
   setExpanded: React.Dispatch<React.SetStateAction<boolean>>
-  appliedProducts: string[]
+  appliedProducts: BeautyAppliedSelection[]
   hiddenProducts: string[]
   products: AdminProductRecord[]
-  makeupCatalog: MakeupCatalogRow[]
+  variants: AdminProductVariantRecord[]
   onToggleVisibility: (id: string) => void
   onAddToCart: (id: string) => void
   onClear: () => void
@@ -28,10 +29,6 @@ function getProductImage(product?: AdminProductRecord) {
   return product?.image_url ?? ''
 }
 
-function getProductColor(productId: string, catalog: MakeupCatalogRow[]) {
-  return catalog.find((item) => item.productId === productId)?.primaryColor ?? null
-}
-
 export default function BeautyAppliedProducts({
   mobile = false,
   expanded,
@@ -39,21 +36,25 @@ export default function BeautyAppliedProducts({
   appliedProducts,
   hiddenProducts,
   products,
-  makeupCatalog,
+  variants,
   onToggleVisibility,
   onAddToCart,
   onClear,
   onClose,
 }: Props) {
-  const appliedProductDetails = appliedProducts.map((id) => {
-    const product = products.find((item) => item.id === id)
+  const appliedProductDetails = appliedProducts.map((selection) => {
+    const product = products.find((item) => item.id === selection.productId)
+    const variant = variants.find((item) => item.id === selection.variantId)
     return {
-      id,
+      id: selection.variantId,
+      productId: selection.productId,
       brand: product?.brand ?? 'Product',
-      name: product?.name ?? `Product ${id}`,
-      imageUrl: getProductImage(product),
-      color: getProductColor(id, makeupCatalog),
-      hidden: hiddenProducts.includes(id),
+      name: product?.name ?? `Product ${selection.productId}`,
+      variantName: variant?.name ?? null,
+      texture: variant?.texture ?? null,
+      imageUrl: variant?.image_url || getProductImage(product),
+      color: variant?.color_hex ?? null,
+      hidden: hiddenProducts.includes(selection.variantId),
     }
   })
 
@@ -96,6 +97,11 @@ export default function BeautyAppliedProducts({
                   <p className="truncate text-sm font-medium text-neutral-900">
                     {product.brand} {product.name}
                   </p>
+                  {(product.variantName || product.texture) && (
+                    <p className="truncate text-xs text-neutral-500">
+                      {[product.variantName, product.texture].filter(Boolean).join(' / ')}
+                    </p>
+                  )}
                 </div>
 
                 <button

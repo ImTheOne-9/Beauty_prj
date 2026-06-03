@@ -7,7 +7,15 @@ import type {
   MakeupPalette,
   MakeupTexture,
 } from '@/features/ai-scan/types/makeup-vto'
-import type { MakeupCatalogRow } from '@/services/supabase/database-service'
+import type {
+  AdminProductVariantRecord,
+  MakeupCatalogRow,
+} from '@/services/supabase/database-service'
+
+export type BeautyAppliedSelection = {
+  productId: string
+  variantId: string
+}
 
 const MAKEUP_TEXTURES = new Set<MakeupTexture>([
   'matte',
@@ -44,8 +52,11 @@ function cloneDefaultEffect(category: string): MakeupEffect {
   }
 }
 
-function buildColorTextureEffect(item: MakeupCatalogRow): MakeupEffect | null {
-  const color = item.primaryColor?.trim()
+function buildColorTextureEffect(
+  item: MakeupCatalogRow,
+  variant: AdminProductVariantRecord,
+): MakeupEffect | null {
+  const color = variant.color_hex?.trim()
 
   if (!color) {
     return null
@@ -70,22 +81,24 @@ function buildColorTextureEffect(item: MakeupCatalogRow): MakeupEffect | null {
       {
         ...existingPalette,
         color,
-        colorIntensity:
-          item.colorIntensity ?? existingPalette.colorIntensity ?? 50,
-        ...(isMakeupTexture(item.texture) ? { texture: item.texture } : {}),
+        colorIntensity: item.colorIntensity ?? existingPalette.colorIntensity ?? 50,
+        ...(isMakeupTexture(variant.texture) ? { texture: variant.texture } : {}),
       },
     ],
   }
 }
 
 export function buildBeautyMakeupEffects(
-  productIds: string[],
+  selections: BeautyAppliedSelection[],
   catalog: MakeupCatalogRow[],
+  variants: AdminProductVariantRecord[],
 ) {
-  return productIds
-    .map((productId) => catalog.find((item) => item.productId === productId))
-    .filter((item): item is MakeupCatalogRow => Boolean(item))
-    .map(buildColorTextureEffect)
+  return selections
+    .map((selection) => {
+      const item = catalog.find((catalogItem) => catalogItem.productId === selection.productId)
+      const variant = variants.find((entry) => entry.id === selection.variantId)
+      return item && variant ? buildColorTextureEffect(item, variant) : null
+    })
     .filter((effect): effect is MakeupEffect => Boolean(effect))
 }
 

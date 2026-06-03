@@ -1,15 +1,21 @@
-import type { AdminProductRecord } from '@/services/supabase/database-service'
+import type {
+  AdminProductRecord,
+  AdminProductVariantRecord,
+} from '@/services/supabase/database-service'
+import type { BeautyAppliedSelection } from '@/features/beauty-try-on/lib/beauty-makeup-adapter'
 
 interface Props {
   mobile?: boolean
   products: AdminProductRecord[]
-  appliedProducts: string[]
-  onToggle: (id: string) => void
+  variants: AdminProductVariantRecord[]
+  appliedProducts: BeautyAppliedSelection[]
+  onToggle: (productId: string, variantId: string) => void
 }
 
 export default function BeautyProductGrid({
   mobile = false,
   products,
+  variants,
   appliedProducts,
   onToggle,
 }: Props) {
@@ -26,10 +32,11 @@ export default function BeautyProductGrid({
     <div className="h-full overflow-y-auto">
       <div className="space-y-4 p-4">
         {products.map((product) => {
-          const active =
-            appliedProducts.includes(
-              product.id,
-            )
+          const productVariants = variants.filter(
+            (variant) => variant.product_id === product.id && variant.is_active,
+          )
+          const selected = appliedProducts.find((item) => item.productId === product.id)
+          const active = Boolean(selected)
 
           return (
             <article
@@ -54,8 +61,9 @@ export default function BeautyProductGrid({
 
               <button
                 onClick={() =>
-                  onToggle(product.id)
+                  productVariants[0] && onToggle(product.id, productVariants[0].id)
                 }
+                disabled={productVariants.length === 0}
                 className={`rounded-full px-5 py-2 text-sm font-medium ${
                   active
                     ? 'bg-black text-white'
@@ -78,10 +86,11 @@ export default function BeautyProductGrid({
     <div className="h-full overflow-y-auto pr-2">
       <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
         {products.map((product) => {
-          const active =
-            appliedProducts.includes(
-              product.id,
-            )
+          const productVariants = variants.filter(
+            (variant) => variant.product_id === product.id && variant.is_active,
+          )
+          const selected = appliedProducts.find((item) => item.productId === product.id)
+          const active = Boolean(selected)
 
           return (
             <article
@@ -106,14 +115,42 @@ export default function BeautyProductGrid({
                 </p>
               </div>
 
+              <div className="mt-4 flex flex-wrap justify-center gap-2">
+                {productVariants.length === 0 ? (
+                  <span className="text-xs text-neutral-400">
+                    No variants
+                  </span>
+                ) : (
+                  productVariants.map((variant) => {
+                    const selectedVariant = selected?.variantId === variant.id
+                    return (
+                      <button
+                        key={variant.id}
+                        type="button"
+                        onClick={() => onToggle(product.id, variant.id)}
+                        className={`h-7 w-7 rounded-full border-2 ${
+                          selectedVariant
+                            ? 'border-black'
+                            : 'border-white shadow-sm ring-1 ring-neutral-200'
+                        }`}
+                        style={{ backgroundColor: variant.color_hex }}
+                        aria-label={variant.name ?? variant.color_hex}
+                        title={`${variant.name ?? variant.color_hex}${variant.texture ? ` - ${variant.texture}` : ''}`}
+                      />
+                    )
+                  })
+                )}
+              </div>
+
               <button
                 onClick={() =>
-                  onToggle(product.id)
+                  productVariants[0] && onToggle(product.id, selected?.variantId ?? productVariants[0].id)
                 }
+                disabled={productVariants.length === 0}
                 className={`mt-5 w-full rounded-xl py-3 ${
                   active
                     ? 'bg-black text-white'
-                    : 'border'
+                    : 'border disabled:cursor-not-allowed disabled:opacity-50'
                 }`}
               >
                 {active
