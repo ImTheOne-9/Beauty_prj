@@ -2,25 +2,25 @@ import { lazy, Suspense } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { Loader } from '@/shared/components/ui/Loader'
 import { AppLayout } from '@/shared/components/layout/AppLayout'
-import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute'
-import PlanPage from '@/features/plans/pages/PlanPage'
-import AiNailColorPage from '@/features/ai-nail-color/pages/AiNailColorPage'
-import BeautyTryOnPage from '@/features/beauty-try-on/pages/BeautyTryOnPage'
+import { ProtectedRoute } from '@/features/auth/presentation/components/ProtectedRoute'
+import PlanPage from '@/features/plans/presentation/pages/PlanPage'
+import AiNailColorPage from '@/features/ai-nail-color/presentation/pages/AiNailColorPage'
+import BeautyTryOnPage from '@/features/beauty-try-on/presentation/pages/BeautyTryOnPage'
 
-const LandingPage = lazy(() => import('@/features/landing/pages/LandingPage'))
-const VirtualMakeupTryOnPage = lazy(() => import('@/features/virtual-makeup-tryon/pages/VirtualMakeupTryOnPage'))
-const AIScanPage = lazy(() => import('@/features/ai-scan/pages/AIScanPage'))
-const RecommendationsPage = lazy(() => import('@/features/recommendations/pages/RecommendationsPage'))
-const ProductsPage = lazy(() => import('@/features/products/pages/ProductsPage'))
-const AuthPage = lazy(() => import('@/features/auth/pages/AuthPage'))
-const DashboardPage = lazy(() => import('@/features/dashboard/pages/DashboardPage'))
-const AdminPage = lazy(() => import('@/features/admin/pages/AdminPage'))
-const CheckoutPage = lazy(() => import('@/features/checkout/pages/CheckoutPage'))
-const ProfilePage = lazy(() => import('@/features/profile/pages/ProfilePage'))
-const VerifyEmailPage = lazy(() => import('@/features/auth/pages/VerifyEmailPage'))
-const ResetPasswordPage = lazy(() => import('@/features/auth/pages/ResetPasswordPage'))
-const AgileHandPage = lazy(() => import('@/features/agile-hand/pages/AgileHandPage'))
-const MakeupArPage = lazy(() => import('@/features/makeup-ar/pages/MakeupArPage'))
+const LandingPage = lazy(() => import('@/features/landing/presentation/pages/LandingPage'))
+const VirtualMakeupTryOnPage = lazy(() => import('@/features/virtual-makeup-tryon/presentation/pages/VirtualMakeupTryOnPage'))
+const AIScanPage = lazy(() => import('@/features/ai-scan/presentation/pages/AIScanPage'))
+const RecommendationsPage = lazy(() => import('@/features/recommendations/presentation/pages/RecommendationsPage'))
+const ProductsPage = lazy(() => import('@/features/products/presentation/pages/ProductsPage'))
+const AuthPage = lazy(() => import('@/features/auth/presentation/pages/AuthPage'))
+const DashboardPage = lazy(() => import('@/features/dashboard/presentation/pages/DashboardPage'))
+const AdminPage = lazy(() => import('@/features/admin/presentation/pages/AdminPage'))
+const CheckoutPage = lazy(() => import('@/features/checkout/presentation/pages/CheckoutPage'))
+const ProfilePage = lazy(() => import('@/features/profile/presentation/pages/ProfilePage'))
+const VerifyEmailPage = lazy(() => import('@/features/auth/presentation/pages/VerifyEmailPage'))
+const ResetPasswordPage = lazy(() => import('@/features/auth/presentation/pages/ResetPasswordPage'))
+const AgileHandPage = lazy(() => import('@/features/agile-hand/presentation/pages/AgileHandPage'))
+const MakeupArPage = lazy(() => import('@/features/makeup-ar/presentation/pages/MakeupArPage'))
 
 const router = createBrowserRouter([
   {

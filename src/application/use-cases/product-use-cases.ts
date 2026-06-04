@@ -1,0 +1,23 @@
+import type { IProductRepository } from '@/core/interfaces';
+import type { ProductRecommendation } from '@/core/entities';
+
+export function createProductUseCases(productRepo: IProductRepository) {
+  return {
+    async listProducts() {
+      return productRepo.getAll();
+    },
+
+    async listProductRecommendations(): Promise<ProductRecommendation[]> {
+      const products = await productRepo.getAll();
+      return products.map((product) => ({
+        id: product.id,
+        name: product.name,
+        image: product.imageUrl ?? '',
+        description: product.description ?? '',
+        reason: `Catalog pick for ${product.brand ?? 'skincare'}.`,
+        externalLink: product.externalUrl ?? '',
+        category: product.brand ?? 'skincare',
+      }));
+    },
+  };
+}

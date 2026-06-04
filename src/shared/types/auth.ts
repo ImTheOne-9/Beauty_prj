@@ -1,4 +1,4 @@
-import type { Plan } from "@/services/supabase/database-service"
+import type { Plan } from '@/core/entities'
 
 export type UserRole = 'guest' | 'user' | 'admin'
 export type SubscriptionTier = 'guest' | 'free' | 'pro' | 'premium'

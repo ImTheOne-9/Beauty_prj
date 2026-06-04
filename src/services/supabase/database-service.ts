@@ -1,10 +1,6 @@
-import { supabase, type Json } from "@/services/supabase/client";
-import { type ScanResult, type OrderRecord } from "@/shared/lib/types";
-import {
-  getSubscriptionTier,
-  setSubscriptionTier,
-} from "@/shared/lib/subscription";
-import { storageService } from "./storage-service";
+import { dependencies } from "@/app/providers/DependencyProvider";
+import type { Json } from "@/services/supabase/client";
+import type { ScanResult, Order } from "@/core/entities";
 
 type SaveRecommendationInput = {
   productId: string;
@@ -22,7 +18,7 @@ export type AdminProductRecord = {
   created_at: string;
 };
 
-type AdminApiKeyRecord = {
+export type AdminApiKeyRecord = {
   id: string;
   name: string | null;
   key_value?: string | null;
@@ -56,15 +52,6 @@ export type AdminCategoryRecord = {
   created_at: string;
 };
 
-/**
- * Schema mới sau migration:
- * - effect_category : text  (blush, lip_color, v.v.)
- * - primary_color   : text  (hex màu palette đầu tiên, để hiển thị swatch)
- * - effect_data     : jsonb (toàn bộ effect object gửi lên MakeupAR API)
- *
- * Các cột cũ (hex_color, texture, color_intensity, pattern_name, extra_params)
- * đã bị drop trong migration.
- */
 export type AdminProductConfigRecord = {
   id: string;
   product_id: string;
@@ -78,7 +65,6 @@ export type AdminProductConfigRecord = {
   created_at: string;
 };
 
-/** Input khi create/update config — không cần id và created_at */
 export type ProductConfigInput = Omit<AdminProductConfigRecord, "id" | "created_at">;
 
 export type AdminProductVariantRecord = {
@@ -109,13 +95,13 @@ export type AdminUserProfileRecord = {
   created_at: string;
 };
 
-type CreateProductInput = Omit<AdminProductRecord, "id" | "created_at">;
+export type CreateProductInput = Omit<AdminProductRecord, "id" | "created_at">;
 
-type CreateApiKeyInput = Omit<AdminApiKeyRecord, "id" | "created_at">;
+export type CreateApiKeyInput = Omit<AdminApiKeyRecord, "id" | "created_at">;
 
-type UpdateProductInput = Partial<CreateProductInput>;
+export type UpdateProductInput = Partial<CreateProductInput>;
 
-type UpdateApiKeyInput = Partial<CreateApiKeyInput>;
+export type UpdateApiKeyInput = Partial<CreateApiKeyInput>;
 
 export type MakeupCatalogRow = {
   productId: string;
@@ -173,10 +159,68 @@ export type Subscription = {
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-/** Lấy hex màu đầu tiên từ effect_data để hiển thị swatch */
-function extractPrimaryColor(effectData: Record<string, unknown>): string | null {
-  const palettes = effectData.palettes as Array<{ color?: string }> | undefined;
-  return palettes?.[0]?.color ?? null;
+function mapProductToRecord(p: any): AdminProductRecord {
+  return {
+    id: p.id,
+    name: p.name,
+    description: p.description,
+    image_url: p.imageUrl,
+    external_url: p.externalUrl,
+    brand: p.brand,
+    category_id: p.categoryId,
+    created_at: p.createdAt,
+  };
+}
+
+function mapVariantToRecord(v: any): AdminProductVariantRecord {
+  return {
+    id: v.id,
+    product_id: v.productId,
+    name: v.name,
+    color_hex: v.colorHex,
+    texture: v.texture,
+    shimmer_color: v.shimmerColor,
+    image_url: v.imageUrl,
+    sku: v.sku,
+    sort_order: v.sortOrder,
+    is_active: v.isActive,
+    created_at: v.createdAt,
+  };
+}
+
+function mapConfigToRecord(c: any): AdminProductConfigRecord {
+  return {
+    id: c.id,
+    product_id: c.productId,
+    category_id: c.categoryId,
+    primary_color: c.primaryColor,
+    texture: c.texture,
+    hex_color: c.hexColor ?? null,
+    color_intensity: c.colorIntensity ?? null,
+    pattern_name: c.patternName ?? null,
+    extra_params: c.extraParams as Json,
+    created_at: c.createdAt,
+  };
+}
+
+function mapCategoryToRecord(c: any): AdminCategoryRecord {
+  return {
+    id: c.id,
+    name: c.name,
+    api_category_key: c.apiCategoryKey,
+    created_at: c.createdAt,
+  };
+}
+
+function mapApiKeyToRecord(k: any): AdminApiKeyRecord {
+  return {
+    id: k.id,
+    name: k.name,
+    key_value: k.keyValue ?? null,
+    provider: k.provider,
+    is_active: k.isActive,
+    created_at: k.createdAt,
+  };
 }
 
 // ─── Service ──────────────────────────────────────────────────────────────────
@@ -185,221 +229,127 @@ export const databaseService = {
   // ── Makeup Catalog ──────────────────────────────────────────────────────────
 
   async getMakeupCatalog(): Promise<MakeupCatalogRow[]> {
-    const [
-      { data: products, error: productsError },
-      { data: categories, error: categoriesError },
-      { data: configs, error: configsError },
-    ] = await Promise.all([
-      supabase.from("products").select("*").order("created_at", { ascending: false }),
-      supabase.from("categories").select("*"),
-      supabase.from("product_configs").select("*"),
-    ]);
-
-    if (productsError) throw productsError;
-    if (categoriesError) throw categoriesError;
-    if (configsError) throw configsError;
-
-    const categoryMap = new Map(
-      (categories ?? []).map((c) => [c.id, c as AdminCategoryRecord]),
-    );
-
-    // Một product có thể có nhiều configs (multi-effect) → group theo product_id
-    const configsByProduct = new Map<string, AdminProductConfigRecord[]>();
-    for (const raw of configs ?? []) {
-      const config = raw as unknown as AdminProductConfigRecord;
-      if (!configsByProduct.has(config.product_id)) {
-        configsByProduct.set(config.product_id, []);
-      }
-      configsByProduct.get(config.product_id)!.push(config);
-    }
-
-    return ((products ?? []) as AdminProductRecord[]).map((product) => {
-      const category = categoryMap.get(product.category_id);
-      const productConfigs = configsByProduct.get(product.id) ?? [];
-      const firstConfig = productConfigs[0];
-
-      return {
-        productId: product.id,
-        name: product.name,
-        description: product.description,
-        image: product.image_url ?? "",
-        externalLink: product.external_url ?? "",
-        brand: product.brand,
-        categoryId: product.category_id,
-        categoryName: category?.name ?? "Uncategorized",
-        apiCategoryKey: category?.api_category_key ?? "general",
-        texture: firstConfig?.texture ?? null,
-        primaryColor: firstConfig?.primary_color ?? firstConfig?.hex_color ?? null,
-        colorIntensity:
-          typeof firstConfig?.color_intensity === "number"
-            ? firstConfig.color_intensity
-            : typeof firstConfig?.color_intensity === "string"
-              ? Number(firstConfig.color_intensity) || null
-              : null,
-      };
-    });
+    const items = await dependencies.makeupCatalogRepo.getMakeupCatalog();
+    return items.map((item) => ({
+      productId: item.productId,
+      name: item.name,
+      description: item.description,
+      image: item.image,
+      externalLink: item.externalLink,
+      brand: item.brand,
+      categoryId: item.categoryId,
+      categoryName: item.categoryName,
+      apiCategoryKey: item.apiCategoryKey,
+      primaryColor: item.primaryColor,
+      colorIntensity: item.colorIntensity ?? null,
+      texture: item.texture ?? null,
+    }));
   },
 
   // ── Products ────────────────────────────────────────────────────────────────
 
   async getProducts() {
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) throw error;
-    return (data ?? []) as AdminProductRecord[];
+    const products = await dependencies.productRepo.getAll();
+    return products.map(mapProductToRecord);
   },
 
   async getAdminProducts() {
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) throw error;
-    return (data ?? []) as AdminProductRecord[];
+    const products = await dependencies.productRepo.getAll();
+    return products.map(mapProductToRecord);
   },
 
   async createProduct(input: CreateProductInput) {
-    const { data, error } = await supabase
-      .from("products")
-      .insert(input)
-      .select("*")
-      .single();
-    if (error) throw error;
-    return data as AdminProductRecord;
+    const product = await dependencies.productRepo.create({
+      name: input.name,
+      description: input.description,
+      imageUrl: input.image_url,
+      externalUrl: input.external_url,
+      brand: input.brand,
+      categoryId: input.category_id,
+    });
+    return mapProductToRecord(product);
   },
 
   async updateProduct(id: string, input: UpdateProductInput) {
-    const { data, error } = await supabase
-      .from("products")
-      .update(input)
-      .eq("id", id)
-      .select("*")
-      .single();
-    if (error) throw error;
-    return data as AdminProductRecord;
+    const product = await dependencies.productRepo.update(id, {
+      name: input.name,
+      description: input.description,
+      imageUrl: input.image_url,
+      externalUrl: input.external_url,
+      brand: input.brand,
+      categoryId: input.category_id,
+    });
+    return mapProductToRecord(product);
   },
 
   async deleteProduct(id: string) {
-    const { error } = await supabase.from("products").delete().eq("id", id);
-    if (error) throw error;
+    await dependencies.productRepo.delete(id);
   },
 
   async getAdminProductVariants() {
-    const { data, error } = await (supabase as any)
-      .from("product_variants")
-      .select("*")
-      .order("sort_order", { ascending: true })
-      .order("created_at", { ascending: true });
-    if (error) throw error;
-    return (data ?? []) as AdminProductVariantRecord[];
+    const variants = await dependencies.productVariantRepo.getAll();
+    return variants.map(mapVariantToRecord);
   },
 
   async replaceProductVariants(
     productId: string,
     variants: Omit<ProductVariantInput, "product_id">[],
   ) {
-    const { error: deleteError } = await (supabase as any)
-      .from("product_variants")
-      .delete()
-      .eq("product_id", productId);
-    if (deleteError) throw deleteError;
-
-    if (variants.length === 0) return [];
-
-    const rows = variants.map((variant, index) => ({
-      product_id: productId,
-      name: variant.name?.trim() || null,
-      color_hex: variant.color_hex,
-      texture: variant.texture?.trim() || null,
-      shimmer_color: variant.shimmer_color?.trim() || null,
-      image_url: variant.image_url?.trim() || null,
-      sku: variant.sku?.trim() || null,
-      sort_order: variant.sort_order ?? index,
-      is_active: variant.is_active ?? true,
-    }));
-
-    const { data, error } = await (supabase as any)
-      .from("product_variants")
-      .insert(rows)
-      .select("*");
-    if (error) throw error;
-    return (data ?? []) as AdminProductVariantRecord[];
+    const result = await dependencies.productVariantRepo.replaceForProduct(
+      productId,
+      variants.map((v) => ({
+        name: v.name ?? null,
+        colorHex: v.color_hex,
+        texture: v.texture ?? null,
+        shimmerColor: v.shimmer_color ?? null,
+        imageUrl: v.image_url ?? null,
+        sku: v.sku ?? null,
+        sortOrder: v.sort_order,
+        isActive: v.is_active,
+      })),
+    );
+    return result.map(mapVariantToRecord);
   },
 
   async deleteProductVariant(id: string) {
-    const { error } = await (supabase as any)
-      .from("product_variants")
-      .delete()
-      .eq("id", id);
-    if (error) throw error;
+    await dependencies.productVariantRepo.delete(id);
   },
 
   // ── Product Configs ─────────────────────────────────────────────────────────
 
   async getAdminProductConfigs() {
-    const { data, error } = await supabase
-      .from("product_configs")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) throw error;
-    return (data ?? []) as unknown as AdminProductConfigRecord[];
+    const configs = await dependencies.productConfigRepo.getAll();
+    return configs.map(mapConfigToRecord);
   },
 
-  /** Lấy tất cả configs của 1 product — dùng cho ProductWithConfigModal khi edit */
   async getProductConfigsByProductId(productId: string) {
-    const { data, error } = await supabase
-      .from("product_configs")
-      .select("*")
-      .eq("product_id", productId)
-      .order("created_at", { ascending: true });
-    if (error) throw error;
-    return (data ?? []) as unknown as AdminProductConfigRecord[];
+    const configs = await dependencies.productConfigRepo.getByProductId(productId);
+    return configs.map(mapConfigToRecord);
   },
 
   async createProductConfig(input: ProductConfigInput) {
-    const payload = {
-      product_id: input.product_id,
-      category_id: input.category_id,
-      primary_color: input.primary_color,
+    const config = await dependencies.productConfigRepo.create({
+      productId: input.product_id,
+      categoryId: input.category_id,
+      primaryColor: input.primary_color,
       texture: input.texture,
-    };
-    const { data, error } = await supabase
-      .from("product_configs")
-      .insert(payload as any)
-      .select("*")
-      .single();
-    if (error) throw error;
-    return data as unknown as AdminProductConfigRecord;
+    });
+    return mapConfigToRecord(config);
   },
 
   async updateProductConfig(id: string, input: Partial<ProductConfigInput>) {
-    const payload: Record<string, unknown> = {};
-    if (input.category_id !== undefined) payload.category_id = input.category_id;
-    if (input.primary_color !== undefined) payload.primary_color = input.primary_color;
-    if (input.texture !== undefined) payload.texture = input.texture;
-
-    const { data, error } = await supabase
-      .from("product_configs")
-      .update(payload as any)
-      .eq("id", id)
-      .select("*")
-      .single();
-    if (error) throw error;
-    return data as unknown as AdminProductConfigRecord;
+    const config = await dependencies.productConfigRepo.update(id, {
+      categoryId: input.category_id,
+      primaryColor: input.primary_color,
+      texture: input.texture,
+    });
+    return mapConfigToRecord(config);
   },
 
   async deleteProductConfig(id: string) {
-    const { error } = await supabase.from("product_configs").delete().eq("id", id);
-    if (error) throw error;
+    await dependencies.productConfigRepo.delete(id);
   },
 
-  /**
-   * Replace toàn bộ configs của 1 product.
-   * Dùng trong ProductWithConfigModal khi save.
-   * Delete all → insert new (đơn giản, atomic hơn diff).
-   */
   async replaceProductConfigs(
     productId: string,
     configs: Array<{
@@ -408,286 +358,189 @@ export const databaseService = {
       effect_data: Record<string, unknown>;
     }>,
   ) {
-    // 1. Xóa hết config cũ
-    const { error: delErr } = await supabase
-      .from("product_configs")
-      .delete()
-      .eq("product_id", productId);
-    if (delErr) throw delErr;
-
-    // 2. Insert mới (nếu có)
-    if (configs.length === 0) return [];
-
-    const rows = configs.map((c) => ({
-      product_id: productId,
-      effect_category: c.effect_category,
-      primary_color: c.primary_color ?? extractPrimaryColor(c.effect_data),
-      effect_data: c.effect_data as Json,
-    }));
-
-    const { data, error: insErr } = await supabase
-      .from("product_configs")
-      .insert(rows as any)
-      .select("*");
-    if (insErr) throw insErr;
-    return (data ?? []) as unknown as AdminProductConfigRecord[];
+    const result = await dependencies.productConfigRepo.replaceForProduct(productId, configs);
+    return result.map(mapConfigToRecord);
   },
 
   // ── Categories ──────────────────────────────────────────────────────────────
 
   async getAdminCategories() {
-    const { data, error } = await supabase
-      .from("categories")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) throw error;
-    return (data ?? []) as AdminCategoryRecord[];
+    const categories = await dependencies.categoryRepo.getAll();
+    return categories.map(mapCategoryToRecord);
   },
 
   async getCategories() {
-    const { data, error } = await supabase
-      .from("categories")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) throw error;
-    return (data ?? []) as AdminCategoryRecord[];
+    const categories = await dependencies.categoryRepo.getAll();
+    return categories.map(mapCategoryToRecord);
   },
 
   async createCategory(input: Omit<AdminCategoryRecord, "id" | "created_at">) {
-    const { data, error } = await supabase
-      .from("categories")
-      .insert(input)
-      .select("*")
-      .single();
-    if (error) throw error;
-    return data as AdminCategoryRecord;
+    const category = await dependencies.categoryRepo.create({
+      name: input.name,
+      apiCategoryKey: input.api_category_key,
+    });
+    return mapCategoryToRecord(category);
   },
 
   async updateCategory(
     id: string,
     input: Partial<Omit<AdminCategoryRecord, "id" | "created_at">>,
   ) {
-    const { data, error } = await supabase
-      .from("categories")
-      .update(input)
-      .eq("id", id)
-      .select("*")
-      .single();
-    if (error) throw error;
-    return data as AdminCategoryRecord;
+    const category = await dependencies.categoryRepo.update(id, {
+      name: input.name,
+      apiCategoryKey: input.api_category_key,
+    });
+    return mapCategoryToRecord(category);
   },
 
   async deleteCategory(id: string) {
-    const { error } = await supabase.from("categories").delete().eq("id", id);
-    if (error) throw error;
+    await dependencies.categoryRepo.delete(id);
   },
 
   // ── API Keys ────────────────────────────────────────────────────────────────
 
   async getAdminApiKeys() {
-    const { data, error } = await supabase
-      .from("api_keys")
-      .select("id, name, provider, is_active, created_at, updated_at") // key_value bị ẩn
-      .order("created_at", { ascending: false });
-    if (error) throw error;
-    return (data ?? []) as Omit<AdminApiKeyRecord, "key_value">[];
+    const keys = await dependencies.apiKeyRepo.getAll();
+    return keys.map((key) => ({
+      id: key.id,
+      name: key.name,
+      provider: key.provider,
+      is_active: key.isActive,
+      created_at: key.createdAt,
+    }));
   },
 
   async createApiKey(input: CreateApiKeyInput) {
-    const { data, error } = await supabase.functions.invoke("manage-api-key", {
-      body: { action: "create", payload: input },
+    const key = await dependencies.apiKeyRepo.create({
+      name: input.name ?? null,
+      keyValue: input.key_value ?? null,
+      provider: input.provider ?? null,
+      isActive: input.is_active ?? true,
     });
-    if (error) throw error;
-    return data;
+    return mapApiKeyToRecord(key);
   },
 
   async updateApiKey(id: string, input: UpdateApiKeyInput) {
-    const { data, error } = await supabase.functions.invoke("manage-api-key", {
-      body: { action: "update", id, payload: input },
+    const key = await dependencies.apiKeyRepo.update(id, {
+      name: input.name,
+      keyValue: input.key_value,
+      provider: input.provider,
+      isActive: input.is_active,
     });
-    if (error) throw error;
-    return data;
+    return mapApiKeyToRecord(key);
   },
 
   async deleteApiKey(id: string) {
-    const { error } = await supabase.functions.invoke("manage-api-key", {
-      body: { action: "delete", id },
-    });
-    if (error) throw error;
+    await dependencies.apiKeyRepo.delete(id);
   },
 
   // ── Scans ───────────────────────────────────────────────────────────────────
 
   async getScanHistory(userId: string) {
-    const { data, error } = await supabase
-      .from("scans")
-      .select("*")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false });
-    if (error) throw error;
-    return data ?? [];
+    const scans = await dependencies.scanRepo.getScanHistory(userId);
+    return scans.map((s) => ({
+      id: s.id,
+      created_at: s.createdAt,
+      user_id: s.userId,
+      original_image: s.originalImage,
+      image_url: s.imageUrl,
+      effects: s.effects as any[],
+      mode: s.mode,
+    }));
   },
 
   async getScanCountThisMonth(userId: string) {
-    const startOfMonth = new Date(
-      Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1),
-    ).toISOString();
-    const { data, error } = await supabase
-      .from("scans")
-      .select("id")
-      .eq("user_id", userId)
-      .gte("created_at", startOfMonth);
-    if (error) throw error;
-    return (data ?? []).length;
+    return dependencies.scanRepo.getScanCountThisMonth(userId);
   },
 
   async getAdminScans() {
-    const { data, error } = await supabase
-      .from("scans")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) {
-      console.error("Supabase Error:", error);
-      throw error;
-    }
-    return (data ?? []) as AdminScanRecord[];
+    const scans = await dependencies.scanRepo.getAdminScans();
+    return scans.map((s) => ({
+      id: s.id,
+      created_at: s.createdAt,
+      user_id: s.userId,
+      original_image: s.originalImage,
+      image_url: s.imageUrl,
+      effects: s.effects as any[],
+      mode: s.mode,
+    }));
   },
 
   async deleteScan(id: string) {
-    const { error } = await supabase.from("scans").delete().eq("id", id);
-    if (error) throw error;
+    await dependencies.scanRepo.deleteScan(id);
   },
 
   async saveScan(userId: string, scanResult: ScanResult) {
-    const { data, error: insertError } = await supabase
-      .from("scans")
-      .insert({
-        user_id: userId,
-        original_image: scanResult.originalImage,
-        image_url: null,
-        effects: scanResult.appliedEffects.filter((e) => e.enabled) as unknown as Json,
-        mode: scanResult.mode,
-      } as any)
-      .select("id")
-      .single();
-
-    if (insertError) throw insertError;
-    const scanId = data.id;
-
-    const storedResultUrl = await storageService.uploadMakeupResult(
-      userId,
-      scanResult.resultImageUrl,
-      scanId,
-    );
-
-    const { error: updateError } = await supabase
-      .from("scans")
-      .update({ image_url: storedResultUrl })
-      .eq("id", scanId);
-
-    if (updateError) throw updateError;
-    return scanId;
+    return dependencies.scanRepo.saveScan(userId, scanResult);
   },
 
   // ── Recommendations ─────────────────────────────────────────────────────────
 
   async saveRecommendations(scanId: string, items: SaveRecommendationInput[]) {
-    if (items.length === 0) return;
-    const { error } = await supabase.from("recommendations").insert(
+    await dependencies.recommendationRepo.save(
+      scanId,
       items.map((item) => ({
-        scan_id: scanId,
-        product_id: item.productId,
-        reason: item.reason ?? "",
-      })) as any,
+        productId: item.productId,
+        reason: item.reason,
+      })),
     );
-    if (error) throw error;
   },
 
   async getAdminRecommendations() {
-    const { data, error } = await supabase
-      .from("recommendations")
-      .select("*")
-      .order("created_at", { ascending: false });
-    if (error) throw error;
-    return (data ?? []) as AdminRecommendationRecord[];
+    const recs = await dependencies.recommendationRepo.getAll();
+    return recs.map((r: any) => ({
+      id: r.id,
+      scan_id: r.scanId,
+      product_id: r.productId,
+      reason: r.reason,
+      created_at: r.createdAt,
+    }));
   },
 
   // ── Users / Profiles ────────────────────────────────────────────────────────
 
   async getProfiles() {
-    const { data, error } = await supabase
-      .from("profiles")
-      .select("id, email, role, updated_at")
-      .order("updated_at", { ascending: false });
-    if (error) throw error;
-    return data ?? [];
+    const profiles = await dependencies.userRepo.getProfiles();
+    return profiles.map((p: any) => ({
+      id: p.id,
+      email: p.email,
+      role: p.role,
+      updated_at: p.updated_at,
+    }));
   },
 
   async getUsersWithRoles() {
-    try {
-      const profiles = await this.getProfiles();
-      const stored = localStorage.getItem("lumina_user_roles");
-      let localOverrides: Array<{ id: string; email: string; role: string; created_at: string }> = [];
-      if (stored) {
-        try { localOverrides = JSON.parse(stored); } catch { /* ignore */ }
-      }
-      const mapped = profiles.map((profile) => {
-        const local = localOverrides.find(
-          (u) => u.email.toLowerCase() === (profile as any).email.toLowerCase(),
-        );
-        return { ...profile, role: local?.role ?? (profile as any).role, created_at: (profile as any).updated_at };
-      });
-      if (mapped.length > 0) return mapped;
-    } catch { /* fallback */ }
-
-    const stored = localStorage.getItem("lumina_user_roles");
-    if (stored) {
-      try {
-        const users = JSON.parse(stored) as Array<{ id: string; email: string; role: string; created_at: string }>;
-        return users.map((user) => ({
-          ...user,
-          role: user.role === "admin" ? "admin" : "user",
-          subscription_tier: getSubscriptionTier(user.id) ?? "free",
-        }));
-      } catch { /* ignore */ }
-    }
-
-    const defaultUsers = [
-      { id: "u1", email: "admin@lumina.ai", role: "admin", created_at: new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString() },
-      { id: "u6", email: "guest-customer@gmail.com", role: "user", created_at: new Date().toISOString() },
-    ];
-    localStorage.setItem("lumina_user_roles", JSON.stringify(defaultUsers));
-    defaultUsers.forEach((user) => setSubscriptionTier(user.id, "free"));
-    return defaultUsers.map((user) => ({ ...user, subscription_tier: "free" }));
+    const users = (await dependencies.userRepo.getUsersWithRoles()) as any[];
+    return users.map((u: any) => ({
+      id: u.id,
+      email: u.email,
+      role: u.role,
+      subscription_tier: u.subscriptionTier,
+      updated_at: u.updatedAt,
+      created_at: u.createdAt,
+    }));
   },
 
   async updateUserRole(userId: string, role: string) {
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .update({ role, updated_at: new Date().toISOString() })
-        .eq("id", userId)
-        .select("id, email, role, updated_at")
-        .single();
-      if (error) throw error;
-      return [{ ...data, created_at: data.updated_at }];
-    } catch {
-      const users = await this.getUsersWithRoles();
-      const updated = users.map((u: any) => u.id === userId ? { ...u, role } : u);
-      localStorage.setItem("lumina_user_roles", JSON.stringify(updated));
-      return updated;
-    }
+    const users = (await dependencies.userRepo.updateUserRole(userId, role)) as any[];
+    return users.map((u: any) => ({
+      id: u.id,
+      email: u.email,
+      role: u.role,
+      updated_at: u.updated_at ?? u.updatedAt,
+      created_at: u.created_at ?? u.createdAt,
+    }));
   },
 
   async updateUserSubscriptionTier(userId: string, subscriptionTier: string) {
-    const { data, error } = await supabase
-      .from("profiles")
-      .update({ subscription_tier: subscriptionTier, updated_at: new Date().toISOString() })
-      .eq("id", userId)
-      .select("id, email, role, updated_at")
-      .single();
-    if (error) throw error;
-    return { ...data, created_at: data.updated_at };
+    const user = (await dependencies.userRepo.updateUserSubscriptionTier(userId, subscriptionTier)) as any;
+    return {
+      id: user.id,
+      email: user.email,
+      role: user.role,
+      updated_at: user.updated_at ?? user.updatedAt,
+      created_at: user.created_at ?? user.createdAt,
+    };
   },
 
   async createUserWithRole(
@@ -698,128 +551,140 @@ export const databaseService = {
     role: "admin" | "user",
     planId: string = "",
   ) {
-    const { data, error } = await supabase.functions.invoke("create-user", {
-      body: { email, firstName, lastName, password, role, planId: planId || null },
-    });
-    if (error) throw new Error(error.message);
-    if (data?.error) throw new Error(data.error);
-    return data;
+    return dependencies.userRepo.createUserWithRole(email, password, firstName, lastName, role, planId);
   },
 
   async deleteUserRole(userId: string) {
-    const { data, error } = await supabase.functions.invoke("delete-user", {
-      body: { userId },
-    });
-    if (error) throw new Error(error.message);
-    if (data?.error) throw new Error(data.error);
-    return data;
+    return dependencies.userRepo.deleteUser(userId);
   },
 
   // ── Orders (localStorage) ───────────────────────────────────────────────────
 
-  getOrders(): OrderRecord[] {
-    const stored = localStorage.getItem("lumina_orders");
-    if (stored) {
-      try { return JSON.parse(stored) as OrderRecord[]; } catch { /* ignore */ }
-    }
-    return this.seedOrders();
+  getOrders(): Order[] {
+    return dependencies.orderRepo.getAll();
   },
 
-  createOrder(order: OrderRecord): OrderRecord {
-    const orders = this.getOrders();
-    localStorage.setItem("lumina_orders", JSON.stringify([order, ...orders]));
-    return order;
+  createOrder(order: Order): Order {
+    return dependencies.orderRepo.create(order);
   },
 
-  deleteOrder(orderId: string): OrderRecord[] {
-    const updated = this.getOrders().filter((o) => o.id !== orderId);
-    localStorage.setItem("lumina_orders", JSON.stringify(updated));
-    return updated;
+  deleteOrder(orderId: string): Order[] {
+    return dependencies.orderRepo.delete(orderId);
   },
 
-  updateOrderStatus(orderId: string, status: "pending" | "completed" | "canceled"): OrderRecord[] {
-    const updated = this.getOrders().map((o) => o.id === orderId ? { ...o, status } : o);
-    localStorage.setItem("lumina_orders", JSON.stringify(updated));
-    return updated;
+  updateOrderStatus(orderId: string, status: "pending" | "completed" | "canceled"): Order[] {
+    return dependencies.orderRepo.updateStatus(orderId, status);
   },
 
-  seedOrders(): OrderRecord[] {
-    const products = [
-      { id: "p1", name: "La Roche-Posay Hyalu B5 Serum", category: "Serum", price: 390000, image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?auto=format&fit=crop&w=400&q=80" },
-      { id: "p2", name: "CeraVe Moisturising Cream", category: "Moisturizer", price: 490000, image: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?auto=format&fit=crop&w=400&q=80" },
-      { id: "p3", name: "Paula's Choice 2% BHA Liquid Exfoliant", category: "Toner", price: 590000, image: "https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&w=400&q=80" },
-      { id: "p4", name: "Cetaphil Gentle Skin Cleanser", category: "Cleanser", price: 290000, image: "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=400&q=80" },
-    ];
-    const firstNames = ["John", "Jane", "Michael", "Emily", "Chris", "Sarah", "David", "Jessica", "Daniel"];
-    const lastNames = ["Smith", "Johnson", "Williams", "Brown", "Jones", "Garcia", "Miller", "Davis", "Rodriguez"];
-    const cities = ["New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia"];
-    const paymentMethods = ["cod", "momo", "visa", "apple"] as const;
-    const statuses = ["completed", "completed", "completed", "pending", "canceled"] as const;
-
-    const orders: OrderRecord[] = Array.from({ length: 24 }, () => {
-      const prod = products[Math.floor(Math.random() * products.length)];
-      const quantity = Math.floor(Math.random() * 2) + 1;
-      return {
-        id: `BG-${Math.floor(100000 + Math.random() * 900000)}`,
-        productId: prod.id,
-        productName: prod.name,
-        productImage: prod.image,
-        productCategory: prod.category,
-        quantity,
-        price: prod.price,
-        totalPrice: prod.price * quantity,
-        paymentMethod: paymentMethods[Math.floor(Math.random() * paymentMethods.length)],
-        shippingInfo: {
-          name: `${firstNames[Math.floor(Math.random() * firstNames.length)]} ${lastNames[Math.floor(Math.random() * lastNames.length)]}`,
-          phone: `09${Math.floor(10000000 + Math.random() * 90000000)}`,
-          address: `${Math.floor(Math.random() * 150) + 1} Main St, ${cities[Math.floor(Math.random() * cities.length)]}`,
-        },
-        status: statuses[Math.floor(Math.random() * statuses.length)],
-        createdAt: new Date(Date.now() - Math.floor(Math.random() * 8) * 24 * 3600 * 1000).toISOString(),
-      };
-    }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-    localStorage.setItem("lumina_orders", JSON.stringify(orders));
-    return orders;
+  seedOrders(): Order[] {
+    return dependencies.orderRepo.getAll();
   },
 
   // ── Plans ───────────────────────────────────────────────────────────────────
 
   async getPlans() {
-    const { data, error } = await supabase
-      .from("plans")
-      .select("*")
-      .order("price", { ascending: true });
-    if (error) throw error;
-    return (data ?? []) as Plan[];
+    const plans = await dependencies.planRepo.getAll();
+    return plans.map((p) => ({
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      price: p.price,
+      billing_interval: p.billingInterval,
+      scan_limit: p.scanLimit,
+      history_days: p.historyDays,
+      description: p.description,
+      features: p.features,
+      badge: p.badge,
+      is_active: p.isActive,
+      created_at: p.createdAt,
+    }));
   },
 
   async createPlan(plan: any) {
-    const { data, error } = await (supabase as any).from("plans").insert(plan).select().single();
-    if (error) throw error;
-    return data;
+    const created = await dependencies.planRepo.create({
+      name: plan.name,
+      slug: plan.slug,
+      price: plan.price,
+      billingInterval: plan.billing_interval,
+      scanLimit: plan.scan_limit,
+      historyDays: plan.history_days,
+      description: plan.description ?? null,
+      features: plan.features,
+      badge: plan.badge ?? null,
+      isActive: plan.is_active ?? true,
+    });
+    return {
+      id: created.id,
+      name: created.name,
+      slug: created.slug,
+      price: created.price,
+      billing_interval: created.billingInterval,
+      scan_limit: created.scanLimit,
+      history_days: created.historyDays,
+      description: created.description,
+      features: created.features,
+      badge: created.badge,
+      is_active: created.isActive,
+      created_at: created.createdAt,
+    };
   },
 
   async updatePlan(id: string, patch: any) {
-    const { data, error } = await (supabase as any).from("plans").update(patch).eq("id", id).select().single();
-    if (error) throw error;
-    return data;
+    const updated = await dependencies.planRepo.update(id, {
+      name: patch.name,
+      slug: patch.slug,
+      price: patch.price,
+      billingInterval: patch.billing_interval,
+      scanLimit: patch.scan_limit,
+      historyDays: patch.history_days,
+      description: patch.description,
+      features: patch.features,
+      badge: patch.badge,
+      isActive: patch.is_active,
+    });
+    return {
+      id: updated.id,
+      name: updated.name,
+      slug: updated.slug,
+      price: updated.price,
+      billing_interval: updated.billingInterval,
+      scan_limit: updated.scanLimit,
+      history_days: updated.historyDays,
+      description: updated.description,
+      features: updated.features,
+      badge: updated.badge,
+      is_active: updated.isActive,
+      created_at: updated.createdAt,
+    };
   },
 
   async deletePlan(id: string) {
-    const { error } = await (supabase as any).from("plans").delete().eq("id", id);
-    if (error) throw error;
+    await dependencies.planRepo.delete(id);
   },
 
   // ── Subscriptions ───────────────────────────────────────────────────────────
 
   async getSubscriptions() {
-    const { data, error } = await (supabase as any)
-      .from("subscriptions")
-      .select(`*, plan:plans(id, name, slug, price, billing_interval)`)
-      .order("created_at", { ascending: false });
-    if (error) throw error;
-    return (data ?? []) as Subscription[];
+    const subs = await dependencies.subscriptionRepo.getAll();
+    return subs.map((s) => ({
+      id: s.id,
+      user_id: s.userId,
+      plan_id: s.planId,
+      status: s.status,
+      started_at: s.startedAt,
+      expires_at: s.expiresAt,
+      cancelled_at: s.cancelledAt,
+      created_at: s.createdAt,
+      plan: s.plan
+        ? {
+            id: s.plan.id,
+            name: s.plan.name,
+            slug: s.plan.slug,
+            price: s.plan.price,
+            billing_interval: s.plan.billingInterval,
+          }
+        : undefined,
+    }));
   },
 
   async createSubscription(input: {
@@ -829,21 +694,54 @@ export const databaseService = {
     started_at: string;
     expires_at: string | null;
   }) {
-    const { data, error } = await (supabase as any).from("subscriptions").insert(input).select().single();
-    if (error) throw error;
-    return data as Subscription;
+    const created = await dependencies.subscriptionRepo.create({
+      userId: input.user_id,
+      planId: input.plan_id,
+      status: input.status,
+      startedAt: input.started_at,
+      expiresAt: input.expires_at,
+    });
+    return {
+      id: created.id,
+      user_id: created.userId,
+      plan_id: created.planId,
+      status: created.status,
+      started_at: created.startedAt,
+      expires_at: created.expiresAt,
+      cancelled_at: created.cancelledAt,
+      created_at: created.createdAt,
+    };
   },
 
   async updateSubscription(id: string, patch: any) {
-    const { data, error } = await (supabase as any).from("subscriptions").update(patch).eq("id", id).select().single();
-    if (error) throw error;
-    return data as Subscription;
+    const updated = await dependencies.subscriptionRepo.update(id, {
+      status: patch.status,
+      expiresAt: patch.expires_at,
+      cancelledAt: patch.cancelled_at,
+    });
+    return {
+      id: updated.id,
+      user_id: updated.userId,
+      plan_id: updated.planId,
+      status: updated.status,
+      started_at: updated.startedAt,
+      expires_at: updated.expiresAt,
+      cancelled_at: updated.cancelledAt,
+      created_at: updated.createdAt,
+    };
   },
 
   async cancelSubscription(id: string) {
-    return this.updateSubscription(id, {
-      status: "cancelled",
-      cancelled_at: new Date().toISOString(),
-    });
+    const updated = await dependencies.subscriptionRepo.cancel(id);
+    return {
+      id: updated.id,
+      user_id: updated.userId,
+      plan_id: updated.planId,
+      status: updated.status,
+      started_at: updated.startedAt,
+      expires_at: updated.expiresAt,
+      cancelled_at: updated.cancelledAt,
+      created_at: updated.createdAt,
+    };
   },
 };

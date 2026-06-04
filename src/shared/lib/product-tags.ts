@@ -1,12 +1,11 @@
-import { type ProductRecommendation } from '@/shared/lib/types'
-import { type AdminProductRecord } from '@/services/supabase/database-service'
+import { type ProductRecommendation, type Product } from '@/core/entities'
 
 export interface ParsedProduct extends Omit<ProductRecommendation, 'reason' | 'externalLink'> {
   originalTags: string[]
   cleanTags: string[]
 }
 
-export function parseProductTags(product: AdminProductRecord & { tags?: string[] }): ParsedProduct {
+export function parseProductTags(product: Product & { tags?: string[] }): ParsedProduct {
   const tags = product.tags ?? []
   let category = 'Skincare'
   let price = ''
@@ -55,7 +54,7 @@ export function parseProductTags(product: AdminProductRecord & { tags?: string[]
   return {
     id: product.id,
     name: product.name,
-    image: product.image_url ?? '',
+    image: product.imageUrl ?? '',
     description: product.description ?? '',
     category,
     price,

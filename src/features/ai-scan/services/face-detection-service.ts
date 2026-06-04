@@ -125,7 +125,7 @@ export async function validateImage(imageSource: string): Promise<{ isValid: boo
   if (!result.hasFace) {
     return {
       isValid: false,
-      message: 'Không tìm thấy khuôn mặt, vui lòng chụp lại rõ hơn',
+      message: 'No face detected, please retake the photo more clearly',
     }
   }
   

@@ -3,12 +3,15 @@
 ## What Was Done
 
 ### 🎯 Objective
+
 Add client-side image validation to prevent wasting API calls to Perfect Corp before images are verified to contain faces.
 
 ### 📦 Deliverables
 
 #### 1. Face Detection Service ✓
+
 **File**: `src/features/ai-scan/services/face-detection-service.ts`
+
 - Loads face-api.js TinyFaceDetector model
 - Detects faces in images (local processing)
 - Returns boolean validation result
@@ -16,7 +19,9 @@ Add client-side image validation to prevent wasting API calls to Perfect Corp be
 - Handles CORS and image loading
 
 #### 2. Validation Hook ✓
+
 **File**: `src/features/ai-scan/hooks/useFaceValidation.ts`
+
 - Manages validation state machine
 - Tracks: idle → checking → valid/invalid
 - Provides error messages
@@ -24,7 +29,9 @@ Add client-side image validation to prevent wasting API calls to Perfect Corp be
 - Fully TypeScript typed
 
 #### 3. Enhanced Component ✓
+
 **File**: `src/features/ai-scan/components/MakeupInputPanel.tsx`
+
 - Integrated validation on image selection
 - Visual feedback during validation
 - Error alerts with Vietnamese messages
@@ -32,6 +39,7 @@ Add client-side image validation to prevent wasting API calls to Perfect Corp be
 - Works with all input modes
 
 #### 4. Documentation ✓
+
 - **FACE_DETECTION_IMPLEMENTATION.md** - Feature overview
 - **FACE_DETECTION_TESTING.md** - Testing guide
 - **FACE_DETECTION_ARCHITECTURE.md** - Technical architecture
@@ -42,6 +50,7 @@ Add client-side image validation to prevent wasting API calls to Perfect Corp be
 ## Technical Specifications
 
 ### Dependencies Added
+
 ```json
 {
   "dependencies": {
@@ -51,6 +60,7 @@ Add client-side image validation to prevent wasting API calls to Perfect Corp be
 ```
 
 ### Model Details
+
 - **Name**: TinyFaceDetector
 - **Size**: ~70KB (very lightweight)
 - **Performance**: 1-2 seconds per image
@@ -58,6 +68,7 @@ Add client-side image validation to prevent wasting API calls to Perfect Corp be
 - **Loading**: On-demand from CDN
 
 ### Component Changes
+
 ```typescript
 // Added to MakeupInputPanel
 const [isValidated, setIsValidated] = useState(false)
@@ -83,6 +94,7 @@ disabled={!imageSource || !isValidated || isProcessing || validationState === 'c
 ## User Experience Flow
 
 ### Success Path (Image with Face)
+
 ```
 User selects image
     ↓
@@ -100,6 +112,7 @@ User can proceed with makeup try-on
 ```
 
 ### Failure Path (No Face)
+
 ```
 User selects image
     ↓
@@ -110,7 +123,7 @@ Analyze image with AI model
 No face detected ✗
     ↓
 Show error message:
-"Không tìm thấy khuôn mặt, vui lòng chụp lại rõ hơn"
+"No face detected, please retake the photo more clearly"
     ↓
 Keep "Start Processing" button disabled
     ↓
@@ -122,10 +135,12 @@ User can select different image to retry
 ## Code Changes Summary
 
 ### New Files (2)
+
 1. `src/features/ai-scan/services/face-detection-service.ts` (90 lines)
 2. `src/features/ai-scan/hooks/useFaceValidation.ts` (50 lines)
 
 ### Modified Files (1)
+
 1. `src/features/ai-scan/components/MakeupInputPanel.tsx`
    - Added imports (AlertCircle, Loader icons, useFaceValidation hook)
    - Added state: `isValidated`, validation hook usage
@@ -134,6 +149,7 @@ User can select different image to retry
    - All changes maintain backward compatibility
 
 ### Configuration Changes (1)
+
 1. `package.json`
    - Added dependency: `face-api.js@0.22.2`
 
@@ -142,13 +158,15 @@ User can select different image to retry
 ## API Impact Analysis
 
 ### Cost Savings
-| Metric | Before | After | Savings |
-|--------|--------|-------|---------|
-| Invalid images processed | 100% | 0% | 100% |
-| API calls prevented | 0 | ~30-50% | ~30-50% |
+
+| Metric                     | Before   | After       | Savings     |
+| -------------------------- | -------- | ----------- | ----------- |
+| Invalid images processed   | 100%     | 0%          | 100%        |
+| API calls prevented        | 0        | ~30-50%     | ~30-50%     |
 | Monthly API cost reduction | Baseline | 30-50% less | Significant |
 
 ### User Experience Improvement
+
 - ⏱️ Faster feedback (1-2 seconds vs. 5-10 seconds API call)
 - 🎯 Clearer guidance (error messages in Vietnamese)
 - ♻️ Easy retry (simple image reselection)
@@ -192,6 +210,7 @@ User can select different image to retry
 ## Future Enhancement Opportunities
 
 ### Phase 2 (if needed)
+
 1. **Visual Feedback**: Show face detection bounding box
 2. **Multiple Models**: Fallback to higher accuracy model if needed
 3. **Batch Processing**: Validate multiple images at once
@@ -200,12 +219,13 @@ User can select different image to retry
 6. **Offline Support**: Work without internet connection
 
 ### Configuration Options
+
 ```typescript
 // Could add to config
-FACE_DETECTION_ENABLED: true
-FACE_DETECTION_MODEL: 'tiny' | 'full'
-FACE_DETECTION_THRESHOLD: 0.5  // Confidence level
-FACE_DETECTION_TIMEOUT: 5000   // Max wait time
+FACE_DETECTION_ENABLED: true;
+FACE_DETECTION_MODEL: "tiny" | "full";
+FACE_DETECTION_THRESHOLD: 0.5; // Confidence level
+FACE_DETECTION_TIMEOUT: 5000; // Max wait time
 ```
 
 ---
@@ -245,6 +265,7 @@ A: Yes, modify `handleImageSelection` in MakeupInputPanel to skip validation for
 A: Models need to be downloaded first (requires internet), then works offline. Future versions can bundle models.
 
 ### Monitoring
+
 - Check browser console for any model loading errors
 - Monitor Network tab to see CDN requests
 - Track validation performance metrics
@@ -254,14 +275,14 @@ A: Models need to be downloaded first (requires internet), then works offline. F
 
 ## Files Reference
 
-| File | Type | Lines | Purpose |
-|------|------|-------|---------|
-| face-detection-service.ts | Service | 90 | Face detection AI |
-| useFaceValidation.ts | Hook | 50 | State management |
-| MakeupInputPanel.tsx | Component | ~50 changes | UI integration |
-| FACE_DETECTION_IMPLEMENTATION.md | Docs | Detailed guide | Feature overview |
-| FACE_DETECTION_TESTING.md | Docs | Test scenarios | QA testing |
-| FACE_DETECTION_ARCHITECTURE.md | Docs | Diagrams | Technical design |
+| File                             | Type      | Lines          | Purpose           |
+| -------------------------------- | --------- | -------------- | ----------------- |
+| face-detection-service.ts        | Service   | 90             | Face detection AI |
+| useFaceValidation.ts             | Hook      | 50             | State management  |
+| MakeupInputPanel.tsx             | Component | ~50 changes    | UI integration    |
+| FACE_DETECTION_IMPLEMENTATION.md | Docs      | Detailed guide | Feature overview  |
+| FACE_DETECTION_TESTING.md        | Docs      | Test scenarios | QA testing        |
+| FACE_DETECTION_ARCHITECTURE.md   | Docs      | Diagrams       | Technical design  |
 
 ---
 
@@ -275,6 +296,7 @@ A: Models need to be downloaded first (requires internet), then works offline. F
 ✅ **Maintainable**: Clean code with proper error handling
 
 ### Next Steps
+
 1. Start dev server: `npm run dev`
 2. Test the feature manually
 3. Review documentation if needed

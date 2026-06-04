@@ -3,16 +3,18 @@
 ## Face Detection Service
 
 ### Localização
+
 ```
 src/features/ai-scan/services/face-detection-service.ts
 ```
 
 ### Uso Básico
+
 ```typescript
-import { validateImage } from '@/features/ai-scan/services/face-detection-service'
+import { validateImage } from "@/features/ai-scan/services/face-detection-service";
 
 // Validar uma imagem
-const result = await validateImage(imageUrl)
+const result = await validateImage(imageUrl);
 if (result.isValid) {
   // Prosseguir com processamento
 } else {
@@ -21,6 +23,7 @@ if (result.isValid) {
 ```
 
 ### Resultado
+
 ```typescript
 {
   isValid: boolean,
@@ -33,16 +36,18 @@ if (result.isValid) {
 ## Face Validation Hook
 
 ### Localização
+
 ```
 src/features/ai-scan/hooks/useFaceValidation.ts
 ```
 
 ### Uso no Componente
+
 ```typescript
 import { useFaceValidation } from '@/features/ai-scan/hooks/useFaceValidation'
 
 export function MeuComponente() {
-  const { 
+  const {
     validationState,      // 'idle' | 'checking' | 'valid' | 'invalid'
     validationError,      // string | null
     validateAndSetImage,  // função
@@ -70,33 +75,42 @@ export function MeuComponente() {
 ## MakeupInputPanel Integration
 
 ### Localização
+
 ```
 src/features/ai-scan/components/MakeupInputPanel.tsx
 ```
 
 ### Estados Adicionados
+
 ```typescript
-const [isValidated, setIsValidated] = useState(false)
-const { validationState, validationError, validateAndSetImage, resetValidation } = useFaceValidation()
+const [isValidated, setIsValidated] = useState(false);
+const {
+  validationState,
+  validationError,
+  validateAndSetImage,
+  resetValidation,
+} = useFaceValidation();
 ```
 
 ### Handler de Seleção de Imagem
+
 ```typescript
 const handleImageSelection = async (imageUrl: string) => {
-  setIsValidated(false)
-  resetValidation()
-  
-  const isValid = await validateAndSetImage(imageUrl)
+  setIsValidated(false);
+  resetValidation();
+
+  const isValid = await validateAndSetImage(imageUrl);
   if (isValid) {
-    setIsValidated(true)
-    onImageChange(imageUrl)  // Callback original
+    setIsValidated(true);
+    onImageChange(imageUrl); // Callback original
   }
-}
+};
 ```
 
 ### Condição do Botão
+
 ```typescript
-<Button 
+<Button
   disabled={!imageSource || !isValidated || isProcessing || validationState === 'checking'}
 >
   {validationState === 'checking' ? 'Đang kiểm tra...' : isProcessing ? 'Processing...' : 'Start Processing'}
@@ -104,6 +118,7 @@ const handleImageSelection = async (imageUrl: string) => {
 ```
 
 ### Mensagens de Status
+
 ```typescript
 {validationState === 'checking' && (
   <div className="flex items-center justify-center gap-2 rounded-lg bg-blue-50 py-3 text-sm text-blue-700">
@@ -128,42 +143,48 @@ const handleImageSelection = async (imageUrl: string) => {
 ## Configurações & Customização
 
 ### Mudar Mensagem de Erro
+
 **Em**: `src/features/ai-scan/services/face-detection-service.ts` (linha 58-62)
+
 ```typescript
 if (!result.hasFace) {
   return {
     isValid: false,
-    message: 'Sua mensagem personalizada aqui',  // ← Mudar isto
-  }
+    message: "Sua mensagem personalizada aqui", // ← Mudar isto
+  };
 }
 ```
 
 ### Ajustar URL do CDN (se necessário)
+
 **Em**: `src/features/ai-scan/services/face-detection-service.ts` (linha 22)
+
 ```typescript
-const MODEL_URL = 'https://seu-cdn.com/modelo-weights'  // ← URL customizado
+const MODEL_URL = "https://seu-cdn.com/modelo-weights"; // ← URL customizado
 ```
 
 ### Desabilitar Validação para Certos Casos
+
 **Em**: `src/features/ai-scan/components/MakeupInputPanel.tsx`
+
 ```typescript
 const handleImageSelection = async (imageUrl: string) => {
   // Exemplo: pular validação para amostras
   if (isFromSample) {
-    setIsValidated(true)
-    onImageChange(imageUrl)
-    return
+    setIsValidated(true);
+    onImageChange(imageUrl);
+    return;
   }
-  
+
   // Validação normal para o resto
-  setIsValidated(false)
-  resetValidation()
-  const isValid = await validateAndSetImage(imageUrl)
+  setIsValidated(false);
+  resetValidation();
+  const isValid = await validateAndSetImage(imageUrl);
   if (isValid) {
-    setIsValidated(true)
-    onImageChange(imageUrl)
+    setIsValidated(true);
+    onImageChange(imageUrl);
   }
-}
+};
 ```
 
 ---
@@ -171,25 +192,28 @@ const handleImageSelection = async (imageUrl: string) => {
 ## Estados e Tipos
 
 ### ImageValidationState
+
 ```typescript
-type ImageValidationState = 'idle' | 'checking' | 'valid' | 'invalid'
+type ImageValidationState = "idle" | "checking" | "valid" | "invalid";
 ```
 
 ### FaceDetectionResult
+
 ```typescript
 type FaceDetectionResult = {
-  hasFace: boolean
-  detections: number
-  error?: string
-}
+  hasFace: boolean;
+  detections: number;
+  error?: string;
+};
 ```
 
 ### ValidationResult
+
 ```typescript
 type ValidationResult = {
-  isValid: boolean
-  message?: string  // Erro em vietnamita
-}
+  isValid: boolean;
+  message?: string; // Erro em vietnamita
+};
 ```
 
 ---
@@ -197,11 +221,13 @@ type ValidationResult = {
 ## Fluxo de Dados
 
 ### Entrada
+
 ```
 imageSource: string  // URL ou data URL de imagem
 ```
 
 ### Processamento
+
 ```typescript
 // No service
 1. Carregar modelo face-api.js
@@ -222,6 +248,7 @@ imageSource: string  // URL ou data URL de imagem
 ```
 
 ### Saída
+
 ```typescript
 {
   isValid: true | false,
@@ -234,20 +261,23 @@ imageSource: string  // URL ou data URL de imagem
 ## Imports Necessários
 
 ### Service
+
 ```typescript
-import * as faceapi from 'face-api.js'
+import * as faceapi from "face-api.js";
 ```
 
 ### Hook
+
 ```typescript
-import { useCallback, useState } from 'react'
-import { validateImage } from '@/features/ai-scan/services/face-detection-service'
+import { useCallback, useState } from "react";
+import { validateImage } from "@/features/ai-scan/services/face-detection-service";
 ```
 
 ### Component
+
 ```typescript
-import { useFaceValidation } from '@/features/ai-scan/hooks/useFaceValidation'
-import { Loader, AlertCircle } from 'lucide-react'
+import { useFaceValidation } from "@/features/ai-scan/hooks/useFaceValidation";
+import { Loader, AlertCircle } from "lucide-react";
 ```
 
 ---
@@ -255,23 +285,26 @@ import { Loader, AlertCircle } from 'lucide-react'
 ## Console Debugging
 
 ### Ver informações de detecção
+
 ```javascript
 // No console do browser
-localStorage.setItem('DEBUG_FACE_DETECTION', 'true')
+localStorage.setItem("DEBUG_FACE_DETECTION", "true");
 
 // Depois, no service:
-if (localStorage.getItem('DEBUG_FACE_DETECTION')) {
-  console.log('Faces detected:', detections.length)
+if (localStorage.getItem("DEBUG_FACE_DETECTION")) {
+  console.log("Faces detected:", detections.length);
 }
 ```
 
 ### Verificar se modelo carregou
+
 ```javascript
 // No console
-typeof faceapi !== 'undefined' ? 'Carregado ✓' : 'Não carregado ✗'
+typeof faceapi !== "undefined" ? "Carregado ✓" : "Não carregado ✗";
 ```
 
 ### Ver requisições do CDN
+
 ```
 1. Abrir DevTools (F12)
 2. Ir para aba "Network"
@@ -284,55 +317,56 @@ typeof faceapi !== 'undefined' ? 'Carregado ✓' : 'Não carregado ✗'
 ## Casos de Uso Comuns
 
 ### 1. Validar múltiplas imagens em sequência
+
 ```typescript
-const images = [url1, url2, url3]
+const images = [url1, url2, url3];
 
 for (const imageUrl of images) {
-  const isValid = await validateAndSetImage(imageUrl)
+  const isValid = await validateAndSetImage(imageUrl);
   if (isValid) {
-    processImage(imageUrl)
+    processImage(imageUrl);
   }
 }
 ```
 
 ### 2. Validação com timeout
+
 ```typescript
 const validateWithTimeout = async (imageUrl: string, timeoutMs = 5000) => {
   const timeoutPromise = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error('Timeout')), timeoutMs)
-  )
-  
-  return Promise.race([
-    validateAndSetImage(imageUrl),
-    timeoutPromise
-  ])
-}
+    setTimeout(() => reject(new Error("Timeout")), timeoutMs),
+  );
+
+  return Promise.race([validateAndSetImage(imageUrl), timeoutPromise]);
+};
 ```
 
 ### 3. Revalidar imagem
+
 ```typescript
 const revalidateImage = async () => {
-  resetValidation()
-  const isValid = await validateAndSetImage(currentImage)
-  setIsValidated(isValid)
-}
+  resetValidation();
+  const isValid = await validateAndSetImage(currentImage);
+  setIsValidated(isValid);
+};
 ```
 
 ### 4. Batch validation com progress
+
 ```typescript
 const validateBatch = async (images: string[]) => {
-  const results: boolean[] = []
-  
+  const results: boolean[] = [];
+
   for (let i = 0; i < images.length; i++) {
-    const isValid = await validateAndSetImage(images[i])
-    results.push(isValid)
-    
+    const isValid = await validateAndSetImage(images[i]);
+    results.push(isValid);
+
     // Progress callback
-    onProgress((i + 1) / images.length)
+    onProgress((i + 1) / images.length);
   }
-  
-  return results
-}
+
+  return results;
+};
 ```
 
 ---
@@ -340,26 +374,28 @@ const validateBatch = async (images: string[]) => {
 ## Tratamento de Erros
 
 ### Try-Catch Pattern
+
 ```typescript
 try {
-  const isValid = await validateAndSetImage(imageUrl)
+  const isValid = await validateAndSetImage(imageUrl);
   if (isValid) {
     // Success path
   }
 } catch (error) {
-  console.error('Validation error:', error)
-  showErrorMessage('Falha ao validar imagem')
+  console.error("Validation error:", error);
+  showErrorMessage("Falha ao validar imagem");
 }
 ```
 
 ### Error Messages em Vietnamita
+
 ```typescript
 const errorMessages: Record<string, string> = {
-  'no_face': 'Không tìm thấy khuôn mặt, vui lòng chụp lại rõ hơn',
-  'model_error': 'Không thể tải mô hình AI',
-  'image_error': 'Không thể tải ảnh, vui lòng kiểm tra URL',
-  'network_error': 'Lỗi kết nối mạng',
-}
+  no_face: "No face detected, please retake the photo more clearly",
+  model_error: "Unable to load AI model",
+  image_error: "Unable to load image, please check the URL",
+  network_error: "Network connection error",
+};
 ```
 
 ---
@@ -367,31 +403,34 @@ const errorMessages: Record<string, string> = {
 ## Performance Tips
 
 ### Cache do Modelo
+
 ```typescript
 // Automaticamente cached no localStorage após primeiro carregamento
 // Para limpar:
-localStorage.clear()
+localStorage.clear();
 
 // Para verificar:
-localStorage.getItem('face-api-models-loaded') // true/false
+localStorage.getItem("face-api-models-loaded"); // true/false
 ```
 
 ### Lazy Loading
+
 ```typescript
 // Modelo carrega só quando necessário (primeira seleção de imagem)
 // Não afeta initial page load
 ```
 
 ### Memory Management
+
 ```typescript
 // Se trabalhar com muitas imagens:
-const { resetValidation } = useFaceValidation()
+const { resetValidation } = useFaceValidation();
 
 useEffect(() => {
   return () => {
-    resetValidation()  // Limpeza ao desmontar
-  }
-}, [resetValidation])
+    resetValidation(); // Limpeza ao desmontar
+  };
+}, [resetValidation]);
 ```
 
 ---
@@ -401,17 +440,17 @@ useEffect(() => {
 ```typescript
 // Para adicionar suporte a teclado no futuro:
 const handleKeyDown = (e: React.KeyboardEvent) => {
-  if (e.key === 'Enter') {
+  if (e.key === "Enter") {
     if (isValidated && !isProcessing) {
-      onProcess()
+      onProcess();
     }
   }
-  
-  if (e.key === 'Escape') {
-    resetValidation()
-    setIsValidated(false)
+
+  if (e.key === "Escape") {
+    resetValidation();
+    setIsValidated(false);
   }
-}
+};
 ```
 
 ---

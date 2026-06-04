@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, LogOut, UserRound, History } from 'lucide-react'
-import { useAuth } from '@/features/auth/hooks/useAuth'
+import { useAuth } from '@/features/auth/presentation/hooks/useAuth'
 import { useToast } from '@/shared/hooks/useToast'
 import { getUserInitials } from '@/shared/lib/profile'
 import { cn } from '@/shared/lib/cn'

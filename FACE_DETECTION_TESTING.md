@@ -5,6 +5,7 @@
 ### Manual Testing Steps
 
 1. **Start the dev server:**
+
    ```bash
    npm run dev
    ```
@@ -12,6 +13,7 @@
 2. **Navigate to AI Scan page** and test the following scenarios:
 
 ### Test Case 1: Valid Image (Face Detected) ✓
+
 - Upload/select an image with a clear face
 - Expected behavior:
   - Shows "Đang kiểm tra ảnh..." (Checking image...)
@@ -20,27 +22,31 @@
   - Image preview displays
 
 ### Test Case 2: Invalid Image (No Face) ✗
+
 - Upload/select an image without a face (landscape, object, etc.)
 - Expected behavior:
-  - Shows "Đang kiểm tra ảnh..." (Checking image...)
+  - Shows "Checking image..." (Checking image...)
   - After 1-2 seconds: error message appears
-  - Error text: "Không tìm thấy khuôn mặt, vui lòng chụp lại rõ hơn"
+  - Error text: "No face detected, please retake the photo more clearly"
   - "Start Processing" button remains disabled
   - User can select another image
 
 ### Test Case 3: Multiple Faces
+
 - Upload/select image with multiple faces
 - Expected behavior:
   - Should pass validation (detects at least 1 face)
   - Proceeding should work normally
 
 ### Test Case 4: Invalid Image URL
+
 - Enter invalid/broken image URL
 - Expected behavior:
   - Error message after validation
   - "Start Processing" remains disabled
 
 ### Test Case 5: Sample Images
+
 - Click on the pre-loaded sample selfies
 - Expected behavior:
   - Validation should pass (pre-vetted images)
@@ -49,6 +55,7 @@
 ## Debugging
 
 ### Check Console Logs
+
 ```javascript
 // In browser console, you should see:
 // "Face detection models loaded successfully"
@@ -112,20 +119,20 @@ To add automated tests:
 
 ```typescript
 // In tests/face-detection.test.ts
-import { validateImage } from '@/features/ai-scan/services/face-detection-service'
+import { validateImage } from "@/features/ai-scan/services/face-detection-service";
 
-describe('Face Detection', () => {
-  it('should detect faces in valid images', async () => {
-    const result = await validateImage('path/to/valid/image.jpg')
-    expect(result.isValid).toBe(true)
-  })
+describe("Face Detection", () => {
+  it("should detect faces in valid images", async () => {
+    const result = await validateImage("path/to/valid/image.jpg");
+    expect(result.isValid).toBe(true);
+  });
 
-  it('should reject images without faces', async () => {
-    const result = await validateImage('path/to/landscape.jpg')
-    expect(result.isValid).toBe(false)
-    expect(result.message).toContain('Không tìm thấy')
-  })
-})
+  it("should reject images without faces", async () => {
+    const result = await validateImage("path/to/landscape.jpg");
+    expect(result.isValid).toBe(false);
+    expect(result.message).toContain("Không tìm thấy");
+  });
+});
 ```
 
 ## Browser DevTools Tips
