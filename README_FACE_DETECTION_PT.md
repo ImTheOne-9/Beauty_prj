@@ -9,6 +9,7 @@ Você agora possui um sistema completo de **validação de imagens no cliente** 
 ## 🚀 Começar Rápido
 
 ### 1. Verificar Instalação
+
 ```bash
 cd e:\Beauty\Beauty_prj
 npm list face-api.js
@@ -16,12 +17,14 @@ npm list face-api.js
 ```
 
 ### 2. Iniciar o Servidor
+
 ```bash
 npm run dev
 # Acesse http://localhost:5173
 ```
 
 ### 3. Testar a Funcionalidade
+
 1. Vá para a página **AI Scan / Makeup Studio**
 2. Selecione uma imagem:
    - ✅ Com rosto → Validação passa, botão fica habilitado
@@ -33,15 +36,17 @@ npm run dev
 ## 📁 Arquivos Criados/Modificados
 
 ### Novos Arquivos (2)
+
 ```
 ✓ src/features/ai-scan/services/face-detection-service.ts (90 linhas)
   └─ Serviço de detecção de rosto usando face-api.js
-  
+
 ✓ src/features/ai-scan/hooks/useFaceValidation.ts (50 linhas)
   └─ Hook React para gerenciar estado de validação
 ```
 
 ### Arquivo Modificado (1)
+
 ```
 ✓ src/features/ai-scan/components/MakeupInputPanel.tsx
   └─ Integrada validação no fluxo de seleção de imagem
@@ -50,6 +55,7 @@ npm run dev
 ```
 
 ### Documentação Criada (4)
+
 ```
 ✓ FACE_DETECTION_IMPLEMENTATION.md    - Visão geral completa
 ✓ FACE_DETECTION_TESTING.md          - Guia de testes
@@ -62,6 +68,7 @@ npm run dev
 ## 💡 Como Funciona
 
 ### Fluxo Básico
+
 ```
 Usuário seleciona imagem
          ↓
@@ -80,6 +87,7 @@ Rosto?      Sem rosto?
 ```
 
 ### Componentes Envolvidos
+
 ```
 MakeupInputPanel (Component)
     ↓
@@ -95,12 +103,14 @@ face-api.js (Biblioteca externa)
 ## 🎯 Benefícios
 
 ### Para Usuários
+
 - ⚡ Feedback imediato (1-2 segundos)
 - 📝 Mensagens de erro em vietnamita
 - ♻️ Fácil tentar novamente
 - ✨ Interface clara e intuitiva
 
 ### Para a Empresa
+
 - 💰 Economiza chamadas API (30-50% redução estimada)
 - 🚀 Carregamento mais rápido (não espera resposta do servidor)
 - 📊 Melhor análise de dados (apenas imagens válidas)
@@ -111,6 +121,7 @@ face-api.js (Biblioteca externa)
 ## 📊 Especificações Técnicas
 
 ### Modelo AI Usado
+
 - **Nome**: TinyFaceDetector (da face-api.js)
 - **Tamanho**: ~70 KB (muito leve)
 - **Tempo**: 1-2 segundos por imagem
@@ -118,6 +129,7 @@ face-api.js (Biblioteca externa)
 - **Carregamento**: CDN (primeira vez), depois cache
 
 ### Estados de Validação
+
 ```typescript
 'idle'     - Inicial, sem imagem
 'checking' - Analisando imagem
@@ -126,9 +138,10 @@ face-api.js (Biblioteca externa)
 ```
 
 ### Mensagens em Vietnamita
+
 ```
 ✓ Válida: (nenhuma mensagem, apenas habilita botão)
-✗ Sem rosto: "Không tìm thấy khuôn mặt, vui lòng chụp lại rõ hơn"
+✗ Sem rosto: "No face detected, please retake the photo more clearly"
 ✗ Erro: "Unable to load face detection models..."
 ```
 
@@ -137,6 +150,7 @@ face-api.js (Biblioteca externa)
 ## 🧪 Testando a Implementação
 
 ### Teste 1: Imagem com Rosto (Deve Passar)
+
 ```
 1. Faça upload de selfie clara
 2. Observe: "Đang kiểm tra ảnh..." por 1-2 segundos
@@ -147,6 +161,7 @@ face-api.js (Biblioteca externa)
 ```
 
 ### Teste 2: Imagem sem Rosto (Deve Falhar)
+
 ```
 1. Faça upload de foto de paisagem ou objeto
 2. Observe: "Đang kiểm tra ảnh..." por 1-2 segundos
@@ -157,6 +172,7 @@ face-api.js (Biblioteca externa)
 ```
 
 ### Teste 3: URL de Imagem
+
 ```
 1. Clique na aba "url"
 2. Cole URL de imagem válida
@@ -165,6 +181,7 @@ face-api.js (Biblioteca externa)
 ```
 
 ### Teste 4: Imagem de Exemplo
+
 ```
 1. Clique em um dos 6 exemplos pré-carregados
 2. Todos devem passar (imagens pré-aprovadas)
@@ -177,47 +194,53 @@ face-api.js (Biblioteca externa)
 
 Para mais informações, consulte:
 
-| Documento | Conteúdo |
-|-----------|----------|
-| **FACE_DETECTION_IMPLEMENTATION.md** | Overview completo, exemplos de uso |
-| **FACE_DETECTION_TESTING.md** | Casos de teste, debugging, troubleshooting |
-| **FACE_DETECTION_ARCHITECTURE.md** | Diagramas, fluxos de dados, timelines |
-| **FACE_DETECTION_SUMMARY.md** | Resumo técnico, checklist de deploy |
+| Documento                            | Conteúdo                                   |
+| ------------------------------------ | ------------------------------------------ |
+| **FACE_DETECTION_IMPLEMENTATION.md** | Overview completo, exemplos de uso         |
+| **FACE_DETECTION_TESTING.md**        | Casos de teste, debugging, troubleshooting |
+| **FACE_DETECTION_ARCHITECTURE.md**   | Diagramas, fluxos de dados, timelines      |
+| **FACE_DETECTION_SUMMARY.md**        | Resumo técnico, checklist de deploy        |
 
 ---
 
 ## 🛠️ Se Precisar Personalizar
 
 ### Mudar Mensagem de Erro
+
 **Arquivo**: `src/features/ai-scan/services/face-detection-service.ts`
+
 ```typescript
 // Linha ~62
-message: 'Không tìm thấy khuôn mặt, vui lòng chụp lại rõ hơn'
+message: "No face detected, please retake the photo more clearly";
 // ↓ Pode mudar para:
-message: 'Sua mensagem personalizada aqui'
+message: "Sua mensagem personalizada aqui";
 ```
 
 ### Desabilitar Validação para Imagens de Exemplo
+
 **Arquivo**: `src/features/ai-scan/components/MakeupInputPanel.tsx`
+
 ```typescript
 const handleImageSelection = async (imageUrl: string) => {
   // Pular validação para samples se necessário
   if (isSample) {
-    onImageChange(imageUrl)
-    return
+    onImageChange(imageUrl);
+    return;
   }
-  
+
   // ... resto do código de validação
-}
+};
 ```
 
 ### Ajustar Timeout de Validação
+
 **Arquivo**: `src/features/ai-scan/services/face-detection-service.ts`
+
 ```typescript
 // Adicionar timeout se necessário
 const timeoutPromise = new Promise((_, reject) =>
-  setTimeout(() => reject(new Error('Validation timeout')), 5000)
-)
+  setTimeout(() => reject(new Error("Validation timeout")), 5000),
+);
 ```
 
 ---
@@ -225,13 +248,15 @@ const timeoutPromise = new Promise((_, reject) =>
 ## ⚡ Performance
 
 ### Tempos Esperados
-| Evento | Tempo | Observação |
-|--------|-------|-----------|
-| Primeira imagem | 1-2s modelo + 1-2s análise | Modelo baixa do CDN |
-| Próximas imagens | 1-2s análise | Modelo em cache |
-| Sample images | ~1s | Pré-analisadas |
+
+| Evento           | Tempo                      | Observação          |
+| ---------------- | -------------------------- | ------------------- |
+| Primeira imagem  | 1-2s modelo + 1-2s análise | Modelo baixa do CDN |
+| Próximas imagens | 1-2s análise               | Modelo em cache     |
+| Sample images    | ~1s                        | Pré-analisadas      |
 
 ### Otimizações Implementadas
+
 - ✅ Carregamento lazy do modelo (só quando necessário)
 - ✅ Cache automático após primeiro carregamento
 - ✅ Modelo leve (70KB, não inteiro em bundle)
@@ -251,15 +276,19 @@ const timeoutPromise = new Promise((_, reject) =>
 ## 🚨 Solução de Problemas
 
 ### Problema: Validação não inicia
+
 **Solução**: Verifique no console se há erros de CORS
 
 ### Problema: Modelo não carrega do CDN
+
 **Solução**: Verifique acesso à internet, ou limpe cache
 
 ### Problema: Rosto não é detectado em imagem clara
+
 **Solução**: Tente ângulo frontal, melhor iluminação, ou face maior
 
 ### Problema: Muito lento
+
 **Solução**: Normal na primeira imagem. Próximas mais rápidas.
 
 ---
@@ -267,16 +296,19 @@ const timeoutPromise = new Promise((_, reject) =>
 ## 📞 Próximos Passos
 
 ### Agora
+
 - ✅ Testar manualmente (5-10 minutos)
 - ✅ Ler documentação se tiver dúvidas
 
 ### Depois
+
 - 📋 Code review por colega
 - 🧪 Testes automatizados (opcional)
 - 🚀 Deploy em staging
 - ✨ Deploy em produção
 
 ### Futuro (Fase 2)
+
 - Mostrar bounding box do rosto detectado
 - Sugerir melhorias de foto (ângulo, iluminação)
 - Validar qualidade da foto, não só presença de rosto
@@ -287,10 +319,12 @@ const timeoutPromise = new Promise((_, reject) =>
 ## 📊 Impacto Estimado
 
 ### Antes
+
 - Toda imagem upload → API call (dinheiro gasto)
 - Sem feedback imediato (espera 5-10s)
 
-### Depois  
+### Depois
+
 - Apenas imagens válidas → API call (economiza dinheiro)
 - Feedback imediato (1-2s)
 - Usuários satisfeitos com melhor UX
@@ -302,11 +336,13 @@ const timeoutPromise = new Promise((_, reject) =>
 ## 🎓 Referências Técnicas
 
 ### face-api.js
+
 - 📖 Docs: https://github.com/justadudewhohacks/face-api.js
 - 🧠 Model: TinyFaceDetector (otimizado para mobile)
 - 🔗 CDN: cdn.jsdelivr.net/npm/face-api.js@0.22.2
 
 ### Alternativas Futuras
+
 - **MediaPipe**: Mais pesado, melhor para mobile
 - **face-recognition.js**: Para reconhecimento facial
 - **TensorFlow.js**: Framework geral de ML
