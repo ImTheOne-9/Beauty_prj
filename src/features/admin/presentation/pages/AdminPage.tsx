@@ -2,33 +2,16 @@ import { useEffect, useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   Camera,
-  CheckCircle2,
-  Clock3,
-  Database,
-  LayoutGrid,
-  ListChecks,
-  Megaphone,
   PencilLine,
-  Rocket,
   ShieldCheck,
-  Sparkles,
   Store,
   Trash2,
-  Users,
-  Wrench,
-  Activity,
-  Wifi,
   Search,
-  DollarSign,
   RefreshCw,
   UserCheck,
   ChevronLeft,
   ChevronRight,
-  ExternalLink,
   X,
-  CreditCard,
-  BadgeCheck,
-  Key,
 } from 'lucide-react'
 import { Button } from '@/shared/components/ui/Button'
 import { Card } from '@/shared/components/ui/Card'
@@ -36,36 +19,21 @@ import { Input } from '@/shared/components/ui/Input'
 import { Loader } from '@/shared/components/ui/Loader'
 import { useAuth } from '@/features/auth/presentation/hooks/useAuth'
 import { useAuthStore } from '@/features/auth/presentation/store/auth-store'
-import { supabase } from '@/services/supabase/client'
-import {
-  databaseService,
-  type AdminProductRecord,
-  type AdminProductVariantRecord,
-} from '@/services/supabase/database-service'
+import type { AdminProductRecord, AdminProductVariantRecord } from '@/application/dtos/admin'
+import { useDependencies } from '@/app/providers/DependencyProvider'
 import { canAccessAdminSection, getAdminRoleLabel, type AdminSection, type AdminRole } from '@/shared/lib/admin'
 import { parseProductTags } from '@/shared/lib/product-tags'
 import { type Order } from '@/core/entities'
 import { cn } from '@/shared/lib/cn'
-import { ProductWithConfigModal } from '../components/Productwithconfigmodal'
-
-const sidebarSections: Array<{
-  id: AdminSection
-  label: string
-  description: string
-  icon: typeof LayoutGrid
-}> = [
-    { id: 'overview', label: 'Overview', description: 'System status and metrics', icon: LayoutGrid },
-    { id: 'products', label: 'Products', description: 'Manage goods and catalog', icon: Store },
-    { id: 'categories', label: 'Categories', description: 'Manage product categories', icon: ListChecks },
-    { id: 'product-configs', label: 'Variants', description: 'Manage product shades and textures', icon: Sparkles },
-    { id: 'scans', label: 'Scans', description: 'View scan history and simulation', icon: Camera },
-    { id: 'access', label: 'Access', description: 'Roles and permissions', icon: Users },
-    { id: 'plans', label: 'Plans', description: 'Manage subscription plans', icon: CreditCard },
-    { id: 'subscriptions', label: 'Subscriptions', description: 'Manage user subscriptions', icon: BadgeCheck },
-    { id: 'api-keys', label: 'API Keys', description: 'Manage API Keys', icon: Key },
-    { id: 'settings', label: 'Settings', description: 'Platform and environment', icon: Wrench },
-    { id: 'revenue', label: 'Revenue', description: 'Orders and sales', icon: DollarSign },
-  ]
+import { AdminSidebar } from '../components/AdminSidebar'
+import { AdminSettingsSection } from '../components/AdminSettingsSection'
+import { AdminOverviewSection } from '../components/AdminOverviewSection'
+import { AdminProductsSection } from '../components/AdminProductsSection'
+import { AdminCategoriesSection } from '../components/AdminCategoriesSection'
+import { AdminSectionTitle } from '../components/AdminSectionTitle'
+import { AdminProductVariantsSection } from '../components/AdminProductVariantsSection'
+import { adminNavigationSections } from '../config/admin-navigation'
+import { useAdminHealth } from '../hooks/useAdminHealth'
 
 // type ApiKeyFormState = {
 //   id: string
@@ -155,9 +123,6 @@ const EMPTY_PLAN = {
 //   reason: '',
 // }
 
-const PRODUCT_PLACEHOLDER_IMAGE =
-  'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?auto=format&fit=crop&w=400&q=80'
-
 function formatDate(value: string) {
   return new Date(value).toLocaleString('vi-VN', {
     month: 'short',
@@ -195,24 +160,6 @@ function formatDate(value: string) {
 //     reason: recommendation.reason,
 //   }
 // }
-
-function AdminSectionTitle({
-  eyebrow,
-  title,
-  description,
-}: {
-  eyebrow: string
-  title: string
-  description: string
-}) {
-  return (
-    <div>
-      <p className="text-xs uppercase tracking-[0.24em] text-slate-500">{eyebrow}</p>
-      <h2 className="mt-2 font-admin text-3xl font-semibold text-admin-ink">{title}</h2>
-      <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">{description}</p>
-    </div>
-  )
-}
 
 function SubForm({ initial, plans, users, onSubmit, isPending }: {
   initial: any | null
@@ -308,6 +255,9 @@ function SubForm({ initial, plans, users, onSubmit, isPending }: {
 }
 
 export default function AdminPage() {
+  const { useCases } = useDependencies()
+  const adminUseCases = useCases.admin
+  const { pingTime, pingStatus, testPing } = useAdminHealth(adminUseCases.pingDatabase)
   const { adminRole, signOut, user: currentAuthUser } = useAuth()
   const queryClient = useQueryClient()
   const [activeSection, setActiveSection] = useState<AdminSection>('overview')
@@ -344,10 +294,6 @@ export default function AdminPage() {
   const [newUserPassword, setNewUserPassword] = useState('')
   const [newUserRole, setNewUserRole] = useState<AdminRole | 'user'>('user')
 
-  // Ping Check
-  const [pingTime, setPingTime] = useState<number | null>(null)
-  const [pingStatus, setPingStatus] = useState<'idle' | 'pinging' | 'success' | 'failed'>('idle')
-
   const [planModalOpen, setPlanModalOpen] = useState(false)
   const [planForm, setPlanForm] = useState(EMPTY_PLAN)
   const [selectedPlan, setSelectedPlan] = useState<any>(null)
@@ -377,7 +323,7 @@ export default function AdminPage() {
   // ✅ GIỮ NGUYÊN khai báo này:
   const productConfigsQuery = useQuery({
     queryKey: ['admin', 'product-configs'],
-    queryFn: () => databaseService.getAdminProductVariants(),
+    queryFn: () => adminUseCases.getAdminProductVariants(),
   })
 
   // ✅ THÊM existingConfigs ngay đây:
@@ -421,77 +367,50 @@ export default function AdminPage() {
     }
     setUserModalOpen(true)
   }
-  const testPing = async () => {
-    setPingStatus('pinging')
-    const start = performance.now()
-    try {
-      await supabase.from('products').select('id').limit(1)
-      setPingTime(Math.round(performance.now() - start))
-      setPingStatus('success')
-    } catch {
-      setPingTime(-1)
-      setPingStatus('failed')
-    }
-  }
-
-  // Auto ping on mount
-  useEffect(() => {
-    void testPing()
-  }, [])
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [activeSection])
   // Queries
   const keysQuery = useQuery({
     queryKey: ['admin', 'api-keys'],
-    queryFn: () => databaseService.getAdminApiKeys(),
+    queryFn: () => adminUseCases.getAdminApiKeys(),
   })
 
   const productsQuery = useQuery({
     queryKey: ['admin', 'products'],
-    queryFn: () => databaseService.getAdminProducts(),
+    queryFn: () => adminUseCases.getAdminProducts(),
   })
 
   const scansQuery = useQuery({
     queryKey: ['admin', 'scans'],
-    queryFn: () => databaseService.getAdminScans(),
+    queryFn: () => adminUseCases.getAdminScans(),
   })
 
   const categoriesQuery = useQuery({
     queryKey: ['admin', 'categories'],
-    queryFn: () => databaseService.getAdminCategories(),
+    queryFn: () => adminUseCases.getAdminCategories(),
   })
 
 
   const usersQuery = useQuery({
-  queryKey: ['admin', 'profiles'],
-  queryFn: async () => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .select(`
-        *,
-        plan:plans(id, name, slug, price, billing_interval)
-      `) as { data: any[] | null; error: any }  // ← cast ở đây
-    if (error) throw error
-    return data ?? []
-  },
-})
-
+    queryKey: ['admin', 'profiles'],
+    queryFn: () => adminUseCases.getProfilesWithPlans(),
+  })
   const ordersQuery = useQuery({
     queryKey: ['admin', 'orders'],
-    queryFn: async () => databaseService.getOrders(),
+    queryFn: async () => adminUseCases.getOrders(),
   })
 
   const plansQuery = useQuery({
     queryKey: ['admin', 'plans'],
-    queryFn: () => databaseService.getPlans(),
+    queryFn: () => adminUseCases.getPlans(),
   })
 
   
 
   // Lookups & Filters
   const tabs = useMemo(
-    () => sidebarSections.filter((section) => canAccessAdminSection(adminRole, section.id)),
+    () => adminNavigationSections.filter((section) => canAccessAdminSection(adminRole, section.id)),
     [adminRole],
   )
 
@@ -508,10 +427,6 @@ export default function AdminPage() {
       setActiveSection(tabs[0].id)
     }
   }, [activeSection, tabs])
-
-  const productLookup = useMemo(() => {
-    return new Map((productsQuery.data ?? []).map((product) => [product.id, product]))
-  }, [productsQuery.data])
 
   // const scanLookup = useMemo(() => {
   //   return new Map((scansQuery.data ?? []).map((scan) => [scan.id, scan]))
@@ -682,9 +597,9 @@ export default function AdminPage() {
       if (!payload.key_value) throw new Error('Please provide a key value.')
 
       if (apiKeyForm.id) {
-        return databaseService.updateApiKey(apiKeyForm.id, payload)
+        return adminUseCases.updateApiKey(apiKeyForm.id, payload)
       }
-      return databaseService.createApiKey(payload)
+      return adminUseCases.createApiKey(payload)
     },
     onSuccess: async () => {
       setApiKeyForm(EMPTY_FORM)
@@ -701,20 +616,20 @@ export default function AdminPage() {
         // Set tất cả còn lại thành inactive
         await Promise.all(
           others.map((k: any) =>
-            databaseService.updateApiKey(k.id, { is_active: false })
+            adminUseCases.updateApiKey(k.id, { is_active: false })
           )
         )
       }
 
       // Sau đó update key được chọn
-      return databaseService.updateApiKey(id, { is_active })
+      return adminUseCases.updateApiKey(id, { is_active })
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['admin', 'api-keys'] })
     },
   })
   const deleteApiKeyMutation = useMutation({
-    mutationFn: async (id: string) => databaseService.deleteApiKey(id),
+    mutationFn: async (id: string) => adminUseCases.deleteApiKey(id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['admin', 'api-keys'] })
       await queryClient.invalidateQueries({ queryKey: ['catalog', 'api-keys'] })
@@ -724,7 +639,7 @@ export default function AdminPage() {
 
 
   const deleteProductMutation = useMutation({
-    mutationFn: async (id: string) => databaseService.deleteProduct(id),
+    mutationFn: async (id: string) => adminUseCases.deleteProduct(id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['admin', 'products'] })
       await queryClient.invalidateQueries({ queryKey: ['catalog', 'products'] })
@@ -744,10 +659,10 @@ export default function AdminPage() {
       }
 
       if (categoryForm.id) {
-        return databaseService.updateCategory(categoryForm.id, input)
+        return adminUseCases.updateCategory(categoryForm.id, input)
       }
 
-      return databaseService.createCategory(input)
+      return adminUseCases.createCategory(input)
     },
     onSuccess: async () => {
       setCategoryForm(emptyCategoryForm)
@@ -756,7 +671,7 @@ export default function AdminPage() {
   })
 
   const deleteCategoryMutation = useMutation({
-    mutationFn: async (id: string) => databaseService.deleteCategory(id),
+    mutationFn: async (id: string) => adminUseCases.deleteCategory(id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['admin', 'categories'] })
     },
@@ -765,7 +680,7 @@ export default function AdminPage() {
   
 
   const deleteProductConfigMutation = useMutation({
-    mutationFn: async (id: string) => databaseService.deleteProductVariant(id),
+    mutationFn: async (id: string) => adminUseCases.deleteProductVariant(id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['admin', 'product-configs'] })
     },
@@ -773,7 +688,7 @@ export default function AdminPage() {
 
 
   const deleteScanMutation = useMutation({
-    mutationFn: async (id: string) => databaseService.deleteScan(id),
+    mutationFn: async (id: string) => adminUseCases.deleteScan(id),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['admin', 'scans'] })
       await queryClient.invalidateQueries({ queryKey: ['scan-history'] })
@@ -782,18 +697,18 @@ export default function AdminPage() {
   })
 
   const createPlanMutation = useMutation({
-    mutationFn: (plan: any) => databaseService.createPlan(plan),
+    mutationFn: (plan: any) => adminUseCases.createPlan(plan),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'plans'] }),
   })
 
   const updatePlanMutation = useMutation({
     mutationFn: ({ id, patch }: { id: string; patch: any }) =>
-      databaseService.updatePlan(id, patch),
+      adminUseCases.updatePlan(id, patch),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'plans'] }),
   })
 
   const deletePlanMutation = useMutation({
-    mutationFn: (id: string) => databaseService.deletePlan(id),
+    mutationFn: (id: string) => adminUseCases.deletePlan(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'plans'] }),
   })
 
@@ -801,7 +716,7 @@ export default function AdminPage() {
   // User Manager Mutations
   const updateUserRoleMutation = useMutation({
     mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
-      return databaseService.updateUserRole(userId, role)
+      return adminUseCases.updateUserRole(userId, role)
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['admin', 'profiles'] })
@@ -817,7 +732,7 @@ export default function AdminPage() {
       if (!newUserPassword || newUserPassword.length < 8) {
         throw new Error('Password must be at least 8 characters.')
       }
-      return databaseService.createUserWithRole(
+      return adminUseCases.createUserWithRole(
         newUserEmail,
         newUserPassword,
         newUserFirstName,
@@ -837,7 +752,7 @@ export default function AdminPage() {
 
   const deleteUserRoleMutation = useMutation({
     mutationFn: async (userId: string) => {
-      return databaseService.deleteUserRole(userId)
+      return adminUseCases.deleteUserRole(userId)
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['admin', 'profiles'] })
@@ -846,24 +761,18 @@ export default function AdminPage() {
   })
 
   const updateUserPlanMutation = useMutation({
-    mutationFn: async ({ userId, planId, role, firstName, lastName }: { userId: string; planId: string, role: string, firstName: string, lastName: string }) => {
-      const { error } = await supabase
-        .from('profiles')
-        .update({ plan_id: planId || null, role: role, first_name: firstName, last_name: lastName } as any)  // ← thêm `as any`
-        .eq('id', userId)
-      if (error) throw error
+    mutationFn: async ({ userId, planId, role, firstName, lastName }: { userId: string; planId: string; role: string; firstName: string; lastName: string }) => {
+      await adminUseCases.updateUserProfile({ userId, planId, role, firstName, lastName })
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['admin', 'profiles'] })
       await useAuthStore.getState().initialize()
     },
   })
-
-
   // Order & Revenue Mutations
   const updateOrderStatusMutation = useMutation({
     mutationFn: async ({ orderId, status }: { orderId: string; status: 'pending' | 'completed' | 'canceled' }) => {
-      return databaseService.updateOrderStatus(orderId, status)
+      return adminUseCases.updateOrderStatus(orderId, status)
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['admin', 'orders'] })
@@ -872,7 +781,7 @@ export default function AdminPage() {
 
   const deleteOrderMutation = useMutation({
     mutationFn: async (orderId: string) => {
-      return databaseService.deleteOrder(orderId)
+      return adminUseCases.deleteOrder(orderId)
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['admin', 'orders'] })
@@ -909,7 +818,7 @@ export default function AdminPage() {
         status: 'pending',
         createdAt: new Date().toISOString(),
       }
-      return databaseService.createOrder(newOrder)
+      return adminUseCases.createOrder(newOrder)
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['admin', 'orders'] })
@@ -918,22 +827,22 @@ export default function AdminPage() {
 
   const subscriptionsQuery = useQuery({
     queryKey: ['admin', 'subscriptions'],
-    queryFn: () => databaseService.getSubscriptions(),
+    queryFn: () => adminUseCases.getSubscriptions(),
   })
 
   const createSubMutation = useMutation({
-    mutationFn: (input: any) => databaseService.createSubscription(input),
+    mutationFn: (input: any) => adminUseCases.createSubscription(input),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'subscriptions'] }),
   })
 
   const updateSubMutation = useMutation({
     mutationFn: ({ id, patch }: { id: string; patch: any }) =>
-      databaseService.updateSubscription(id, patch),
+      adminUseCases.updateSubscription(id, patch),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'subscriptions'] }),
   })
 
   const cancelSubMutation = useMutation({
-    mutationFn: (id: string) => databaseService.cancelSubscription(id),
+    mutationFn: (id: string) => adminUseCases.cancelSubscription(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'subscriptions'] }),
   })
 
@@ -1013,621 +922,128 @@ export default function AdminPage() {
   return (
     <section className="admin-shell section-shell min-h-screen bg-admin-surface pb-12 pt-4">
       <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
-        {/* Sidebar Nav */}
-        <aside className="admin-panel sticky top-[calc(var(--app-header-height)+1rem)] h-fit p-3">
-          <div className="rounded-lg border border-admin-border bg-admin-surface p-4">
-            <div className="inline-flex items-center gap-2 rounded-md border border-admin-border bg-white px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-admin-accent">
-              <ShieldCheck className="h-4 w-4" />
-              {getAdminRoleLabel(adminRole)}
-            </div>
-            <h1 className="mt-3 font-admin text-2xl font-semibold text-admin-ink">Dashboard</h1>
-            <p className="mt-2 text-sm leading-6 text-admin-muted">
-              Manage product data, skin scan history, and user access roles in real-time.
-            </p>
-          </div>
-
-          <nav className="mt-4 space-y-2">
-            {tabs.map((section) => {
-              const Icon = section.icon
-              const active = activeSection === section.id
-
-              return (
-                <button
-                  key={section.id}
-                  type="button"
-                  onClick={() => setActiveSection(section.id)}
-                  className={`w-full rounded-lg border px-3 py-2.5 text-left transition ${active
-                    ? 'border-admin-border bg-slate-100 text-admin-ink'
-                    : 'border-transparent bg-white text-admin-muted hover:border-admin-border hover:bg-admin-surface hover:text-admin-ink'
-                    }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className={`rounded-md p-2 ${active ? 'bg-white text-admin-ink shadow-sm' : 'bg-admin-surface text-admin-muted'}`}>
-                      <Icon className="h-4 w-4" />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="font-semibold">{section.label}</p>
-                      <p className="mt-0.5 text-xs leading-5 text-admin-muted">{section.description}</p>
-                    </div>
-                  </div>
-                </button>
-              )
-            })}
-          </nav>
-
-          <div className="mt-4 space-y-2">
-            <Button
-              className="admin-primary w-full justify-center"
-              onClick={() => {
-                void queryClient.invalidateQueries({ queryKey: ['admin'] })
-                void testPing()
-              }}
-            >
-              <RefreshCw className="mr-2 h-4 w-4" />
-              Refresh Data
-            </Button>
-            <Button variant="ghost" className="admin-secondary w-full justify-center" onClick={() => void signOut()}>
-              Sign Out
-            </Button>
-          </div>
-        </aside>
+        <AdminSidebar
+          adminRole={adminRole}
+          activeSection={activeSection}
+          sections={tabs}
+          onSectionChange={setActiveSection}
+          onRefresh={() => {
+            void queryClient.invalidateQueries({ queryKey: ['admin'] })
+            void testPing()
+          }}
+          onSignOut={() => void signOut()}
+        />
 
         {/* Content Area */}
         <div className="space-y-6">
-          {/* Dashboard Welcome Header */}
-          {activeSection === 'overview' && (
-            <Card className="relative overflow-hidden border-admin-border bg-white p-0">
-              <div className="grid gap-6 p-6 lg:grid-cols-[1.35fr_0.9fr] lg:p-8 relative z-10">
-                <div className="space-y-5">
-                  <div className="inline-flex items-center gap-2 rounded-md border border-admin-border bg-admin-surface px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-admin-accent">
-                    <Database className="h-4 w-4" />
-                    Supabase Platform Connection
-                  </div>
-                  <div className="space-y-3">
-                    <h2 className="font-admin text-3xl font-semibold text-admin-ink md:text-4xl">
-                      Operate the entire beauty platform from one place
-                    </h2>
-                    <p className="max-w-2xl text-sm leading-7 text-admin-muted md:text-base">
-                      Real-time Supabase connection is active. Changes to categories, scans, and roles will sync immediately and reflect on the application.
-                    </p>
-                  </div>
-                  <div className="flex flex-wrap gap-3">
-                    <Button className="admin-primary" onClick={() => setActiveSection('products')}>
-                      Manage Products
-                      <PencilLine className="h-4 w-4" />
-                    </Button>
-                    <Button variant="ghost" className="admin-secondary" onClick={() => setActiveSection('scans')}>
-                      Scans & Simulation
-                    </Button>
-                    <Button variant="ghost" className="admin-secondary" onClick={() => setActiveSection('access')}>
-                      Edit User Roles
-                    </Button>
-                  </div>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-                  {overviewCards.map((card) => {
-                    const Icon = card.icon
-
-                    return (
-                      <div key={card.label} className="rounded-lg border border-admin-border bg-admin-surface p-4">
-                        <div className="flex items-start justify-between gap-3">
-                          <div>
-                            <p className="text-xs uppercase tracking-[0.16em] text-admin-muted">{card.label}</p>
-                            <p className="mt-2 font-admin text-3xl font-semibold text-admin-ink">{card.value}</p>
-                            <p className="mt-1 text-xs text-admin-muted">{card.hint}</p>
-                          </div>
-                          <div className="rounded-md border border-admin-border bg-white p-3 text-admin-accent">
-                            <Icon className="h-5 w-5" />
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-              </div>
-            </Card>
-          )}
-
-          {/* OVERVIEW TAB */}
           {activeSection === 'overview' ? (
-            <div className="space-y-6">
-              {/* Row 1: System Health & Ping Status */}
-              <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="border border-admin-border p-5 bg-white flex flex-col justify-between">
-                  <div>
-                    <div className="flex justify-between items-center text-xs uppercase tracking-[0.2em] text-admin-accent">
-                      <span>Supabase Connection</span>
-                      <Wifi className="h-4 w-4 text-emerald-500 animate-pulse" />
-                    </div>
-                    <h3 className="mt-3 font-admin text-2xl text-admin-ink">Online</h3>
-                    <p className="mt-1 text-xs text-admin-muted leading-relaxed">
-                      API is active and accepting CRUD operations.
-                    </p>
-                  </div>
-                  <div className="mt-4 pt-3 border-t border-admin-border flex items-center justify-between text-xs">
-                    <span className="text-admin-muted">DB Latency:</span>
-                    <span className="font-semibold text-emerald-600">
-                      {pingStatus === 'pinging' ? '...' : pingTime && pingTime > 0 ? `${pingTime}ms` : 'Ping Failed'}
-                    </span>
-                  </div>
-                </Card>
-
-                <Card className="border border-admin-border p-5 bg-white">
-                  <p className="text-xs uppercase tracking-[0.2em] text-admin-accent">DB Queries</p>
-                  <h3 className="mt-3 font-admin text-2xl text-admin-ink">
-                    {scansQuery.data ? scansQuery.data.length + (productsQuery.data?.length ?? 0) : '0'} rows
-                  </h3>
-                  <p className="mt-2 text-xs text-admin-muted">
-                    Products, recommendations, and records.
-                  </p>
-                  <div className="mt-3 pt-3 border-t border-admin-border text-right">
-                    <button
-                      onClick={testPing}
-                      disabled={pingStatus === 'pinging'}
-                      className="text-xs text-admin-accent hover:underline flex items-center justify-end gap-1 ml-auto"
-                    >
-                      <Activity className="h-3 w-3" />
-                      {pingStatus === 'pinging' ? 'Checking...' : 'Check Connection'}
-                    </button>
-                  </div>
-                </Card>
-
-                <Card className="border border-admin-border p-5 bg-white">
-                  <p className="text-xs uppercase tracking-[0.2em] text-admin-accent">CPU Simulation</p>
-                  <h3 className="mt-3 font-admin text-2xl text-admin-ink">14% - 24%</h3>
-                  <div className="w-full bg-admin-subtle h-2 rounded-full mt-3 overflow-hidden">
-                    <div className="bg-gradient-to-r from-admin-accent to-admin-accent h-full rounded-full w-[18%]" />
-                  </div>
-                  <p className="mt-2 text-[10px] text-admin-muted">Average server usage</p>
-                </Card>
-
-                <Card className="border border-admin-border p-5 bg-white">
-                  <p className="text-xs uppercase tracking-[0.2em] text-admin-accent">Memory Load</p>
-                  <h3 className="mt-3 font-admin text-2xl text-admin-ink">512 MB</h3>
-                  <div className="w-full bg-admin-subtle h-2 rounded-full mt-3 overflow-hidden">
-                    <div className="bg-gradient-to-r from-cyan to-teal-400 h-full rounded-full w-[50%]" />
-                  </div>
-                  <p className="mt-2 text-[10px] text-admin-muted">Used 512MB out of 1024MB allocated</p>
-                </Card>
-              </div>
-
-
-              {/* Row 3: Live Audit Logs / Activity Log */}
-              <Card className="border border-admin-border p-6 bg-white space-y-4">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <h3 className="font-admin text-xl text-admin-ink">System Activity</h3>
-                    <p className="text-xs text-admin-muted">Live notifications and activity logs.</p>
-                  </div>
-                  <span className="text-[10px] bg-admin-subtle text-admin-accent px-2.5 py-1 rounded-full uppercase tracking-wider font-bold">
-                    Logs
-                  </span>
-                </div>
-                <div className="divide-y divide-rose-50 max-h-60 overflow-y-auto pr-1">
-                  {systemActivityLog.map((log) => (
-                    <div key={log.id} className="py-3 flex justify-between items-start text-xs gap-3">
-                      <div className="flex gap-2">
-                        <span className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${log.type === 'success' ? 'bg-emerald-500' : log.type === 'warning' ? 'bg-amber-500' : 'bg-admin-subtle0'
-                          }`} />
-                        <div>
-                          <p className="font-semibold text-admin-ink">{log.user}</p>
-                          <p className="text-admin-muted">{log.event}</p>
-                        </div>
-                      </div>
-                      <span className="text-admin-muted whitespace-nowrap">{log.time}</span>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-            </div>
+            <AdminOverviewSection
+              cards={overviewCards}
+              activityLog={systemActivityLog}
+              rowCount={(scansQuery.data?.length ?? 0) + (productsQuery.data?.length ?? 0)}
+              pingTime={pingTime}
+              pingStatus={pingStatus}
+              onPing={testPing}
+              onNavigate={setActiveSection}
+            />
           ) : null}
-
           {/* PRODUCTS TAB */}
           {activeSection === 'products' ? (
-            <div className="space-y-4">
-              {/* Search & Filters */}
-              <div className="bg-white border border-admin-border rounded-3xl p-4 flex flex-wrap gap-3 items-center">
-                <div className="flex-1 relative min-w-[200px]">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-admin-muted" />
-                  <input
-                    type="text"
-                    className="w-full rounded-full border border-admin-border pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-admin-accent/20"
-                    placeholder="Search products by name or brand..."
-                    value={productSearch}
-                    onChange={(e) => setProductSearch(e.target.value)}
-                  />
-                </div>
-                <select
-                  className="rounded-full border border-admin-border px-3 py-2 text-sm text-admin-ink focus:outline-none"
-                  value={productCategoryFilter}
-                  onChange={(e) => setProductCategoryFilter(e.target.value)}
-                >
-                  <option value="All">All Categories</option>
-                  {(categoriesQuery.data ?? []).map((category) => (
-                    <option key={category.id} value={category.name}>{category.name}</option>
-                  ))}
-                </select>
-                <Button onClick={() => openProductModal()}>
-                  + Add Product
-                </Button>
-              </div>
-
-              {/* Products Table */}
-              <Card className="border border-admin-border p-6 bg-white shadow-sm overflow-x-auto">
-                <AdminSectionTitle
-                  eyebrow="Product List"
-                  title="Manage Products"
-                  description={`${filteredProducts.length} product(s) — image preview, full description, IDs, and partner links.`}
-                />
-                <div className="mt-6 overflow-x-auto">
-                  <table className="w-full min-w-[960px] text-left border-collapse text-xs">
-                    <thead>
-                      <tr className="border-b border-admin-border text-admin-ink font-bold uppercase tracking-wider">
-                        <th className="pb-3 pr-3 w-[72px]">Image</th>
-                        <th className="pb-3 px-3 min-w-[200px]">Product</th>
-                        <th className="pb-3 px-3">Brand</th>
-                        <th className="pb-3 px-3">Category</th>
-                        <th className="pb-3 px-3 min-w-[180px]">Links</th>
-                        <th className="pb-3 px-3 whitespace-nowrap">Created</th>
-                        <th className="pb-3 pl-3 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-rose-50">
-                      {paginatedProducts.map((product) => {
-                        const categoryName = categoriesQuery.data?.find((c) => c.id === product.category_id)?.name ?? 'Unknown'
-                        const imageSrc = product.image_url?.trim() || PRODUCT_PLACEHOLDER_IMAGE
-                        return (
-                          <tr key={product.id} className="hover:bg-admin-subtle text-admin-ink align-top">
-                            <td className="py-3 pr-3">
-                              <img
-                                src={imageSrc}
-                                alt={product.name}
-                                loading="lazy"
-                                className="h-14 w-14 shrink-0 rounded-xl border border-admin-border bg-admin-subtle object-cover"
-                                onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = PRODUCT_PLACEHOLDER_IMAGE }}
-                              />
-                            </td>
-                            <td className="py-3 px-3">
-                              <div className="min-w-0 max-w-[280px]">
-                                <p className="font-bold text-sm leading-tight text-admin-ink">{product.name}</p>
-                                <p className="mt-1 font-mono text-[10px] text-admin-muted break-all">ID: {product.id}</p>
-                                <p className="mt-1.5 text-[11px] leading-relaxed text-admin-muted whitespace-pre-wrap break-words">
-                                  {product.description?.trim() || '—'}
-                                </p>
-                              </div>
-                            </td>
-                            <td className="py-3 px-3 text-admin-muted whitespace-nowrap">{product.brand?.trim() || '—'}</td>
-                            <td className="py-3 px-3">
-                              <p className="font-semibold text-admin-accent">{categoryName}</p>
-                              <p className="mt-0.5 font-mono text-[10px] text-admin-muted break-all">{product.category_id}</p>
-                            </td>
-                            <td className="py-3 px-3 text-admin-muted">
-                              <div className="space-y-2 min-w-0 max-w-[220px]">
-                                {product.image_url?.trim() ? (
-                                  <a href={product.image_url} target="_blank" rel="noreferrer"
-                                    className="inline-flex items-start gap-1 text-[10px] text-admin-accent hover:underline break-all">
-                                    <ExternalLink className="h-3 w-3 shrink-0 mt-0.5" /> Image URL
-                                  </a>
-                                ) : <span className="text-[10px]">No image URL</span>}
-                                {product.external_url?.trim() ? (
-                                  <a href={product.external_url} target="_blank" rel="noreferrer"
-                                    className="inline-flex items-start gap-1 text-[10px] text-admin-accent hover:underline break-all">
-                                    <ExternalLink className="h-3 w-3 shrink-0 mt-0.5" /> Partner URL
-                                  </a>
-                                ) : <span className="text-[10px]">No partner URL</span>}
-                              </div>
-                            </td>
-                            <td className="py-3 px-3 text-admin-muted whitespace-nowrap">{formatDate(product.created_at)}</td>
-                            <td className="py-3 pl-3 text-right">
-                              <div className="flex justify-end gap-1">
-                                <Button size="sm" variant="ghost" onClick={() => openProductModal(product)}>
-                                  <PencilLine className="h-4 w-4" />
-                                </Button>
-                                <Button size="sm" variant="ghost"
-                                  onClick={() => { if (confirm(`Delete ${product.name}?`)) deleteProductMutation.mutate(product.id) }}
-                                  disabled={deleteProductMutation.isPending}>
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                  {paginatedProducts.length === 0 && (
-                    <div className="text-center py-12 text-admin-muted text-sm">
-                      No products match the search or category filter.
-                    </div>
-                  )}
-                </div>
-                {totalProductPages > 1 && (
-                  <div className="flex items-center justify-center gap-4 pt-4 mt-4 border-t border-admin-border">
-                    <Button variant="ghost" size="sm" disabled={productPage === 1}
-                      onClick={() => setProductPage(p => Math.max(1, p - 1))}>
-                      <ChevronLeft className="h-4 w-4 mr-1" /> Prev
-                    </Button>
-                    <span className="text-xs font-semibold text-admin-ink">Page {productPage} of {totalProductPages}</span>
-                    <Button variant="ghost" size="sm" disabled={productPage === totalProductPages}
-                      onClick={() => setProductPage(p => Math.min(totalProductPages, p + 1))}>
-                      Next <ChevronRight className="h-4 w-4 ml-1" />
-                    </Button>
-                  </div>
-                )}
-              </Card>
-
-              
-            </div>
+            <AdminProductsSection
+              products={paginatedProducts}
+              filteredCount={filteredProducts.length}
+              categories={categoriesQuery.data ?? []}
+              search={productSearch}
+              categoryFilter={productCategoryFilter}
+              page={productPage}
+              totalPages={totalProductPages}
+              isDeleting={deleteProductMutation.isPending}
+              modalOpen={productModalOpen}
+              configOnly={configOnlyMode}
+              editingProduct={editingProduct}
+              existingConfigs={existingConfigs}
+              onSearchChange={(value) => {
+                setProductSearch(value)
+                setProductPage(1)
+              }}
+              onCategoryFilterChange={(value) => {
+                setProductCategoryFilter(value)
+                setProductPage(1)
+              }}
+              onPageChange={setProductPage}
+              onAdd={() => openProductModal()}
+              onEdit={openProductModal}
+              onDelete={(product) => {
+                if (confirm(`Delete ${product.name}?`)) {
+                  deleteProductMutation.mutate(product.id)
+                }
+              }}
+              onModalClose={() => {
+                setConfigOnlyMode(false)
+                setProductModalOpen(false)
+                setEditingProduct(null)
+              }}
+              onSaved={() => {
+                queryClient.invalidateQueries({ queryKey: ['admin', 'products'] })
+                queryClient.invalidateQueries({ queryKey: ['admin', 'product-configs'] })
+                queryClient.invalidateQueries({ queryKey: ['catalog', 'products'] })
+                queryClient.invalidateQueries({ queryKey: ['makeup', 'catalog'] })
+                setProductModalOpen(false)
+                setEditingProduct(null)
+              }}
+            />
           ) : null}
-          {/* ─── Product Modal ─── */}
-              <ProductWithConfigModal
-                configOnly={configOnlyMode}
-                open={productModalOpen}
-                onClose={() => { 
-                  setConfigOnlyMode(false)  // ← quan trọng: reset mode khi close
-                  setProductModalOpen(false)
-                  setEditingProduct(null) }}
-                categories={categoriesQuery.data ?? []}
-                initial={editingProduct}
-                existingConfigs={existingConfigs}
-                onSaved={() => {
-                  queryClient.invalidateQueries({ queryKey: ['admin', 'products'] })
-                  queryClient.invalidateQueries({ queryKey: ['admin', 'product-configs'] })
-                  queryClient.invalidateQueries({ queryKey: ['catalog', 'products'] })
-                  queryClient.invalidateQueries({ queryKey: ['makeup', 'catalog'] })
-                  setProductModalOpen(false)
-                  setEditingProduct(null)
-                }}
-              />
           {/* CATEGORIES TAB */}
           {activeSection === 'categories' ? (
-            <div className="space-y-4">
-              {/* Header + Add button */}
-              <div className="bg-white border border-admin-border rounded-3xl p-4 flex flex-wrap gap-3 items-center">
-              <div className="flex-1 relative min-w-[200px]">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-admin-muted" />
-                <input
-                  type="text"
-                  className="w-full rounded-full border border-admin-border pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-admin-accent/20"
-                  placeholder="Search by name or API key..."
-                  value={categorySearch}
-                  onChange={(e) => {
-                    setCategorySearch(e.target.value)
-                    setCategoryPage(1) // reset về trang 1 khi tìm
-                  }}
-                />
-              </div>
-              <Button onClick={() => openCategoryModal()}>
-                + Add Category
-              </Button>
-            </div>
-
-              {/* Categories Table */}
-              <Card className="border border-admin-border p-6 bg-white shadow-sm">
-                <AdminSectionTitle
-                  eyebrow="Category List"
-                  title="Manage Categories"
-                  description={`${filteredCategories.length} categor${filteredCategories.length === 1 ? 'y' : 'ies'} found.`}
-                />
-                <div className="mt-6 overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-xs">
-                    <thead>
-                      <tr className="border-b border-admin-border text-admin-ink font-bold uppercase tracking-wider">
-                        <th className="pb-3 pr-3">Category Name</th>
-                        <th className="pb-3 px-3">API Key</th>
-                        <th className="pb-3 px-3">Created At</th>
-                        <th className="pb-3 pl-3 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-rose-50">
-                      {paginatedCategories.map((category) => (
-                        <tr key={category.id} className="hover:bg-admin-subtle text-admin-ink">
-                          <td className="py-3 pr-3 font-medium">{category.name}</td>
-                          <td className="py-3 px-3 text-admin-muted">{category.api_category_key}</td>
-                          <td className="py-3 px-3 text-admin-muted">{formatDate(category.created_at)}</td>
-                          <td className="py-3 pl-3 text-right">
-                            <div className="flex justify-end gap-2">
-                              <Button size="sm" variant="ghost" onClick={() => openCategoryModal(category)}>
-                                Edit
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => {
-                                  if (confirm(`Delete category ${category.name}?`)) {
-                                    deleteCategoryMutation.mutate(category.id)
-                                  }
-                                }}
-                                disabled={deleteCategoryMutation.isPending}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {paginatedCategories.length === 0 && (
-                    <p className="mt-4 text-sm text-admin-muted text-center py-4">
-                      No categories available. Click "Add Category" to get started.
-                    </p>
-                  )}
-                </div>
-                {totalCategoryPages > 1 && (
-                  <div className="flex items-center justify-center gap-4 pt-4 mt-4 border-t border-admin-border">
-                    <Button variant="ghost" size="sm" disabled={categoryPage === 1}
-                      onClick={() => setCategoryPage(p => Math.max(1, p - 1))}>
-                      <ChevronLeft className="h-4 w-4 mr-1" /> Prev
-                    </Button>
-                    <span className="text-xs font-semibold text-admin-ink">Page {categoryPage} of {totalCategoryPages}</span>
-                    <Button variant="ghost" size="sm" disabled={categoryPage === totalCategoryPages}
-                      onClick={() => setCategoryPage(p => Math.min(totalCategoryPages, p + 1))}>
-                      Next <ChevronRight className="h-4 w-4 ml-1" />
-                    </Button>
-                  </div>
-                )}
-              </Card>
-
-              {/* ─── Category Modal ─── */}
-              {categoryModalOpen && (
-                <div
-                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
-                  onClick={(e) => { if (e.target === e.currentTarget) setCategoryModalOpen(false) }}
-                >
-                  <div className="relative w-full max-w-md rounded-[2rem] border border-admin-border bg-white p-6 shadow-xl space-y-4">
-                    <button
-                      onClick={() => setCategoryModalOpen(false)}
-                      className="absolute right-4 top-4 rounded-full p-1.5 text-admin-muted hover:bg-admin-subtle transition"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-
-                    <h2 className="font-admin text-xl text-admin-ink">
-                      {categoryForm.id ? 'Edit Category' : 'Add New Category'}
-                    </h2>
-
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">Category Name</label>
-                        <Input
-                          placeholder="e.g. Lipstick"
-                          value={categoryForm.name}
-                          onChange={(e) => setCategoryForm((s) => ({ ...s, name: e.target.value }))}
-                        />
-                      </div>
-                      <div>
-                        <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">API Category Key</label>
-                        <Input
-                          placeholder="e.g. lip_color"
-                          value={categoryForm.apiCategoryKey}
-                          onChange={(e) => setCategoryForm((s) => ({ ...s, apiCategoryKey: e.target.value }))}
-                        />
-                      </div>
-
-                      {saveCategoryMutation.error && (
-                        <p className="text-sm text-admin-accent">{saveCategoryMutation.error.message}</p>
-                      )}
-
-                      <div className="flex justify-end gap-2 pt-2">
-                        <Button variant="ghost" onClick={() => setCategoryModalOpen(false)}>Cancel</Button>
-                        <Button
-                          onClick={async () => {
-                            await saveCategoryMutation.mutateAsync()
-                            setCategoryModalOpen(false)
-                          }}
-                          disabled={saveCategoryMutation.isPending}
-                        >
-                          {saveCategoryMutation.isPending
-                            ? 'Saving...'
-                            : categoryForm.id ? 'Update Category' : 'Create Category'}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <AdminCategoriesSection
+              categories={paginatedCategories}
+              filteredCount={filteredCategories.length}
+              search={categorySearch}
+              page={categoryPage}
+              totalPages={totalCategoryPages}
+              modalOpen={categoryModalOpen}
+              form={categoryForm}
+              isDeleting={deleteCategoryMutation.isPending}
+              isSaving={saveCategoryMutation.isPending}
+              saveError={saveCategoryMutation.error?.message}
+              onSearchChange={(value) => {
+                setCategorySearch(value)
+                setCategoryPage(1)
+              }}
+              onPageChange={setCategoryPage}
+              onAdd={() => openCategoryModal()}
+              onEdit={openCategoryModal}
+              onDelete={(category) => {
+                if (confirm(`Delete category ${category.name}?`)) {
+                  deleteCategoryMutation.mutate(category.id)
+                }
+              }}
+              onModalClose={() => setCategoryModalOpen(false)}
+              onFormChange={setCategoryForm}
+              onSave={async () => {
+                await saveCategoryMutation.mutateAsync()
+                setCategoryModalOpen(false)
+              }}
+            />
           ) : null}
 
           {/* PRODUCT CONFIGS TAB */}
           {activeSection === 'product-configs' ? (
-            <div className="space-y-4">
-              {/* Bảng xem nhanh tất cả configs */}
-              <Card className="border border-admin-border p-6 bg-white shadow-sm">
-                <AdminSectionTitle
-                  eyebrow="Config List"
-                  title="All Product Variants"
-                  description={`${productConfigsQuery.data?.length ?? 0} variant(s) - one row per shade or texture.`}
-                />
-                <div className="mt-6 overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-xs">
-                    <thead>
-                      <tr className="border-b border-admin-border text-admin-ink font-bold uppercase tracking-wider">
-                        <th className="pb-3 pr-3">Product</th>
-                        <th className="pb-3 px-3">Variant</th>
-                        <th className="pb-3 px-3">Color</th>
-                        <th className="pb-3 px-3 min-w-[180px]">Texture</th>
-                        <th className="pb-3 pl-3 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-rose-50">
-                      {(productConfigsQuery.data ?? []).map((config) => (
-                        <tr key={config.id} className="hover:bg-admin-subtle text-admin-ink align-top">
-                          <td className="py-3 pr-3 font-medium">
-                            {productLookup.get(config.product_id)?.name ?? 'Unknown'}
-                          </td>
-                          <td className="py-3 px-3">
-                            <span className="rounded-full bg-admin-subtle border border-admin-border px-2 py-0.5 text-[11px] font-medium text-admin-accent capitalize">
-                              {config.name || 'Default shade'}
-                            </span>
-                          </td>
-                          <td className="py-3 px-3">
-                            {config.color_hex ? (
-                              <div className="flex items-center gap-2">
-                                <span
-                                  className="h-4 w-4 rounded-full border border-white shadow-sm shrink-0"
-                                  style={{ backgroundColor: config.color_hex }}
-                                />
-                                <span className="font-mono text-[11px] text-admin-muted uppercase">
-                                  {config.color_hex}
-                                </span>
-                              </div>
-                            ) : (
-                              <span className="text-admin-muted">—</span>
-                            )}
-                          </td>
-                          <td className="py-3 px-3">
-                            {config.texture ? (
-                              <span className="font-mono text-[11px] text-admin-muted capitalize">
-                                {config.texture}
-                              </span>
-                            ) : (
-                              <span className="text-admin-muted">—</span>
-                            )}
-                          </td>
-                          <td className="py-3 pl-3 text-right">
-                            <div className="flex justify-end gap-1">
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => {
-                                  const product = productLookup.get(config.product_id)
-                                  if (product) {
-                                    setEditingProduct(product)
-                                    setConfigOnlyMode(true)
-                                    setProductModalOpen(true)
-                                  }
-                                }}
-                              >
-                                <PencilLine className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => {
-                                  if (confirm('Delete this variant?')) {
-                                    deleteProductConfigMutation.mutate(config.id)
-                                  }
-                                }}
-                                disabled={deleteProductConfigMutation.isPending}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  {(productConfigsQuery.data?.length ?? 0) === 0 && (
-                    <div className="text-center py-12 text-admin-muted text-sm">
-                      No variants yet. Add variants from the Products tab.
-                    </div>
-                  )}
-                </div>
-              </Card>
-            </div>
+            <AdminProductVariantsSection
+              variants={productConfigsQuery.data ?? []}
+              products={productsQuery.data ?? []}
+              isDeleting={deleteProductConfigMutation.isPending}
+              onEdit={(product) => {
+                setEditingProduct(product)
+                setConfigOnlyMode(true)
+                setProductModalOpen(true)
+              }}
+              onDelete={(variant) => {
+                if (confirm('Delete this variant?')) {
+                  deleteProductConfigMutation.mutate(variant.id)
+                }
+              }}
+            />
           ) : null}
 
           {/* SCANS TAB WITH SCAN SIMULATOR */}
@@ -2718,56 +2134,7 @@ export default function AdminPage() {
           )}
           
           {/* SETTINGS TAB */}
-          {activeSection === 'settings' ? (
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {[
-                {
-                  title: 'Platform Status',
-                  detail: 'Supabase-powered catalog, scan logs, and admin permissions are live.',
-                  icon: CheckCircle2,
-                },
-                {
-                  title: 'Evaluation Engine',
-                  detail: 'Configure scan scores, modify tags, and customize match reason descriptions.',
-                  icon: ListChecks,
-                },
-                {
-                  title: 'Permission Admin',
-                  detail: 'Limit access by job function through detailed simulated roles for developers.',
-                  icon: Clock3,
-                },
-                {
-                  title: 'Simulation Tools',
-                  detail: 'Generate artificial scan results to verify product catalog and recommendation loops.',
-                  icon: Megaphone,
-                },
-                {
-                  title: 'Data Sync',
-                  detail: 'Actual client pages fetch items from the database instead of simulated files.',
-                  icon: Database,
-                },
-                {
-                  title: 'Reload Cycle',
-                  detail: 'Click reload or clear cache to revalidate queries after updating.',
-                  icon: Rocket,
-                },
-              ].map((item) => {
-                const Icon = item.icon
-
-                return (
-                  <Card key={item.title} className="border border-admin-border p-5 bg-white flex justify-between items-start gap-3">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.2em] text-admin-accent font-bold">{item.title}</p>
-                      <p className="mt-2 text-xs text-admin-muted leading-relaxed">{item.detail}</p>
-                    </div>
-                    <div className="rounded-2xl bg-admin-subtle p-2.5 text-admin-accent shrink-0">
-                      <Icon className="h-5 w-5" />
-                    </div>
-                  </Card>
-                )
-              })}
-            </div>
-          ) : null}
+          {activeSection === 'settings' ? <AdminSettingsSection /> : null}
 
           {/* REVENUE TAB */}
           {activeSection === 'revenue' ? (

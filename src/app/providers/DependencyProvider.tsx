@@ -17,6 +17,7 @@ import { MakeupArApiService } from '@/infrastructure/supabase/MakeupArApiService
 import { FaceApiDetector } from '@/infrastructure/supabase/FaceApiDetector';
 import {
   createCatalogUseCases,
+  createAdminUseCases,
   createPlanUseCases,
   createProductUseCases,
   createScanUseCases,
@@ -46,6 +47,7 @@ const repositories = {
 export const dependencies = {
   ...repositories,
   useCases: {
+    admin: createAdminUseCases(),
     products: createProductUseCases(repositories.productRepo),
     catalog: createCatalogUseCases(repositories.categoryRepo, repositories.makeupCatalogRepo),
     plans: createPlanUseCases(repositories.planRepo, repositories.subscriptionRepo, repositories.authRepo),

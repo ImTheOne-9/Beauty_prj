@@ -13,10 +13,8 @@ import {
 import { Button } from '@/shared/components/ui/Button'
 import { Input } from '@/shared/components/ui/Input'
 import { cn } from '@/shared/lib/cn'
-import {
-  databaseService,
-  type AdminProductVariantRecord,
-} from '@/services/supabase/database-service'
+import type { AdminProductVariantRecord } from '@/application/dtos/admin'
+import { useDependencies } from '@/app/providers/DependencyProvider'
 
 type Category = { id: string; name: string; api_category_key: string }
 
@@ -160,6 +158,8 @@ export function ProductWithConfigModal({
   configOnly?: boolean
   onSaved: () => void
 }) {
+  const { useCases } = useDependencies()
+  const adminUseCases = useCases.admin
   const isEdit = Boolean(initial?.id)
   const [step, setStep] = useState<1 | 2>(1)
   const [saving, setSaving] = useState(false)
@@ -256,9 +256,9 @@ export function ProductWithConfigModal({
         if (!productPayload.category_id) throw new Error('Please select a category.')
 
         if (isEdit) {
-          await databaseService.updateProduct(productId, productPayload)
+          await adminUseCases.updateProduct(productId, productPayload)
         } else {
-          const created = await databaseService.createProduct(productPayload)
+          const created = await adminUseCases.createProduct(productPayload)
           productId = created.id
         }
       }
@@ -268,7 +268,7 @@ export function ProductWithConfigModal({
       }
 
       if (!usesVariants) {
-        await databaseService.replaceProductVariants(productId, [])
+        await adminUseCases.replaceProductVariants(productId, [])
         onSaved()
         onClose()
         return
@@ -308,7 +308,7 @@ export function ProductWithConfigModal({
         throw new Error('Shimmer color must be a valid hex value like #FFFFFF.')
       }
 
-      await databaseService.replaceProductVariants(productId, normalizedVariants)
+      await adminUseCases.replaceProductVariants(productId, normalizedVariants)
 
       onSaved()
       onClose()
