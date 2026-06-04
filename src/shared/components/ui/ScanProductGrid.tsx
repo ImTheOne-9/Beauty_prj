@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronLeft, ChevronRight, ShoppingCart, Star } from 'lucide-react'
-import { type ProductRecommendation } from '@/shared/lib/types'
+import { type ProductRecommendation } from '@/core/entities'
 
 const PAGE_SIZE = 6
 

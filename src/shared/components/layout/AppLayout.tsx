@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Outlet, useLocation } from 'react-router-dom'
 import { AnimatedNavbar } from '@/shared/components/layout/AnimatedNavbar'
-import DarkFooter from '@/features/landing/components/DarkFooter'
+import DarkFooter from '@/features/landing/presentation/components/DarkFooter'
 import { pageTransition } from '@/animations/motion'
 
 export function AppLayout() {

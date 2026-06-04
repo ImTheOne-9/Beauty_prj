@@ -10,10 +10,7 @@ import type {
   MakeupEffect,
   MakeupTexture,
 } from '@/features/ai-scan/types/makeup-vto'
-import type {
-  AdminProductVariantRecord,
-  MakeupCatalogRow,
-} from '@/services/supabase/database-service'
+import type { MakeupCatalogItem, ProductVariant } from '@/core/entities'
 import {
   type BeautyAppliedSelection,
   getBeautySelectionColorCount,
@@ -66,9 +63,9 @@ function cloneDefaultEffect(category: string): MakeupEffect {
 }
 
 function buildColorTextureEffect(
-  item: MakeupCatalogRow,
-  variant: AdminProductVariantRecord | undefined,
-  variants: AdminProductVariantRecord[],
+  item: MakeupCatalogItem,
+  variant: ProductVariant | undefined,
+  variants: ProductVariant[],
   selection: BeautyAppliedSelection,
 ): MakeupEffect | null {
   const category = item.apiCategoryKey
@@ -90,7 +87,7 @@ function buildColorTextureEffect(
     : [selection.variantId]
   const selectedVariants = selectedVariantIds
     .map((variantId) => variants.find((entry) => entry.id === variantId))
-    .filter((entry): entry is AdminProductVariantRecord => Boolean(entry?.color_hex?.trim()))
+    .filter((entry): entry is ProductVariant => Boolean(entry?.colorHex?.trim()))
 
   if (selectedVariants.length === 0) {
     return null
@@ -132,13 +129,13 @@ function buildColorTextureEffect(
         : base.style,
     palettes: paletteTemplates.map((template, index) => {
       const selectedVariant = selectedVariants[index] ?? variant
-      const color = selectedVariant.color_hex.trim()
+      const color = selectedVariant.colorHex.trim()
       const palette = {
         ...template,
         color,
         colorIntensity: item.colorIntensity ?? template.colorIntensity ?? 50,
-        ...(selectedVariant.shimmer_color?.trim()
-          ? { shimmerColor: selectedVariant.shimmer_color.trim() }
+        ...(selectedVariant.shimmerColor?.trim()
+          ? { shimmerColor: selectedVariant.shimmerColor.trim() }
           : {}),
         ...(supportsTexture(category) && isMakeupTexture(selectedVariant.texture)
           ? { texture: selectedVariant.texture }
@@ -151,8 +148,8 @@ function buildColorTextureEffect(
 
 export function buildBeautyMakeupEffects(
   selections: BeautyAppliedSelection[],
-  catalog: MakeupCatalogRow[],
-  variants: AdminProductVariantRecord[],
+  catalog: MakeupCatalogItem[],
+  variants: ProductVariant[],
 ) {
   return selections
     .map((selection) => {

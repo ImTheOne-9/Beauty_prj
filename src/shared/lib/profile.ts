@@ -1,5 +1,6 @@
 import type { User } from '@supabase/supabase-js'
 import type { UserProfile } from '@/shared/types/auth'
+import type { UserProfile as CoreUserProfile } from '@/core/entities'
 import { getLocalStorageItem, setLocalStorageItem } from '@/shared/lib/storage'
 
 type ProfileOverride = {
@@ -22,12 +23,22 @@ export function setProfileOverride(userId: string, override: ProfileOverride) {
   setLocalStorageItem(PROFILE_KEY, map)
 }
 
-export function getDisplayName(profile: UserProfile | null, user: User | null, userId?: string) {
+type ProfileLike = UserProfile | CoreUserProfile
+
+function readString(profile: ProfileLike | null, snakeKey: keyof UserProfile, camelKey: keyof CoreUserProfile) {
+  if (!profile) return ''
+  const snakeValue = (profile as UserProfile)[snakeKey]
+  if (typeof snakeValue === 'string') return snakeValue
+  const camelValue = (profile as CoreUserProfile)[camelKey]
+  return typeof camelValue === 'string' ? camelValue : ''
+}
+
+export function getDisplayName(profile: ProfileLike | null, user: User | null, userId?: string) {
   const override = userId ? getProfileOverride(userId)?.displayName : undefined
   if (override?.trim()) return override.trim()
 
-  const first = profile?.first_name?.trim() ?? ''
-  const last = profile?.last_name?.trim() ?? ''
+  const first = readString(profile, 'first_name', 'firstName').trim()
+  const last = readString(profile, 'last_name', 'lastName').trim()
   const fullName = `${first} ${last}`.trim()
   if (fullName) return fullName
 
@@ -39,8 +50,9 @@ export function getDisplayName(profile: UserProfile | null, user: User | null, u
   return user?.email?.split('@')[0] ?? 'User'
 }
 
-export function getAvatarUrl(profile: UserProfile | null, user: User | null, userId?: string) {
-  if (profile?.avatar_url?.trim()) return profile.avatar_url.trim()
+export function getAvatarUrl(profile: ProfileLike | null, user: User | null, userId?: string) {
+  const profileAvatar = readString(profile, 'avatar_url', 'avatarUrl').trim()
+  if (profileAvatar) return profileAvatar
 
   const metaAvatar =
     typeof user?.user_metadata?.avatar_url === 'string' ? user.user_metadata.avatar_url : null

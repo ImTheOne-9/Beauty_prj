@@ -3,9 +3,9 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, X, Search } from 'lucide-react'
 import { cn } from '@/shared/lib/cn'
-import { useAuth } from '@/features/auth/hooks/useAuth'
+import { useAuth } from '@/features/auth/presentation/hooks/useAuth'
 import { UserAccountMenu } from '@/shared/components/layout/UserAccountMenu'
-import { useCategories } from '@/features/ai-scan/hooks/useCategories'
+import { useCategories } from '@/features/ai-scan/presentation/hooks/useCategories'
 
 // ─── Enterprise Mega Menu Data ──────────────────────────────────────────────
 const enterpriseMenu = {
@@ -100,7 +100,7 @@ export function AnimatedNavbar() {
         items: categories && categories.length > 0
           ? categories.map((cat) => ({
               label: cat.name,
-              to: `/scan?category=${cat.api_category_key}`,
+              to: `/scan?category=${cat.apiCategoryKey}`,
             }))
           : productMenu.columns[0].items,
       },

@@ -1,6 +1,6 @@
-import { getLocalStorageItem, setLocalStorageItem } from '@/shared/lib/storage'
+import { getLocalStorageItem } from '@/shared/lib/storage'
 import type { SubscriptionTier } from '@/shared/types/auth'
-import { databaseService } from '@/services/supabase/database-service'
+import { dependencies } from '@/app/providers/DependencyProvider'
 
 const SCAN_USAGE_STORAGE_KEY = 'ai_scan_usage_history'
 const GUEST_SCAN_KEY = 'guest'
@@ -14,19 +14,7 @@ function getUserKey(userId?: string) {
 }
 
 export function getScanQuotaForRole(role: SubscriptionTier | string) {
-  switch (role) {
-    case 'admin':
-      return null
-    case 'premium':
-      return 500
-    case 'pro':
-      return 25
-    case 'free':
-      return 2
-    case 'guest':
-    default:
-      return 0
-  }
+  return dependencies.useCases.scans.getScanQuotaForRole(role)
 }
 
 export function getScanUsageHistory() {
@@ -40,7 +28,7 @@ export function getScanUsageForUser(userId?: string) {
 
 export async function getScanUsesThisMonth(userId?: string) {
   if (userId) {
-    return databaseService.getScanCountThisMonth(userId)
+    return dependencies.useCases.scans.getScanUsesThisMonth(userId)
   }
 
   const prefix = getMonthPrefix()
@@ -48,13 +36,5 @@ export async function getScanUsesThisMonth(userId?: string) {
 }
 
 export function registerScanUsage(userId?: string) {
-  if (userId) {
-    return
-  }
-
-  const key = getUserKey(userId)
-  const history = getScanUsageHistory()
-  const entry = new Date().toISOString()
-  history[key] = [entry, ...(history[key] ?? [])].slice(0, 500)
-  setLocalStorageItem(SCAN_USAGE_STORAGE_KEY, history)
+  dependencies.useCases.scans.registerScanUsage(userId)
 }

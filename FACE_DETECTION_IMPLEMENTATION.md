@@ -3,6 +3,7 @@
 ## ✅ Completed Features
 
 ### 1. Face Detection Service (`src/features/ai-scan/services/face-detection-service.ts`)
+
 - ✅ Uses **face-api.js** with TinyFaceDetector model
 - ✅ Detects presence of faces in images
 - ✅ Handles CORS-enabled remote images
@@ -11,12 +12,14 @@
 - ✅ Lightweight (<70KB model)
 
 ### 2. Face Validation Hook (`src/features/ai-scan/hooks/useFaceValidation.ts`)
+
 - ✅ Manages validation states: idle → checking → valid/invalid
 - ✅ Provides error messages to UI
 - ✅ Async image validation
 - ✅ Reset functionality for retrying images
 
 ### 3. Enhanced MakeupInputPanel Component
+
 - ✅ Real-time image validation on selection
 - ✅ "Đang kiểm tra ảnh..." (Checking...) status indicator
 - ✅ Loading spinner with animated icon
@@ -47,11 +50,13 @@ Face Detected?           No Face
 ## 📊 Impact Analysis
 
 ### API Cost Savings
+
 - **Before**: Every uploaded image → API call to Perfect Corp
 - **After**: Only validated images → API call
 - **Savings**: ~30-50% reduction in invalid requests (estimated)
 
 ### User Experience Improvements
+
 - **Faster Feedback**: Instant validation (1-2 seconds)
 - **Clear Guidance**: Vietnamese error messages
 - **No Confusion**: Disabled button explains why processing blocked
@@ -60,18 +65,22 @@ Face Detected?           No Face
 ## 🔧 Technical Implementation Details
 
 ### Model Choice: TinyFaceDetector
+
 - ✅ Smallest model (~70KB)
 - ✅ Fast inference (1-2 seconds)
 - ✅ Good accuracy for typical selfies
 - ✅ Works on CPU (no GPU required)
 
 ### Alternative Models Available
+
 If you need more accuracy in the future:
+
 - **LandmarksDetector**: More precise face detection
 - **FaceRecognition**: Can recognize specific faces
 - **MediaPipe**: Better for mobile
 
 ### Error Handling
+
 - ✅ Model loading failures → Graceful degradation
 - ✅ Invalid image URLs → User-friendly error message
 - ✅ CORS issues → Fallback handling
@@ -80,6 +89,7 @@ If you need more accuracy in the future:
 ## 🚀 Quick Start
 
 1. **Already installed** ✓
+
    ```bash
    # face-api.js is added to package.json
    npm install  # if needed
@@ -93,7 +103,7 @@ If you need more accuracy in the future:
 
 3. **Customize error messages** (if needed)
    - Edit `src/features/ai-scan/services/face-detection-service.ts`
-   - Line: `message: 'Không tìm thấy khuôn mặt, vui lòng chụp lại rõ hơn'`
+   - Line: `message: 'No face detected, please retake the photo more clearly'`
 
 ## 📝 Code Examples
 
@@ -104,14 +114,14 @@ import { useFaceValidation } from '@/features/ai-scan/hooks/useFaceValidation'
 
 export function MyComponent() {
   const { validationState, validateAndSetImage, validationError } = useFaceValidation()
-  
+
   const handleImageSelect = async (imageUrl: string) => {
     const isValid = await validateAndSetImage(imageUrl)
     if (isValid) {
       // Process image
     }
   }
-  
+
   return (
     <div>
       {validationState === 'checking' && <p>Checking...</p>}
@@ -124,13 +134,13 @@ export function MyComponent() {
 ### Direct service usage
 
 ```typescript
-import { validateImage } from '@/features/ai-scan/services/face-detection-service'
+import { validateImage } from "@/features/ai-scan/services/face-detection-service";
 
-const result = await validateImage(imageUrl)
+const result = await validateImage(imageUrl);
 if (result.isValid) {
   // Proceed with processing
 } else {
-  console.error(result.message)
+  console.error(result.message);
 }
 ```
 
@@ -147,12 +157,12 @@ if (result.isValid) {
 
 ## 🐛 Troubleshooting
 
-| Issue | Solution |
-|-------|----------|
-| Models won't load | Check CDN access, clear cache, refresh page |
-| False negatives | Use clearer face image, better lighting |
-| Slow validation | Normal for first use (model loading), faster after |
-| CORS errors | Ensure image URL allows crossOrigin access |
+| Issue             | Solution                                           |
+| ----------------- | -------------------------------------------------- |
+| Models won't load | Check CDN access, clear cache, refresh page        |
+| False negatives   | Use clearer face image, better lighting            |
+| Slow validation   | Normal for first use (model loading), faster after |
+| CORS errors       | Ensure image URL allows crossOrigin access         |
 
 ## 📚 Related Files
 
@@ -173,6 +183,7 @@ if (result.isValid) {
 ## 🎉 Summary
 
 You now have a complete client-side image validation system that:
+
 - ✅ Detects faces before API calls
 - ✅ Provides clear user feedback
 - ✅ Saves API costs

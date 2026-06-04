@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion'
 import { ProductCard } from '@/shared/components/ui/ProductCard'
-import { type ProductRecommendation } from '@/shared/lib/types'
+import { type ProductRecommendation } from '@/core/entities'
 
 type RecommendationGridProps = {
   products: ProductRecommendation[]

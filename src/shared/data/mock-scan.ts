@@ -1,4 +1,4 @@
-import { type ScanResult } from '@/shared/lib/types'
+import { type ScanResult } from '@/core/entities'
 
 export const mockScanResult: ScanResult = {
   originalImage: '',
