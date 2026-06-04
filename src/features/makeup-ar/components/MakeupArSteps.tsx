@@ -25,7 +25,7 @@ export default function MakeupArSteps() {
       <div className="mx-auto max-w-[1400px] px-8 space-y-12">
         {/* Title */}
         <div className="text-center space-y-4 max-w-2xl mx-auto">
-          <h2 className="font-display text-2xl font-black tracking-tight sm:text-3xl lg:text-[2.25rem]">
+          <h2 className="font-brand text-2xl font-black tracking-tight sm:text-3xl lg:text-[2.25rem]">
             Easy Steps for Foundation AR Try-on
           </h2>
           <p className="text-sm text-slate-500">
@@ -42,14 +42,14 @@ export default function MakeupArSteps() {
               <div className="bg-white border border-slate-200 rounded-3xl p-6 shadow-sm flex-grow flex flex-col justify-between items-center text-center">
                 <div className="flex items-center gap-1 text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">
                   <span>STEP</span>
-                  <span className="text-rose-500 font-mono text-sm">{step.num}</span>
+                  <span className="text-brand-accent font-mono text-sm">{step.num}</span>
                 </div>
                 <img
                   alt={step.title}
                   src={step.image}
                   className="w-full max-w-[180px] aspect-square object-contain mb-4"
                 />
-                <h3 className="font-display text-sm font-bold text-slate-900 leading-snug">
+                <h3 className="font-brand text-sm font-bold text-slate-900 leading-snug">
                   {step.title}
                 </h3>
               </div>
@@ -68,10 +68,10 @@ export default function MakeupArSteps() {
         <div className="text-center pt-8">
           <Link
             to="/auth"
-            className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-rose-600 hover:text-rose-700 transition group"
+            className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-brand-accent hover:text-brand-accent transition group"
           >
             <span>Get Custom Demo</span>
-            <span className="flex h-7 w-7 items-center justify-center rounded-full border border-rose-500 transition group-hover:bg-rose-500 group-hover:text-white">
+            <span className="flex h-7 w-7 items-center justify-center rounded-full border border-brand-accent transition group-hover:bg-brand-paper0 group-hover:text-white">
               <svg viewBox="0 0 16 16" fill="none" className="h-3 w-3" stroke="currentColor" strokeWidth={2}>
                 <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
               </svg>

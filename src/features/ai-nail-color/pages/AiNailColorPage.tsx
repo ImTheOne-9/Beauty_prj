@@ -8,7 +8,7 @@ import NailFAQ from "../components/NailFAQ";
 
 export default function NailColorPage() {
   return (
-    <main>
+    <main className="public-shell min-h-screen overflow-x-hidden bg-white">
       <NailHero />
       <NailARSection />
       <NailHowItWorks />

@@ -29,10 +29,10 @@ type CategoryEffectEditorProps = {
 
 function FieldLabel({ children, hint }: { children: ReactNode; hint?: string }) {
   return (
-    <label className="flex items-center gap-1 text-sm text-rose-950">
+    <label className="flex items-center gap-1 text-sm text-app-ink">
       {children}
-      <HelpCircle className="h-3.5 w-3.5 text-mist" aria-hidden />
-      {hint ? <span className="ml-auto text-xs font-normal text-mist">{hint}</span> : null}
+      <HelpCircle className="h-3.5 w-3.5 text-app-muted" aria-hidden />
+      {hint ? <span className="ml-auto text-xs font-normal text-app-muted">{hint}</span> : null}
     </label>
   )
 }
@@ -49,7 +49,7 @@ function ColorPaletteFields({
   onChange: (patch: Partial<MakeupPalette>) => void
 }) {
   return (
-    <div className={cn('space-y-3', index > 0 && 'border-t border-rose-100 pt-4')}>
+    <div className={cn('space-y-3', index > 0 && 'border-t border-app-border pt-4')}>
       <FieldLabel>Color {index + 1}</FieldLabel>
       <div className="flex items-center gap-2">
         <Input
@@ -81,7 +81,7 @@ function ColorPaletteFields({
         <div>
           <FieldLabel>Texture</FieldLabel>
           <select
-            className="mt-1 h-9 w-full rounded-sm border border-rose-200 px-2 text-sm capitalize"
+            className="mt-1 h-9 w-full rounded-md border border-app-border bg-app-surface px-2 text-sm capitalize text-app-ink focus:border-app-accent focus:outline-none focus:ring-2 focus:ring-app-accent/10"
             value={palette.texture ?? 'matte'}
             onChange={(event) => onChange({ texture: event.target.value as MakeupTexture })}
           >
@@ -139,24 +139,24 @@ export function CategoryEffectEditor({
 
   return (
     <>
-      <div className="rounded-lg border border-rose-100 bg-white">
+      <div className="rounded-lg border border-app-border bg-app-surface">
         {collapsible ? (
           <button
             type="button"
             className="flex w-full items-center justify-between px-3 py-2.5 text-left"
             onClick={onToggle}
           >
-            <span className="text-sm font-semibold text-rose-950">{meta?.label ?? effect.category}</span>
+            <span className="text-sm font-semibold text-app-ink">{meta?.label ?? effect.category}</span>
             {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </button>
         ) : (
           <div className="px-3 py-2.5">
-            <span className="text-sm font-semibold text-rose-950">{meta?.label ?? effect.category}</span>
+            <span className="text-sm font-semibold text-app-ink">{meta?.label ?? effect.category}</span>
           </div>
         )}
 
         {isOpen ? (
-          <div className="space-y-4 border-t border-rose-100 px-3 py-3">
+          <div className="space-y-4 border-t border-app-border px-3 py-3">
             {effect.category === 'skin_smooth' ? (
               <>
                 <div>
@@ -193,16 +193,16 @@ export function CategoryEffectEditor({
                     <FieldLabel>Pattern</FieldLabel>
                     {!patternSelected ? (
                       <>
-                        <p className="text-xs leading-relaxed text-mist">
+                        <p className="text-xs leading-relaxed text-app-muted">
                           We support multiple application patterns. Click the button below to choose the pattern you
                           want.
                         </p>
-                        <div className="rounded-lg border border-rose-200 bg-rose-50/30 p-3">
+                        <div className="rounded-lg border border-app-border bg-app-subtle p-3">
                           <Button
                             type="button"
                             variant="ghost"
                             size="sm"
-                            className="mx-auto flex w-full border border-rose-200 bg-white"
+                            className="mx-auto flex w-full"
                             onClick={() => setPickerOpen(true)}
                           >
                             Choose pattern
@@ -210,7 +210,7 @@ export function CategoryEffectEditor({
                         </div>
                       </>
                     ) : (
-                      <div className="rounded-lg border border-rose-200 bg-rose-50/30 p-3">
+                      <div className="rounded-lg border border-app-border bg-app-subtle p-3">
                         {patternPreview?.thumbnail ? (
                           <img
                             src={patternPreview.thumbnail}
@@ -218,12 +218,12 @@ export function CategoryEffectEditor({
                             className="mx-auto h-24 w-24 object-contain"
                           />
                         ) : null}
-                        <p className="mt-2 text-center text-sm font-medium text-rose-900">{patternLabel}</p>
+                        <p className="mt-2 text-center text-sm font-medium text-app-ink">{patternLabel}</p>
                         <Button
                           type="button"
                           variant="ghost"
                           size="sm"
-                          className="mx-auto mt-2 flex w-full max-w-[200px] border border-rose-200 bg-white"
+                          className="mx-auto mt-2 flex w-full max-w-[200px]"
                           onClick={() => setPickerOpen(true)}
                         >
                           Choose pattern
@@ -368,7 +368,7 @@ export function CategoryEffectEditor({
                 {showDetailFields &&
                 !['skin_smooth', 'concealer', 'foundation', 'lip_liner'].includes(effect.category) ? (
                   <div className="space-y-1">
-                    <p className="text-sm font-semibold text-rose-950">Color</p>
+                    <p className="text-sm font-semibold text-app-ink">Color</p>
                     {Array.from({ length: paletteCount }).map((_, index) => (
                       <ColorPaletteFields
                         key={index}

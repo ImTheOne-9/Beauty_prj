@@ -339,10 +339,10 @@ export default function BeautyTryOnPage() {
 
   if (categoriesQuery.error || productsQuery.error || makeupCatalogQuery.error || variantsQuery.error) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-white px-6 text-center">
+      <main className="beauty-shell flex min-h-screen items-center justify-center bg-studio-surface px-6 text-center">
         <div>
-          <h1 className="text-xl font-bold">Unable to load beauty catalog</h1>
-          <p className="mt-2 text-sm text-neutral-500">
+          <h1 className="text-xl font-bold text-studio-ink">Unable to load beauty catalog</h1>
+          <p className="mt-2 text-sm text-studio-muted">
             Please check the database connection and try again.
           </p>
         </div>
@@ -351,7 +351,7 @@ export default function BeautyTryOnPage() {
   }
 
   return (
-    <main className="min-h-screen bg-white text-neutral-950 lg:h-screen lg:overflow-hidden">
+    <main className="beauty-shell min-h-screen bg-studio-surface font-ui text-studio-ink lg:h-screen lg:overflow-hidden">
       <div className="flex min-h-screen flex-col lg:h-screen lg:flex-row lg:overflow-hidden">
         <section className="flex min-h-0 flex-1 flex-col lg:flex-[4]">
           <BeautyVirtualMirror
@@ -393,11 +393,14 @@ export default function BeautyTryOnPage() {
           </div>
         </section>
 
-        <aside className="flex min-h-0 flex-col border-l bg-white lg:h-full lg:flex-[8] lg:overflow-hidden">
-          <div className="shrink-0 px-5 py-4">
+        <aside className="flex min-h-0 flex-col border-l border-studio-border bg-studio-surface lg:h-full lg:flex-[8] lg:overflow-hidden">
+          <div className="shrink-0 border-b border-studio-border px-5 py-4">
             <div className="flex items-center justify-between gap-4">
               <div>
-                <h1 className="mt-1 text-xl font-bold">
+                <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-studio-accent">
+                  Virtual makeup
+                </p>
+                <h1 className="mt-1 text-xl font-bold text-studio-ink">
                   Beauty Studio
                 </h1>
               </div>
@@ -405,12 +408,12 @@ export default function BeautyTryOnPage() {
               <button
                 type="button"
                 onClick={() => setMobileAppliedOpen(true)}
-                className="relative rounded-full border p-3 lg:hidden"
+                className="relative rounded-full border border-studio-border bg-studio-surface p-3 text-studio-ink transition hover:bg-studio-subtle lg:hidden"
                 aria-label="Open applied products"
               >
                 <ShoppingBag size={18} />
                 {appliedProducts.length > 0 && (
-                  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-black px-1 text-xs font-semibold text-white">
+                  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-studio-accent px-1 text-xs font-semibold text-white">
                     {appliedProducts.length}
                   </span>
                 )}
@@ -444,12 +447,12 @@ export default function BeautyTryOnPage() {
         <div className="fixed inset-0 z-50 lg:hidden">
           <button
             type="button"
-            className="absolute inset-0 bg-black/40"
+            className="absolute inset-0 bg-studio-ink/40"
             aria-label="Close applied products"
             onClick={() => setMobileAppliedOpen(false)}
           />
 
-          <div className="absolute inset-x-0 bottom-0 h-[80vh] overflow-hidden rounded-t-2xl bg-white shadow-2xl">
+          <div className="absolute inset-x-0 bottom-0 h-[80vh] overflow-hidden rounded-t-lg bg-studio-surface shadow-2xl">
             
 
             <BeautyAppliedProducts

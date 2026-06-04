@@ -265,7 +265,7 @@ export default function HeroSection() {
             {/* Text content */}
             <div className="px-5 pb-10 pt-4 bg-white">
               <motion.p
-                className="text-[10px] font-bold uppercase tracking-[0.3em] text-rose-500"
+                className="text-[10px] font-bold uppercase tracking-[0.24em] text-brand-accent"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
@@ -274,7 +274,7 @@ export default function HeroSection() {
               </motion.p>
 
               <motion.h1
-                className="mt-3 font-black leading-tight tracking-tight text-gray-900"
+                className="mt-3 font-black leading-tight tracking-tight text-brand-ink"
                 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 'clamp(1.6rem, 5.5vw, 2.2rem)' }}
                 initial={{ opacity: 0, y: 14 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -284,7 +284,7 @@ export default function HeroSection() {
               </motion.h1>
 
               <motion.p
-                className="mt-3 text-sm leading-relaxed text-gray-600"
+                className="mt-3 text-sm leading-relaxed text-brand-muted"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
@@ -301,14 +301,14 @@ export default function HeroSection() {
                 <MotionLink
                   to={slide.primaryBtn.link}
                   whileTap={{ scale: 0.97 }}
-                  className="flex-1 rounded-full bg-rose-600 px-6 py-3 text-center text-sm font-bold uppercase tracking-wide text-white shadow-md shadow-rose-500/25 transition hover:bg-rose-700"
+                  className="public-primary flex-1 rounded-full px-6 py-3 text-center text-sm font-bold uppercase tracking-wide shadow-md shadow-brand-accent/25 transition"
                 >
                   {slide.primaryBtn.text}
                 </MotionLink>
                 <MotionLink
                   to={slide.secondaryBtn.link}
                   whileTap={{ scale: 0.97 }}
-                  className="flex-1 rounded-full border-2 border-gray-300 bg-white px-6 py-3 text-center text-sm font-bold uppercase tracking-wide text-gray-700 transition hover:border-rose-400 hover:text-rose-600"
+                  className="public-secondary flex-1 rounded-full px-6 py-3 text-center text-sm font-bold uppercase tracking-wide transition"
                 >
                   {slide.secondaryBtn.text}
                 </MotionLink>
@@ -325,7 +325,7 @@ export default function HeroSection() {
                   {slide.badges.map((badge) => (
                     <span
                       key={badge}
-                      className="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 text-[9px] font-bold tracking-[0.18em] text-gray-500"
+                      className="rounded-full border border-brand-rose bg-brand-surface px-3 py-1 text-[9px] font-bold tracking-[0.18em] text-brand-muted"
                     >
                       {badge}
                     </span>
@@ -343,14 +343,14 @@ export default function HeroSection() {
             className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-lg transition hover:bg-white"
             aria-label="Previous slide"
           >
-            <ChevronLeft className="h-5 w-5 text-gray-700" />
+            <ChevronLeft className="h-5 w-5 text-brand-ink" />
           </button>
           <button
             onClick={next}
             className="pointer-events-auto flex h-10 w-10 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-lg transition hover:bg-white"
             aria-label="Next slide"
           >
-            <ChevronRight className="h-5 w-5 text-gray-700" />
+            <ChevronRight className="h-5 w-5 text-brand-ink" />
           </button>
         </div>
       </section>
@@ -432,7 +432,7 @@ export default function HeroSection() {
               <div className="mx-auto w-full max-w-[1400px] px-4 sm:px-6 lg:px-8">
                 <div className="max-w-xl pt-16 pointer-events-auto">
                   <motion.p
-                    className="text-xs font-bold uppercase tracking-[0.35em] text-rose-500"
+                    className="text-xs font-bold uppercase tracking-[0.24em] text-brand-accent"
                     initial={{ opacity: 0, y: 14 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
@@ -441,7 +441,7 @@ export default function HeroSection() {
                   </motion.p>
 
                   <motion.h1
-                    className="mt-4 font-black leading-[1.05] tracking-[-0.03em] text-gray-900"
+                    className="mt-4 font-black leading-[1.05] text-brand-ink"
                     style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", fontSize: 'clamp(2.4rem, 3.8vw, 4rem)' }}
                     initial={{ opacity: 0, y: 18 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -451,7 +451,7 @@ export default function HeroSection() {
                   </motion.h1>
 
                   <motion.p
-                    className="mt-5 max-w-md text-base leading-relaxed text-gray-700"
+                    className="mt-5 max-w-md text-base leading-relaxed text-brand-muted"
                     initial={{ opacity: 0, y: 14 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7, delay: 0.2 }}
@@ -469,7 +469,7 @@ export default function HeroSection() {
                       to={slide.primaryBtn.link}
                       whileHover={{ scale: 1.03, y: -2 }}
                       whileTap={{ scale: 0.97 }}
-                      className="rounded-full bg-rose-600 px-7 py-3 text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-rose-500/30 transition hover:bg-rose-700"
+                      className="public-primary rounded-full px-7 py-3 text-sm font-bold uppercase tracking-wide shadow-lg shadow-brand-accent/30 transition"
                     >
                       {slide.primaryBtn.text}
                     </MotionLink>
@@ -477,7 +477,7 @@ export default function HeroSection() {
                       to={slide.secondaryBtn.link}
                       whileHover={{ scale: 1.03, y: -2 }}
                       whileTap={{ scale: 0.97 }}
-                      className="rounded-full border-2 border-gray-400 bg-white/70 px-7 py-3 text-sm font-bold uppercase tracking-wide text-gray-800 backdrop-blur-sm transition hover:border-rose-400 hover:text-rose-600"
+                      className="public-secondary rounded-full px-7 py-3 text-sm font-bold uppercase tracking-wide backdrop-blur-sm transition"
                     >
                       {slide.secondaryBtn.text}
                     </MotionLink>
@@ -493,7 +493,7 @@ export default function HeroSection() {
                       {slide.badges.map((badge) => (
                         <span
                           key={badge}
-                          className="rounded-full border border-gray-300 bg-white/80 px-4 py-1.5 text-[10px] font-bold tracking-[0.2em] text-gray-500 shadow-sm backdrop-blur-sm"
+                          className="rounded-full border border-brand-rose bg-white/80 px-4 py-1.5 text-[10px] font-bold tracking-[0.18em] text-brand-muted shadow-sm backdrop-blur-sm"
                         >
                           {badge}
                         </span>
@@ -521,12 +521,12 @@ export default function HeroSection() {
                     ].map(({ value, label }) => (
                       <div key={label} className="text-center">
                         <p
-                          className="text-3xl font-black text-rose-600"
+                          className="text-3xl font-black text-brand-accent"
                           style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                         >
                           {value}
                         </p>
-                        <p className="mt-1 text-xs font-semibold uppercase tracking-[0.25em] text-gray-600">
+                        <p className="mt-1 text-xs font-semibold uppercase tracking-[0.18em] text-brand-muted">
                           {label}
                         </p>
                       </div>
@@ -545,14 +545,14 @@ export default function HeroSection() {
             className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-lg transition hover:bg-white hover:scale-105"
             aria-label="Previous slide"
           >
-            <ChevronLeft className="h-7 w-7 text-gray-700" />
+            <ChevronLeft className="h-7 w-7 text-brand-ink" />
           </button>
           <button
             onClick={next}
             className="pointer-events-auto flex h-14 w-14 items-center justify-center rounded-full bg-white/80 backdrop-blur-sm shadow-lg transition hover:bg-white hover:scale-105"
             aria-label="Next slide"
           >
-            <ChevronRight className="h-7 w-7 text-gray-700" />
+            <ChevronRight className="h-7 w-7 text-brand-ink" />
           </button>
         </div>
 
@@ -567,8 +567,8 @@ export default function HeroSection() {
               }}
               className={`h-3 rounded-full transition-all duration-300 ${
                 i === current
-                  ? 'w-12 bg-rose-600 shadow-md shadow-rose-400/50'
-                  : 'w-3 bg-white shadow-md hover:bg-rose-200'
+                  ? 'w-12 bg-brand-accent shadow-md shadow-brand-accent/40'
+                  : 'w-3 bg-white shadow-md hover:bg-brand-rose'
               }`}
               aria-label={`Go to slide ${i + 1}`}
             />

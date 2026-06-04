@@ -107,10 +107,10 @@ export default function ProfilePage() {
 
   if (!user) {
     return (
-      <section className="section-shell pb-16">
-        <Card className="mx-auto max-w-lg border border-rose-100/60 bg-white/85 p-8 text-center">
-          <h1 className="font-display text-2xl text-pearl">Profile</h1>
-          <p className="mt-2 text-sm text-mist">Please sign in to manage your profile.</p>
+      <section className="app-shell section-shell min-h-screen bg-app-subtle pb-16 pt-4">
+        <Card className="mx-auto max-w-lg border border-app-border bg-white p-8 text-center">
+          <h1 className="font-ui text-2xl font-semibold text-app-ink">Profile</h1>
+          <p className="mt-2 text-sm text-app-muted">Please sign in to manage your profile.</p>
           <Link to="/auth" className="mt-4 inline-block">
             <Button>Sign in</Button>
           </Link>
@@ -125,26 +125,26 @@ export default function ProfilePage() {
   const isUploading = uploadAvatarMutation.isPending
 
   return (
-    <section className="section-shell pb-16">
+    <section className="app-shell section-shell min-h-screen bg-app-subtle pb-16 pt-4">
       <div className="mx-auto max-w-5xl space-y-6">
-        <Card className="border border-rose-100/60 bg-white/85">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-rose-600">Profile</p>
-          <h1 className="mt-2 font-display text-3xl text-pearl">Your account</h1>
-          <p className="mt-2 text-sm text-mist">Update your avatar and personal details.</p>
+        <Card className="border border-app-border bg-white">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-app-accent">Profile</p>
+          <h1 className="mt-2 font-ui text-3xl font-semibold text-app-ink">Your account</h1>
+          <p className="mt-2 text-sm text-app-muted">Update your avatar and personal details.</p>
         </Card>
 
         <div className="grid gap-4 lg:grid-cols-[280px_minmax(0,1fr)]">
-          <Card className="border border-rose-100/60 bg-white/85 p-6 text-center">
+          <Card className="border border-app-border bg-white p-6 text-center">
             <button
               type="button"
               disabled={isUploading}
               onClick={() => fileInputRef.current?.click()}
-              className="group relative mx-auto inline-flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-rose-100 bg-rose-50 transition hover:border-cyan/40"
+              className="group relative mx-auto inline-flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-app-border bg-app-subtle transition hover:border-app-accent"
             >
               {currentAvatar ? (
                 <img src={currentAvatar} alt={displayName} className="h-full w-full object-cover" />
               ) : (
-                <span className="font-display text-3xl font-bold text-rose-700">{initials}</span>
+                <span className="font-ui text-3xl font-bold text-app-accent">{initials}</span>
               )}
               <span className="absolute inset-0 flex items-center justify-center bg-black/35 opacity-0 transition group-hover:opacity-100">
                 {isUploading ? (
@@ -161,17 +161,17 @@ export default function ProfilePage() {
               className="hidden"
               onChange={handleAvatarPick}
             />
-            <p className="mt-4 text-sm font-semibold text-rose-950">{displayName}</p>
-            <p className="mt-1 text-xs text-mist">{user.email}</p>
-            <p className="mt-3 text-[11px] text-mist">Click avatar to upload to Supabase (max 2MB)</p>
+            <p className="mt-4 text-sm font-semibold text-app-ink">{displayName}</p>
+            <p className="mt-1 text-xs text-app-muted">{user.email}</p>
+            <p className="mt-3 text-[11px] text-app-muted">Click avatar to upload to Supabase (max 2MB)</p>
           </Card>
 
           <div className="space-y-4">
-            <Card className="border border-rose-100/60 bg-white/85 p-6">
-              <h2 className="font-display text-2xl text-pearl">Edit profile</h2>
+            <Card className="border border-app-border bg-white p-6">
+              <h2 className="font-ui text-2xl font-semibold text-app-ink">Edit profile</h2>
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wide text-rose-600">First name</label>
+                  <label className="text-xs font-semibold uppercase tracking-wide text-app-muted">First name</label>
                   <Input
                     className="mt-2"
                     placeholder="First name"
@@ -180,7 +180,7 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div>
-                  <label className="text-xs font-semibold uppercase tracking-wide text-rose-600">Last name</label>
+                  <label className="text-xs font-semibold uppercase tracking-wide text-app-muted">Last name</label>
                   <Input
                     className="mt-2"
                     placeholder="Last name"
@@ -190,46 +190,46 @@ export default function ProfilePage() {
                 </div>
               </div>
               <div className="mt-4">
-                <Button onClick={() => saveProfileMutation.mutate()} disabled={isSaving || isUploading}>
+                <Button className="app-primary" onClick={() => saveProfileMutation.mutate()} disabled={isSaving || isUploading}>
                   {isSaving ? 'Saving...' : 'Save changes'}
                 </Button>
               </div>
             </Card>
 
-            <Card className="border border-rose-100/60 bg-white/85 p-6">
-              <h2 className="font-display text-2xl text-pearl">Account details</h2>
+            <Card className="border border-app-border bg-white p-6">
+              <h2 className="font-ui text-2xl font-semibold text-app-ink">Account details</h2>
               <dl className="mt-4 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-rose-100 bg-rose-50/40 px-4 py-3">
-                  <dt className="text-[10px] font-semibold uppercase tracking-wide text-rose-600">Email</dt>
-                  <dd className="mt-1 text-sm text-rose-950 break-all">{profile?.email ?? user.email}</dd>
+                <div className="rounded-2xl border border-app-border bg-app-subtle px-4 py-3">
+                  <dt className="text-[10px] font-semibold uppercase tracking-wide text-app-accent">Email</dt>
+                  <dd className="mt-1 text-sm text-app-ink break-all">{profile?.email ?? user.email}</dd>
                 </div>
-                <div className="rounded-2xl border border-rose-100 bg-rose-50/40 px-4 py-3">
-                  <dt className="text-[10px] font-semibold uppercase tracking-wide text-rose-600">Role</dt>
-                  <dd className="mt-1 text-sm capitalize text-rose-950">{role}</dd>
+                <div className="rounded-2xl border border-app-border bg-app-subtle px-4 py-3">
+                  <dt className="text-[10px] font-semibold uppercase tracking-wide text-app-accent">Role</dt>
+                  <dd className="mt-1 text-sm capitalize text-app-ink">{role}</dd>
                 </div>
-                <div className="rounded-2xl border border-rose-100 bg-rose-50/40 px-4 py-3">
-                  <dt className="text-[10px] font-semibold uppercase tracking-wide text-rose-600">Plan</dt>
-                  <dd className="mt-1 text-sm text-rose-950">{profile?.plan?.name ?? null}</dd>
+                <div className="rounded-2xl border border-app-border bg-app-subtle px-4 py-3">
+                  <dt className="text-[10px] font-semibold uppercase tracking-wide text-app-accent">Plan</dt>
+                  <dd className="mt-1 text-sm text-app-ink">{profile?.plan?.name ?? null}</dd>
                 </div>
-                <div className="rounded-2xl border border-rose-100 bg-rose-50/40 px-4 py-3">
-                  <dt className="text-[10px] font-semibold uppercase tracking-wide text-rose-600">Last sign in</dt>
-                  <dd className="mt-1 text-sm text-rose-950">{formatDateTime(user.last_sign_in_at)}</dd>
+                <div className="rounded-2xl border border-app-border bg-app-subtle px-4 py-3">
+                  <dt className="text-[10px] font-semibold uppercase tracking-wide text-app-accent">Last sign in</dt>
+                  <dd className="mt-1 text-sm text-app-ink">{formatDateTime(user.last_sign_in_at)}</dd>
                 </div>
               </dl>
             </Card>
 
-            <Card className="border border-rose-100/60 bg-white/85 p-6">
-              <h2 className="font-display text-2xl text-pearl">Subscription</h2>
-              <p className="mt-2 text-sm text-mist">Current plan: {subscriptionTier}</p>
-              <div className="mt-4 rounded-2xl border border-rose-100 bg-rose-50/60 p-4 text-sm text-rose-900">
+            <Card className="border border-app-border bg-white p-6">
+              <h2 className="font-ui text-2xl font-semibold text-app-ink">Subscription</h2>
+              <p className="mt-2 text-sm text-app-muted">Current plan: {subscriptionTier}</p>
+              <div className="mt-4 rounded-2xl border border-app-border bg-app-subtle p-4 text-sm text-app-ink">
                 Upgrade anytime to unlock more scans and longer history.
               </div>
               <div className="mt-4 flex flex-wrap gap-3">
                 <Link to="/plans">
-                  <Button>Manage plan</Button>
+                  <Button className="app-primary">Manage plan</Button>
                 </Link>
                 <Link to="/scan">
-                  <Button variant="ghost">Run a scan</Button>
+                  <Button className="app-secondary" variant="ghost">Run a scan</Button>
                 </Link>
               </div>
             </Card>

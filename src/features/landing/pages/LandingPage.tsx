@@ -44,12 +44,12 @@ function SectionHeader({
 }) {
   return (
     <div className="text-center">
-      <p className="text-xs font-bold uppercase tracking-[0.35em] text-rose-500">{eyebrow}</p>
-      <h2 className="mt-2 font-display text-2xl font-black tracking-tight text-gray-900 sm:text-3xl">
+      <p className="text-xs font-bold uppercase tracking-[0.24em] text-brand-accent">{eyebrow}</p>
+      <h2 className="mt-2 font-brand text-2xl font-black tracking-tight text-brand-ink sm:text-3xl">
         {title}
       </h2>
       {subtitle && (
-        <p className="mx-auto mt-2 max-w-xl text-sm text-gray-500">{subtitle}</p>
+        <p className="mx-auto mt-2 max-w-xl text-sm text-brand-muted">{subtitle}</p>
       )}
     </div>
   )
@@ -82,7 +82,7 @@ export default function LandingPage() {
   }, [])
 
   return (
-    <main ref={pageRef} className="min-h-screen overflow-x-hidden bg-white">
+    <main ref={pageRef} className="public-shell min-h-screen overflow-x-hidden bg-white">
 
       {/* ── 1. HERO ──────────────────────────────────────────────────────────── */}
       <HeroSection />
@@ -101,15 +101,15 @@ export default function LandingPage() {
 
       {/* ── 5. PRODUCT RECOMMENDATIONS (KEPT) ───────────────────────────────── */}
       <RevealSection>
-        <section className="bg-gray-50 py-16">
+        <section className="bg-brand-surface py-16">
           <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-8">
             <SectionHeader
               eyebrow="Curated For You"
               title="Makeup picks matched to your skin"
               subtitle="After your virtual try-on, our AI recommends products from top brands that complement your unique skin tone and style."
             />
-            <div className="mt-10 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm lg:p-6">
-              <Suspense fallback={<div className="flex h-48 items-center justify-center text-gray-400 text-sm">Loading recommendations...</div>}>
+            <div className="public-panel mt-10 p-4 lg:p-6">
+              <Suspense fallback={<div className="flex h-48 items-center justify-center text-sm text-brand-muted">Loading recommendations...</div>}>
                 <ProductRecommendations />
               </Suspense>
             </div>
@@ -136,8 +136,8 @@ export default function LandingPage() {
               title="Loved by beauty enthusiasts worldwide"
               subtitle="From first-time makeup buyers to professional artists — everyone uses our virtual try-on to discover looks they'd never dare try in store."
             />
-            <div className="mt-10 rounded-2xl border border-gray-100 bg-gray-50 p-4 lg:p-6">
-              <Suspense fallback={<div className="flex h-48 items-center justify-center text-gray-400 text-sm">Loading testimonials...</div>}>
+            <div className="public-panel mt-10 bg-brand-surface p-4 lg:p-6">
+              <Suspense fallback={<div className="flex h-48 items-center justify-center text-sm text-brand-muted">Loading testimonials...</div>}>
                 <Testimonials />
               </Suspense>
             </div>
@@ -147,13 +147,13 @@ export default function LandingPage() {
 
       {/* ── 9. CTA BANNER ────────────────────────────────────────────────────── */}
       <RevealSection>
-        <section className="bg-rose-600 py-16">
+        <section className="bg-brand-accent py-16">
           <div className="mx-auto max-w-[1400px] px-4 text-center sm:px-6 lg:px-8">
-            <p className="text-xs font-bold uppercase tracking-[0.35em] text-rose-200">Start For Free</p>
-            <h2 className="mt-4 font-display text-4xl font-black leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
+            <p className="text-xs font-bold uppercase tracking-[0.35em] text-white/70">Start For Free</p>
+            <h2 className="mt-4 font-brand text-4xl font-black leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
               One selfie. Thousands of looks.<br className="hidden sm:block" /> Zero commitment.
             </h2>
-            <p className="mx-auto mt-4 max-w-xl text-base text-rose-100">
+            <p className="mx-auto mt-4 max-w-xl text-base text-white/80">
               Join 2.4 million people who've already discovered their perfect look with AI.
             </p>
             <div className="mt-8 flex flex-wrap justify-center gap-4">
@@ -161,7 +161,7 @@ export default function LandingPage() {
                 to="/scan"
                 whileHover={{ scale: 1.04, y: -2 }}
                 whileTap={{ scale: 0.97 }}
-                className="rounded-full bg-white px-8 py-3.5 text-sm font-bold uppercase tracking-wide text-rose-700 shadow-lg transition hover:shadow-xl"
+                className="rounded-full bg-white px-8 py-3.5 text-sm font-bold uppercase tracking-wide text-brand-accent shadow-lg transition hover:shadow-xl"
               >
                 Try On Now — It's Free
               </MotionLink>

@@ -143,20 +143,20 @@ export default function AIScanPage() {
   })
 
   return (
-    <section className="section-shell pb-16 pt-4">
+    <section className="app-shell section-shell bg-app-subtle pb-16 pt-4">
       <div className="mx-auto max-w-[1800px] space-y-6">
         <motion.div
-          className="rounded-[2rem] border border-rose-100/50 bg-white/90 p-6 shadow-sm"
+          className="app-panel p-6"
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
         >
-          <p className="text-[10px] font-semibold uppercase tracking-[0.38em] text-rose-600">AI Makeup Virtual Try-On</p>
-          <h1 className="mt-2 font-display text-3xl font-black text-pearl md:text-4xl">Makeup Studio</h1>
-          <p className="mt-2 max-w-3xl text-sm text-mist">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-app-accent">AI Makeup Virtual Try-On</p>
+          <h1 className="mt-2 font-ui text-3xl font-semibold text-app-ink md:text-4xl">Makeup Studio</h1>
+          <p className="mt-2 max-w-3xl text-sm text-app-muted">
             Configure makeup on the left, preview results in the center, and browse catalog products matched to your
             selected colors and categories on the right.
           </p>
-          <p className="mt-4 text-sm text-mist">
+          <p className="mt-4 text-sm text-app-muted">
             Plan: <span className="font-semibold capitalize">{planId}</span> · {scanQuota === null ? 'Unlimited scans' : user ? `${scanCount}/${scanQuota} scans used this month` : 'Sign in to start scanning'}
           </p>
         </motion.div>

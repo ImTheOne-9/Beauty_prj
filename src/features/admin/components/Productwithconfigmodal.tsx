@@ -116,7 +116,7 @@ function StepIndicator({ step }: { step: 1 | 2 }) {
             <div
               className={cn(
                 'h-px w-8 transition-colors',
-                step > 1 ? 'bg-rose-300' : 'bg-rose-100',
+                step > 1 ? 'bg-slate-400' : 'bg-slate-200',
               )}
             />
           )}
@@ -124,10 +124,10 @@ function StepIndicator({ step }: { step: 1 | 2 }) {
             className={cn(
               'flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
               step === n
-                ? 'bg-rose-600 text-white shadow-sm'
+                ? 'bg-admin-ink text-white shadow-sm'
                 : step > n
-                  ? 'bg-rose-100 text-rose-600'
-                  : 'bg-rose-50 text-mist',
+                  ? 'bg-slate-200 text-admin-ink'
+                  : 'bg-admin-surface text-admin-muted',
             )}
           >
             {step > n ? (
@@ -214,8 +214,7 @@ export function ProductWithConfigModal({
 
   if (!open) return null
 
-  const inputCls =
-    'w-full rounded-2xl border border-rose-200/80 bg-white/85 px-4 py-3 text-sm text-pearl placeholder:text-mist/60 focus:border-cyan focus:outline-none focus:ring-2 focus:ring-cyan/25'
+  const inputCls = 'admin-input'
 
   const updateVariant = (index: number, patch: Partial<VariantForm>) => {
     setVariants((current) =>
@@ -322,23 +321,23 @@ export function ProductWithConfigModal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
+      className="admin-shell fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm"
       onClick={(event) => {
         if (event.target === event.currentTarget) onClose()
       }}
     >
-      <div className="relative flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden rounded-[2rem] border border-rose-100 bg-white shadow-2xl">
-        <div className="shrink-0 border-b border-rose-50 px-6 pb-4 pt-6">
+      <div className="admin-panel relative flex max-h-[92vh] w-full max-w-3xl flex-col overflow-hidden shadow-2xl">
+        <div className="shrink-0 border-b border-admin-border px-6 pb-4 pt-6">
           <button
             onClick={onClose}
-            className="absolute right-5 top-5 rounded-full p-1.5 text-mist transition hover:bg-rose-50 hover:text-rose-600"
+            className="admin-icon-button absolute right-5 top-5 p-1.5"
           >
             <X className="h-4 w-4" />
           </button>
-          <h2 className="font-display pr-8 text-2xl text-rose-950">
+          <h2 className="pr-8 font-admin text-2xl font-semibold text-admin-ink">
             {configOnly ? 'Edit Product Variants' : isEdit ? 'Edit Product' : 'Add New Product'}
           </h2>
-          <p className="mt-1 text-xs text-mist">
+          <p className="mt-1 text-xs text-admin-muted">
             {configOnly
               ? `Editing shades and textures for "${initial?.name}".`
               : isEdit
@@ -356,8 +355,8 @@ export function ProductWithConfigModal({
           {!configOnly && step === 1 && (
             <div className="space-y-4">
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-rose-950">
-                  Product Name <span className="text-rose-400">*</span>
+                <label className="admin-label">
+                  Product Name <span className="text-admin-accent">*</span>
                 </label>
                 <Input
                   placeholder="e.g. MAC Matte Lipstick Ruby Woo"
@@ -370,7 +369,7 @@ export function ProductWithConfigModal({
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-rose-950">
+                  <label className="admin-label">
                     Brand
                   </label>
                   <Input
@@ -382,8 +381,8 @@ export function ProductWithConfigModal({
                   />
                 </div>
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-rose-950">
-                    Category <span className="text-rose-400">*</span>
+                  <label className="admin-label">
+                    Category <span className="text-admin-accent">*</span>
                   </label>
                   <select
                     className={inputCls}
@@ -403,7 +402,7 @@ export function ProductWithConfigModal({
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-rose-950">
+                <label className="admin-label">
                   Description
                 </label>
                 <textarea
@@ -417,7 +416,7 @@ export function ProductWithConfigModal({
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-rose-950">
+                <label className="admin-label">
                   Image URL
                 </label>
                 <Input
@@ -430,7 +429,7 @@ export function ProductWithConfigModal({
               </div>
 
               <div>
-                <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-rose-950">
+                <label className="admin-label">
                   Partner URL
                 </label>
                 <Input
@@ -448,8 +447,8 @@ export function ProductWithConfigModal({
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-semibold text-rose-950">Variants</h3>
-                  <p className="text-xs text-mist">
+                  <h3 className="font-semibold text-admin-ink">Variants</h3>
+                  <p className="text-xs text-admin-muted">
                     Add one row for each shade, texture, SKU, or product color.
                   </p>
                 </div>
@@ -472,7 +471,7 @@ export function ProductWithConfigModal({
                 {variants.map((variant, index) => (
                   <div
                     key={variant.id ?? index}
-                    className="rounded-2xl border border-rose-100 bg-rose-50/30 p-4"
+                    className="rounded-lg border border-admin-border bg-admin-surface p-4"
                   >
                     <div className="mb-3 flex items-center justify-between">
                       <div className="flex items-center gap-2">
@@ -480,7 +479,7 @@ export function ProductWithConfigModal({
                           className="h-6 w-6 rounded-full border border-white shadow-sm"
                           style={{ backgroundColor: variant.colorHex }}
                         />
-                        <span className="text-sm font-semibold text-rose-950">
+                        <span className="text-sm font-semibold text-admin-ink">
                           Variant {index + 1}
                         </span>
                       </div>
@@ -488,7 +487,7 @@ export function ProductWithConfigModal({
                         type="button"
                         onClick={() => removeVariant(index)}
                         disabled={variants.length === 1}
-                        className="rounded-full p-1.5 text-mist hover:bg-white hover:text-rose-600 disabled:opacity-40"
+                        className="admin-icon-button p-1.5 disabled:opacity-40"
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -516,7 +515,7 @@ export function ProductWithConfigModal({
                           onChange={(event) =>
                             updateVariant(index, { colorHex: event.target.value })
                           }
-                          className="h-10 w-10 cursor-pointer rounded-xl border border-rose-100 bg-white p-0.5"
+                          className="h-10 w-10 cursor-pointer rounded-lg border border-admin-border bg-white p-0.5"
                         />
                         <input
                           type="text"
@@ -524,7 +523,7 @@ export function ProductWithConfigModal({
                           onChange={(event) =>
                             updateVariant(index, { colorHex: event.target.value })
                           }
-                          className="flex-1 rounded-xl border border-rose-100 bg-white px-3 py-2 text-xs font-mono uppercase text-rose-950 focus:outline-none focus:ring-1 focus:ring-rose-300"
+                          className="admin-input flex-1 font-mono text-xs uppercase"
                           maxLength={7}
                         />
                       </div>
@@ -551,7 +550,7 @@ export function ProductWithConfigModal({
                                 onChange={(event) =>
                                   updateVariant(index, { shimmerColor: event.target.value })
                                 }
-                                className="h-10 w-10 cursor-pointer rounded-xl border border-rose-100 bg-white p-0.5"
+                                className="h-10 w-10 cursor-pointer rounded-lg border border-admin-border bg-white p-0.5"
                                 aria-label="Shimmer color"
                               />
                               <input
@@ -560,7 +559,7 @@ export function ProductWithConfigModal({
                                 onChange={(event) =>
                                   updateVariant(index, { shimmerColor: event.target.value })
                                 }
-                                className="flex-1 rounded-xl border border-rose-100 bg-white px-3 py-2 text-xs font-mono uppercase text-rose-950 focus:outline-none focus:ring-1 focus:ring-rose-300"
+                                className="admin-input flex-1 font-mono text-xs uppercase"
                                 maxLength={7}
                                 placeholder="#FFFFFF"
                               />
@@ -575,7 +574,7 @@ export function ProductWithConfigModal({
                           updateVariant(index, { imageUrl: event.target.value })
                         }
                       />
-                      <label className="flex items-center gap-2 text-sm text-mist">
+                      <label className="flex items-center gap-2 text-sm text-admin-muted">
                         <input
                           type="checkbox"
                           checked={variant.isActive}
@@ -593,28 +592,29 @@ export function ProductWithConfigModal({
           )}
 
           {error && (
-            <div className="mt-4 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
+            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
               {error}
             </div>
           )}
         </div>
 
-        <div className="flex shrink-0 items-center justify-between gap-3 border-t border-rose-50 px-6 py-4">
-          <span className="text-xs text-mist">
+        <div className="flex shrink-0 items-center justify-between gap-3 border-t border-admin-border px-6 py-4">
+          <span className="text-xs text-admin-muted">
             {configOnly ? initial?.name ?? '' : `Step ${step} / 2`}
           </span>
           <div className="flex items-center gap-2">
             {!configOnly && step === 2 && (
-              <Button variant="ghost" onClick={() => setStep(1)} disabled={saving}>
+              <Button variant="ghost" className="admin-secondary" onClick={() => setStep(1)} disabled={saving}>
                 <ChevronLeft className="mr-1 h-4 w-4" />
                 Back
               </Button>
             )}
-            <Button variant="ghost" onClick={onClose} disabled={saving}>
+            <Button variant="ghost" className="admin-secondary" onClick={onClose} disabled={saving}>
               Cancel
             </Button>
             {!configOnly && step === 1 ? (
               <Button
+                className="admin-primary"
                 onClick={() => {
                   if (!form.name.trim()) {
                     setError('Please enter a product name.')
@@ -636,7 +636,7 @@ export function ProductWithConfigModal({
                 Next <ChevronRight className="ml-1 h-4 w-4" />
               </Button>
             ) : (
-              <Button onClick={handleSave} disabled={saving}>
+              <Button className="admin-primary" onClick={handleSave} disabled={saving}>
                 {saving ? 'Saving...' : isEdit ? 'Save Changes' : 'Create Product'}
               </Button>
             )}

@@ -3,7 +3,7 @@ import { Reveal, ArrowLink } from './nail-ui'
 
 const features = [
   {
-    body: <>Experiment with a wide array of different <strong>nail colors, textures and press-on nails</strong><sup className="ml-0.5 text-rose-500">New</sup>.</>,
+    body: <>Experiment with a wide array of different <strong>nail colors, textures and press-on nails</strong><sup className="ml-0.5 text-brand-accent">New</sup>.</>,
   },
   {
     body: <>Leverage virtual <strong>nail designs</strong> to experience various full nail looks</>,
@@ -59,7 +59,7 @@ export default function NailAmpleFeatures() {
           <ul className="mt-3 space-y-3">
             {features.map((f, i) => (
               <li key={i} className="flex gap-3">
-                <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-rose-600" strokeWidth={3} />
+                <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-accent" strokeWidth={3} />
                 <span className="text-sm leading-relaxed text-gray-700">{f.body}</span>
               </li>
             ))}

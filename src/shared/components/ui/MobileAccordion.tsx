@@ -13,13 +13,13 @@ export default function MobileAccordion({ title = 'Show', children }: Props) {
     <div>
       <button
         type="button"
-        className="sm:hidden mb-3 flex w-full items-center justify-between rounded-xl border border-rose-100 bg-white/90 px-4 py-3 text-left text-sm font-semibold text-rose-700"
+        className="mb-3 flex w-full items-center justify-between rounded-xl border border-[var(--ui-border)] bg-[var(--ui-surface)] px-4 py-3 text-left text-sm font-semibold text-[var(--ui-accent)] sm:hidden"
         onClick={() => setOpen((s) => !s)}
         aria-expanded={open}
       >
         <div className="flex items-center gap-3">
           <span className="inline-block h-4 w-4">
-            <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current text-rose-600">
+            <svg viewBox="0 0 24 24" className="h-4 w-4 fill-current text-[var(--ui-accent)]">
               <path d="M3 6h18v2H3zM3 11h18v2H3zM3 16h18v2H3z" />
             </svg>
           </span>

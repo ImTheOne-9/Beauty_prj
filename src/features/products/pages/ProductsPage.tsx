@@ -34,12 +34,13 @@ export default function ProductsPage() {
   }
 
   return (
-    <section className="section-shell space-y-6 pb-12">
-      <div>
-        <h1 className="mt-3 font-display text-4xl text-pearl">AI Curated Product Library</h1>
+    <section className="app-shell section-shell min-h-screen space-y-6 bg-app-subtle pb-12 pt-4">
+      <div className="app-panel p-6">
+        <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-app-accent">Catalog</p>
+        <h1 className="mt-2 font-ui text-3xl font-semibold text-app-ink">AI Curated Product Library</h1>
       </div>
       {products.length === 0 ? (
-        <div className="rounded-[2rem] border border-rose-100/60 bg-white/80 p-12 text-center text-sm text-mist">
+        <div className="app-panel p-12 text-center text-sm text-app-muted">
           No products in the catalog. Please add new products from the admin page.
         </div>
       ) : (
@@ -47,11 +48,11 @@ export default function ProductsPage() {
           <RecommendationGrid products={paginated} />
           {totalPages > 1 && (
             <div className="flex items-center justify-center gap-4 pt-6">
-              <Button variant="ghost" size="sm" disabled={page === 1} onClick={() => setPage(p => Math.max(1, p - 1))}>
+              <Button className="app-secondary" variant="ghost" size="sm" disabled={page === 1} onClick={() => setPage(p => Math.max(1, p - 1))}>
                 <ChevronLeft className="h-4 w-4 mr-1" /> Prev
               </Button>
-              <span className="text-sm font-semibold text-pearl">Page {page} of {totalPages}</span>
-              <Button variant="ghost" size="sm" disabled={page === totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>
+              <span className="text-sm font-semibold text-app-ink">Page {page} of {totalPages}</span>
+              <Button className="app-secondary" variant="ghost" size="sm" disabled={page === totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))}>
                 Next <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             </div>

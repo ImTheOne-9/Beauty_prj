@@ -20,10 +20,10 @@ export function Modal({ open, title, onClose, children }: ModalProps) {
           onClick={onClose}
         >
           <motion.div
-            className="glass-panel w-full max-w-lg rounded-3xl p-6 max-h-[92vh] overflow-y-auto scrollbar-thin scrollbar-thumb-rose-200/50 scrollbar-track-transparent"
+            className="w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-3xl border border-[var(--ui-border)] bg-[var(--ui-surface)] p-6 shadow-2xl scrollbar-thin scrollbar-thumb-[var(--ui-border)] scrollbar-track-transparent"
             style={{
               scrollbarWidth: 'thin',
-              scrollbarColor: 'rgba(244, 63, 94, 0.2) transparent'
+              scrollbarColor: 'var(--ui-border) transparent'
             }}
             initial={{ y: 30, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
@@ -32,7 +32,7 @@ export function Modal({ open, title, onClose, children }: ModalProps) {
             onClick={(event) => event.stopPropagation()}
           >
             <div className="mb-4 flex items-center justify-between">
-              <h3 className="font-display text-2xl font-semibold text-pearl">{title}</h3>
+              <h3 className="font-ui text-2xl font-semibold text-[var(--ui-ink)]">{title}</h3>
               <Button variant="ghost" size="sm" onClick={onClose}>
                 Close
               </Button>

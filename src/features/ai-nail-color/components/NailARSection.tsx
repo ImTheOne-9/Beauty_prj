@@ -26,7 +26,7 @@ export default function NailARSection() {
                 href="/business/showcase/nail-color"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 rounded-full bg-rose-500 px-6 py-3 text-sm font-bold uppercase tracking-wide text-white shadow-lg transition hover:bg-rose-600"
+                className="inline-flex items-center gap-2 rounded-full bg-brand-paper0 px-6 py-3 text-sm font-bold uppercase tracking-wide text-white shadow-lg transition hover:bg-brand-accent"
                 >
                 <img
                     src="https://d3ss46vukfdtpo.cloudfront.net/static/media/btn_camera.0c6509a0.svg"

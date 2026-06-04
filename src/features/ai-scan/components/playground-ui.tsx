@@ -12,9 +12,9 @@ export function PlaygroundSection({ title, description, className, children }: P
   return (
     <section className={cn('flex w-full flex-col gap-4', className)}>
       {title ? (
-        <header className="space-y-1 text-rose-950">
+        <header className="space-y-1 text-app-ink">
           <h4 className="text-sm font-semibold">{title}</h4>
-          {description ? <p className="text-xs text-mist">{description}</p> : null}
+          {description ? <p className="text-xs text-app-muted">{description}</p> : null}
         </header>
       ) : null}
       <div className="flex w-full flex-col gap-4">{children}</div>
@@ -32,12 +32,12 @@ type PlaygroundFieldLabelProps = {
 export function PlaygroundFieldLabel({ label, hint, action, large }: PlaygroundFieldLabelProps) {
   return (
     <div className="flex items-start justify-between gap-2">
-      <label className={cn('flex flex-col gap-1 text-rose-950', large ? 'text-xl font-semibold' : 'text-sm font-semibold')}>
+      <label className={cn('flex flex-col gap-1 text-app-ink', large ? 'text-xl font-semibold' : 'text-sm font-semibold')}>
         <span className="inline-flex items-center gap-1">
           {label}
-          <HelpCircle className="h-3.5 w-3.5 text-mist" aria-hidden />
+          <HelpCircle className="h-3.5 w-3.5 text-app-muted" aria-hidden />
         </span>
-        {hint ? <span className="text-xs font-normal text-mist">{hint}</span> : null}
+        {hint ? <span className="text-xs font-normal text-app-muted">{hint}</span> : null}
       </label>
       {action}
     </div>
@@ -52,7 +52,7 @@ type PlaygroundTabsProps<T extends string> = {
 
 export function PlaygroundTabs<T extends string>({ tabs, value, onChange }: PlaygroundTabsProps<T>) {
   return (
-    <div className="relative mb-3 flex min-w-full border-b-4 border-rose-100" role="tablist">
+    <div className="relative mb-3 flex min-w-full border-b-4 border-app-border" role="tablist">
       {tabs.map((tab) => {
         const active = value === tab
         return (
@@ -64,13 +64,13 @@ export function PlaygroundTabs<T extends string>({ tabs, value, onChange }: Play
             onClick={() => onChange(tab)}
             className={cn(
               'relative cursor-pointer px-4 py-2 text-sm font-semibold capitalize transition-colors',
-              active ? 'text-cyan-700' : 'text-rose-900 hover:bg-rose-50/80 hover:text-cyan-600',
+              active ? 'text-app-accent' : 'text-app-ink hover:bg-app-subtle hover:text-app-accent',
             )}
           >
             {tab}
             <span
               className={cn(
-                'absolute bottom-[-4px] left-0 h-1 w-full origin-center bg-cyan-600 transition-transform',
+                'absolute bottom-[-4px] left-0 h-1 w-full origin-center bg-app-accent transition-transform',
                 active ? 'scale-x-100' : 'scale-x-0',
               )}
             />
@@ -112,17 +112,17 @@ export function PlaygroundCheckbox({
       aria-checked={checked}
       aria-label={label}
       onClick={onChange}
-      className="flex w-full cursor-pointer items-center gap-3 rounded-md text-left transition hover:bg-rose-50/60"
+      className="flex w-full cursor-pointer items-center gap-3 rounded-md text-left transition hover:bg-app-subtle"
     >
       <span
         className={cn(
           'flex h-6 w-6 shrink-0 items-center justify-center rounded border-2 shadow-sm transition',
-          checked ? 'border-rose-500 bg-rose-500' : 'border-slate-300 bg-white',
+          checked ? 'border-app-accent bg-app-accent' : 'border-app-border bg-white',
         )}
       >
         {checked ? <CheckboxMark /> : null}
       </span>
-      <span className="text-sm text-rose-950">{label}</span>
+      <span className="text-sm text-app-ink">{label}</span>
     </button>
   )
 }

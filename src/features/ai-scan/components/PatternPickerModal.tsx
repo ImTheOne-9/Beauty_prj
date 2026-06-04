@@ -94,11 +94,11 @@ export function PatternPickerModal({
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/45 p-4">
-      <div className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl bg-white shadow-2xl">
-        <div className="flex items-center gap-3 border-b border-rose-100 px-4 py-3">
-          <h3 className="shrink-0 text-lg font-semibold text-rose-950">{title}</h3>
+      <div className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-lg border border-app-border bg-app-surface shadow-2xl">
+        <div className="flex items-center gap-3 border-b border-app-border px-4 py-3">
+          <h3 className="shrink-0 text-lg font-semibold text-app-ink">{title}</h3>
           <div className="relative min-w-0 flex-1">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-mist" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-app-muted" />
             <Input
               className="h-9 pl-9"
               placeholder="Search..."
@@ -106,14 +106,14 @@ export function PatternPickerModal({
               onChange={(event) => setSearch(event.target.value)}
             />
           </div>
-          <button type="button" onClick={onClose} className="rounded p-1 text-mist hover:bg-rose-50" aria-label="Close">
+          <button type="button" onClick={onClose} className="rounded p-1 text-app-muted hover:bg-app-subtle" aria-label="Close">
             <X className="h-5 w-5" />
           </button>
         </div>
 
         {showTabBar ? (
           <div
-            className="flex shrink-0 gap-1 overflow-x-auto border-b border-rose-200 bg-rose-50/40 px-4"
+            className="flex shrink-0 gap-1 overflow-x-auto border-b border-app-border bg-app-subtle px-4"
             role="tablist"
           >
             {(isColorCategory ? COLOR_TAB_LABELS : tabGroups.map((tab) => tab.name)).map((tabName) => {
@@ -129,15 +129,15 @@ export function PatternPickerModal({
                   onClick={() => setActiveTab(tabName)}
                   className={cn(
                     'relative shrink-0 px-4 py-2.5 text-sm font-semibold whitespace-nowrap transition-colors',
-                    active ? 'text-rose-600' : 'text-rose-900/80 hover:text-rose-600',
+                    active ? 'text-app-accent' : 'text-app-ink/80 hover:text-app-accent',
                   )}
                 >
                   {tabName}
                   {isColorCategory && count > 0 ? (
-                    <span className="ml-1 text-xs font-normal text-mist">({count})</span>
+                    <span className="ml-1 text-xs font-normal text-app-muted">({count})</span>
                   ) : null}
                   {active ? (
-                    <span className="absolute right-2 bottom-0 left-2 h-0.5 rounded-full bg-rose-500" />
+                    <span className="absolute right-2 bottom-0 left-2 h-0.5 rounded-full bg-app-accent" />
                   ) : null}
                 </button>
               )
@@ -147,9 +147,9 @@ export function PatternPickerModal({
 
         <div className="min-h-0 flex-1 overflow-y-auto p-4">
           {isLoading ? (
-            <p className="py-12 text-center text-sm text-mist">Loading patterns...</p>
+            <p className="py-12 text-center text-sm text-app-muted">Loading patterns...</p>
           ) : filteredItems.length === 0 ? (
-            <p className="py-12 text-center text-sm text-mist">No patterns in this tab.</p>
+            <p className="py-12 text-center text-sm text-app-muted">No patterns in this tab.</p>
           ) : (
             <div className="grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-5">
               {filteredItems.map((item) => (
@@ -160,19 +160,19 @@ export function PatternPickerModal({
                   className={cn(
                     'rounded-lg border p-1 transition',
                     pendingLabel === item.label
-                      ? 'border-rose-500 ring-2 ring-rose-200'
-                      : 'border-rose-100 hover:border-rose-300',
+                      ? 'border-app-accent ring-2 ring-app-accent/15'
+                      : 'border-app-border hover:border-app-accent/40',
                   )}
                 >
                   <img src={item.thumbnail} alt={item.label} className="aspect-square w-full rounded object-cover" />
-                  <p className="mt-1 truncate text-center text-[10px] text-rose-800">{item.label}</p>
+                  <p className="mt-1 truncate text-center text-[10px] text-app-ink">{item.label}</p>
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        <div className="flex justify-end gap-2 border-t border-rose-100 px-4 py-3">
+        <div className="flex justify-end gap-2 border-t border-app-border px-4 py-3">
           <Button type="button" variant="ghost" onClick={onClose}>
             Cancel
           </Button>

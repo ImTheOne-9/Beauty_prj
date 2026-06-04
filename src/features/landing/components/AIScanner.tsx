@@ -17,31 +17,31 @@ export default function AIScanner() {
   }
 
   return (
-    <div className="grid md:grid-cols-2 gap-6 items-start">
-      <div className="p-6 rounded-2xl bg-white/60 border border-white/40 shadow-md backdrop-blur-md">
-        <h3 className="font-display text-2xl font-bold">AI Skin Scanner</h3>
-        <p className="text-sm text-rose-700/80 mt-2">Upload a selfie to begin a cinematic scan. Our AI analyzes texture, hydration, and tone.</p>
+    <div className="grid items-start gap-6 md:grid-cols-2">
+      <div className="rounded-2xl border border-brand-blush bg-brand-surface/70 p-6 shadow-md backdrop-blur-md">
+        <h3 className="font-brand text-2xl font-bold text-brand-ink">AI Skin Scanner</h3>
+        <p className="mt-2 text-sm text-brand-muted">Upload a selfie to begin a cinematic scan. Our AI analyzes texture, hydration, and tone.</p>
 
         <div className="mt-4">
-          <label className="inline-flex items-center gap-3 cursor-pointer">
+          <label className="inline-flex cursor-pointer items-center gap-3">
             <input type="file" accept="image/*" onChange={onFile} className="hidden" />
-            <div className="px-4 py-2 rounded-lg bg-rose-600 text-white font-semibold">Upload Selfie</div>
+            <div className="rounded-lg bg-brand-accent px-4 py-2 font-semibold text-white">Upload Selfie</div>
           </label>
-          <button onClick={runScan} disabled={!preview || scanning} className="ml-3 px-4 py-2 rounded-lg bg-white/90 border font-semibold">{scanning ? 'Scanning...' : 'Run Scan'}</button>
+          <button onClick={runScan} disabled={!preview || scanning} className="ml-3 rounded-lg border border-brand-blush bg-brand-surface/90 px-4 py-2 font-semibold text-brand-ink disabled:opacity-50">{scanning ? 'Scanning...' : 'Run Scan'}</button>
         </div>
 
         <div className="mt-4">
-          <div className="w-full h-56 rounded-xl overflow-hidden bg-gradient-to-tr from-pink-50 to-ivory-50 flex items-center justify-center">
-            {preview ? <img src={preview} alt="preview" className="h-full w-full object-cover" /> : <div className="text-sm text-rose-400">No image yet</div>}
+          <div className="flex h-56 w-full items-center justify-center overflow-hidden rounded-xl bg-brand-paper">
+            {preview ? <img src={preview} alt="preview" className="h-full w-full object-cover" /> : <div className="text-sm text-brand-muted">No image yet</div>}
             {scanning ? <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="absolute inset-0 bg-gradient-to-t from-black/10" /> : null}
           </div>
         </div>
       </div>
 
-      <div className="p-6 rounded-2xl bg-white/30 border border-white/30 shadow-sm backdrop-blur-sm">
-        <h4 className="font-semibold">Live Scan Preview</h4>
-        <div className="mt-3 h-40 rounded-xl bg-gradient-to-br from-white/30 to-rose-50 flex items-center justify-center">
-          <div className="text-sm text-rose-700/60">AI processing animation will appear here.</div>
+      <div className="rounded-2xl border border-brand-blush bg-brand-surface/45 p-6 shadow-sm backdrop-blur-sm">
+        <h4 className="font-semibold text-brand-ink">Live Scan Preview</h4>
+        <div className="mt-3 flex h-40 items-center justify-center rounded-xl bg-brand-paper">
+          <div className="text-sm text-brand-muted">AI processing animation will appear here.</div>
         </div>
       </div>
     </div>

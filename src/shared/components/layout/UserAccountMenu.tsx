@@ -55,38 +55,38 @@ export function UserAccountMenu({ className, onNavigate }: UserAccountMenuProps)
         aria-label="Account menu"
         aria-expanded={open}
         onClick={() => setOpen((value) => !value)}
-        className="inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-rose-200 bg-white shadow-sm transition hover:border-cyan/50 hover:ring-2 hover:ring-cyan/20"
+        className="inline-flex h-9 w-9 items-center justify-center overflow-hidden rounded-full border border-brand-blush bg-white shadow-sm transition hover:border-brand-accent/50 hover:ring-2 hover:ring-brand-accent/20"
       >
         {avatarUrl ? (
           <img src={avatarUrl} alt={displayName} className="h-full w-full object-cover" />
         ) : (
-          <span className="text-xs font-bold text-rose-700">{initials}</span>
+          <span className="text-xs font-bold text-brand-accent">{initials}</span>
         )}
       </button>
 
       {open ? (
-        <div className="absolute right-0 top-[calc(100%+0.5rem)] z-[80] min-w-[180px] overflow-hidden rounded-2xl border border-rose-100 bg-white py-1 shadow-[0_18px_50px_rgba(168,112,134,0.18)]">
-          <div className="border-b border-rose-50 px-3 py-2">
-            <p className="truncate text-xs font-semibold text-rose-950">{displayName}</p>
-            <p className="truncate text-[10px] text-mist">{user.email}</p>
+        <div className="absolute right-0 top-[calc(100%+0.5rem)] z-[80] min-w-[180px] overflow-hidden rounded-2xl border border-brand-blush bg-white py-1 shadow-[0_18px_50px_rgba(168,112,134,0.18)]">
+          <div className="border-b border-brand-blush px-3 py-2">
+            <p className="truncate text-xs font-semibold text-brand-ink">{displayName}</p>
+            <p className="truncate text-[10px] text-brand-muted">{user.email}</p>
           </div>
 
           {isAdmin ? (
             <Link
               to="/admin"
               onClick={() => { setOpen(false); onNavigate?.() }}
-              className="flex w-full items-center gap-2 px-3 py-2.5 text-xs text-rose-900 transition hover:bg-rose-50"
+              className="flex w-full items-center gap-2 px-3 py-2.5 text-xs text-brand-ink transition hover:bg-brand-paper"
             >
-              <LayoutDashboard className="h-4 w-4 text-cyan" />
+              <LayoutDashboard className="h-4 w-4 text-brand-accent" />
               Admin
             </Link>
           ) : (
             <Link
               to="/profile"
               onClick={() => { setOpen(false); onNavigate?.() }}
-              className="flex w-full items-center gap-2 px-3 py-2.5 text-xs text-rose-900 transition hover:bg-rose-50"
+              className="flex w-full items-center gap-2 px-3 py-2.5 text-xs text-brand-ink transition hover:bg-brand-paper"
             >
-              <UserRound className="h-4 w-4 text-cyan" />
+              <UserRound className="h-4 w-4 text-brand-accent" />
               Profile
             </Link>
           )}
@@ -94,18 +94,18 @@ export function UserAccountMenu({ className, onNavigate }: UserAccountMenuProps)
           <Link
             to="/recommendations"
             onClick={() => { setOpen(false); onNavigate?.() }}
-            className="flex w-full items-center gap-2 px-3 py-2.5 text-xs text-rose-900 transition hover:bg-rose-50"
+            className="flex w-full items-center gap-2 px-3 py-2.5 text-xs text-brand-ink transition hover:bg-brand-paper"
           >
-            <History className="h-4 w-4 text-cyan" />
+            <History className="h-4 w-4 text-brand-accent" />
             Scan History
           </Link>
 
           <button
             type="button"
             onClick={() => void handleSignOut()}
-            className="flex w-full items-center gap-2 px-3 py-2.5 text-xs text-rose-900 transition hover:bg-rose-50"
+            className="flex w-full items-center gap-2 px-3 py-2.5 text-xs text-brand-ink transition hover:bg-brand-paper"
           >
-            <LogOut className="h-4 w-4 text-rose-600" />
+            <LogOut className="h-4 w-4 text-brand-accent" />
             Logout
           </button>
         </div>

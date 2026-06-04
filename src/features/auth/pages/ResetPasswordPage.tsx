@@ -33,12 +33,12 @@ export default function ResetPasswordPage() {
     <section className="section-shell pb-12">
       <Card className="mx-auto max-w-md space-y-6 p-8">
         <div className="flex justify-center">
-          <div className="rounded-full bg-cyan/10 p-4">
-            <LockKeyhole className="h-8 w-8 text-cyan" />
+          <div className="rounded-full bg-app-accent/10 p-4">
+            <LockKeyhole className="h-8 w-8 text-app-accent" />
           </div>
         </div>
         <div className="space-y-2 text-center">
-          <h1 className="font-display text-2xl text-pearl">Set New Password</h1>
+          <h1 className="font-ui text-2xl text-app-ink">Set New Password</h1>
           <p className="text-sm text-sand/80">
             Please enter your new password below.
           </p>
@@ -60,7 +60,7 @@ export default function ResetPasswordPage() {
             required
             minLength={8}
           />
-          {error && <p className="text-sm text-rose-400 text-center">{error}</p>}
+          {error && <p className="text-sm text-red-500 text-center">{error}</p>}
           <Button type="submit" className="w-full" disabled={isPending}>
             {isPending ? 'Updating...' : 'Update Password'}
           </Button>

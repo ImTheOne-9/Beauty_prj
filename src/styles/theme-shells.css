@@ -1,0 +1,477 @@
+.beauty-shell {
+  --ui-ink: var(--studio-ink);
+  --ui-muted: var(--studio-muted);
+  --ui-surface: var(--studio-surface);
+  --ui-subtle: var(--studio-subtle);
+  --ui-border: var(--studio-border);
+  --ui-accent: var(--studio-accent);
+  --ui-accent-hover: #9f1239;
+  --ui-accent-contrast: #ffffff;
+  --ui-focus: rgba(190, 18, 60, 0.16);
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  color: var(--studio-ink);
+  background: var(--studio-surface);
+}
+
+.beauty-shell h1,
+.beauty-shell h2,
+.beauty-shell h3,
+.beauty-shell h4,
+.beauty-shell h5,
+.beauty-shell h6 {
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  color: inherit;
+  letter-spacing: 0;
+}
+
+.beauty-shell button:focus-visible,
+.beauty-shell a:focus-visible,
+.beauty-shell input:focus-visible {
+  outline: 2px solid var(--studio-accent);
+  outline-offset: 2px;
+}
+
+.app-shell {
+  --app-ink: #1e293b;
+  --app-muted: #64748b;
+  --app-surface: #ffffff;
+  --app-subtle: #f8fafc;
+  --app-border: #e2e8f0;
+  --app-accent: #be123c;
+  --ui-ink: var(--app-ink);
+  --ui-muted: var(--app-muted);
+  --ui-surface: var(--app-surface);
+  --ui-subtle: var(--app-subtle);
+  --ui-border: var(--app-border);
+  --ui-accent: var(--app-accent);
+  --ui-accent-hover: #9f1239;
+  --ui-accent-contrast: #ffffff;
+  --ui-focus: rgba(190, 18, 60, 0.12);
+  min-height: 100%;
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  color: var(--app-ink);
+}
+
+.app-shell h1,
+.app-shell h2,
+.app-shell h3,
+.app-shell h4,
+.app-shell h5,
+.app-shell h6 {
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  color: inherit;
+  letter-spacing: 0;
+}
+
+.app-shell .glass-panel,
+.app-panel {
+  border: 1px solid var(--app-border);
+  border-radius: 0.5rem;
+  background: var(--app-surface);
+  background-image: none;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  backdrop-filter: none;
+}
+
+.app-shell .soft-lift:hover {
+  transform: none;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.app-shell [class~="rounded-2xl"],
+.app-shell [class~="rounded-3xl"],
+.app-shell [class~="rounded-[2rem]"] {
+  border-radius: 0.5rem;
+}
+
+.app-shell .font-display {
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  letter-spacing: 0;
+}
+
+.app-shell .text-pearl,
+.app-shell .text-rose-950,
+.app-shell .text-rose-900 {
+  color: var(--app-ink);
+}
+
+.app-shell .text-mist {
+  color: var(--app-muted);
+}
+
+.app-shell .text-cyan,
+.app-shell .text-cyan-600,
+.app-shell .text-cyan-700,
+.app-shell .text-rose-600 {
+  color: var(--app-accent);
+}
+
+.app-shell .border-rose-100,
+.app-shell .border-rose-200,
+.app-shell [class~="border-rose-100/50"],
+.app-shell [class~="border-rose-100/60"] {
+  border-color: var(--app-border);
+}
+
+.app-shell .bg-rose-50,
+.app-shell [class~="bg-rose-50/40"],
+.app-shell [class~="bg-rose-50/50"],
+.app-shell [class~="bg-rose-50/60"] {
+  background-color: var(--app-subtle);
+}
+
+.app-shell input[class*="border-rose"],
+.app-shell textarea[class*="border-rose"],
+.app-input {
+  border-color: var(--app-border);
+  border-radius: 0.5rem;
+  background: var(--app-surface);
+  color: var(--app-ink);
+}
+
+.app-shell input[class*="border-rose"]:focus,
+.app-shell textarea[class*="border-rose"]:focus,
+.app-input:focus {
+  border-color: var(--app-accent);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(190, 18, 60, 0.12);
+}
+
+.app-primary,
+.app-secondary {
+  border-radius: 0.5rem;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.app-primary {
+  border: 1px solid var(--app-accent);
+  background: var(--app-accent);
+  color: #ffffff;
+}
+
+.app-primary:hover {
+  background: #9f1239;
+}
+
+.app-secondary {
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-ink);
+}
+
+.app-secondary:hover {
+  background: var(--app-subtle);
+}
+
+.app-shell button.soft-lift[class*="bg-rose-500"] {
+  border: 1px solid var(--app-accent);
+  background: var(--app-accent);
+  color: #ffffff;
+  box-shadow: none;
+}
+
+.app-shell button.soft-lift[class*="border-rose-100"] {
+  border-color: var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-ink);
+}
+
+.public-shell {
+  --public-ink: #342028;
+  --public-muted: #8c6e78;
+  --public-surface: #fff8fa;
+  --public-paper: #ffffff;
+  --public-border: #f8d9e0;
+  --public-accent: #be123c;
+  --public-accent-soft: #fff1f2;
+  --ui-ink: var(--public-ink);
+  --ui-muted: var(--public-muted);
+  --ui-surface: var(--public-paper);
+  --ui-subtle: var(--public-surface);
+  --ui-border: var(--public-border);
+  --ui-accent: var(--public-accent);
+  --ui-accent-hover: #9f1239;
+  --ui-accent-contrast: #ffffff;
+  --ui-focus: rgba(190, 18, 60, 0.16);
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  color: var(--public-ink);
+  background: var(--public-paper);
+}
+
+.public-shell h1,
+.public-shell h2,
+.public-shell h3,
+.public-shell h4,
+.public-shell h5,
+.public-shell h6 {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: inherit;
+  letter-spacing: 0;
+}
+
+.public-shell .font-display {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+}
+
+.public-shell .text-gray-900,
+.public-shell .text-gray-800,
+.public-shell .text-slate-900,
+.public-shell .text-rose-950,
+.public-shell .text-pearl {
+  color: var(--public-ink);
+}
+
+.public-shell .text-gray-700,
+.public-shell .text-gray-600,
+.public-shell .text-gray-500,
+.public-shell .text-gray-400,
+.public-shell .text-mist {
+  color: var(--public-muted);
+}
+
+.public-shell .text-rose-600,
+.public-shell .text-rose-500,
+.public-shell .text-rose-400,
+.public-shell .text-pink-600,
+.public-shell .text-cyan-600 {
+  color: var(--public-accent);
+}
+
+.public-shell .bg-gray-50,
+.public-shell .bg-rose-50,
+.public-shell .bg-rose-100,
+.public-shell .bg-pink-100,
+.public-shell [class~="bg-rose-50/50"] {
+  background-color: var(--public-surface);
+}
+
+.public-shell .border-gray-100,
+.public-shell .border-gray-200,
+.public-shell .border-gray-300,
+.public-shell .border-rose-100,
+.public-shell .border-rose-200,
+.public-shell [class~="border-rose-100/50"],
+.public-shell [class~="border-rose-100/60"] {
+  border-color: var(--public-border);
+}
+
+.public-shell .bg-rose-600,
+.public-shell .bg-rose-500,
+.public-primary {
+  background-color: var(--public-accent);
+  color: #ffffff;
+}
+
+.public-shell .hover\:bg-rose-700:hover,
+.public-primary:hover {
+  background-color: #9f1239;
+}
+
+.public-secondary {
+  border: 1px solid var(--public-border);
+  background: rgba(255, 255, 255, 0.82);
+  color: var(--public-ink);
+}
+
+.public-shell [class~="rounded-2xl"],
+.public-shell [class~="rounded-3xl"] {
+  border-radius: 0.75rem;
+}
+
+.public-panel {
+  border: 1px solid var(--public-border);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.86);
+  box-shadow: 0 14px 44px rgba(52, 32, 40, 0.08);
+}
+
+.admin-shell {
+  --admin-ink: #0f172a;
+  --admin-muted: #64748b;
+  --admin-border: rgba(148, 163, 184, 0.45);
+  --ui-ink: var(--admin-ink);
+  --ui-muted: var(--admin-muted);
+  --ui-surface: #ffffff;
+  --ui-subtle: #f8fafc;
+  --ui-border: #cbd5e1;
+  --ui-accent: #0f172a;
+  --ui-accent-hover: #1e293b;
+  --ui-accent-contrast: #ffffff;
+  --ui-focus: rgba(100, 116, 139, 0.14);
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  color: var(--admin-ink);
+}
+
+.admin-shell h1,
+.admin-shell h2,
+.admin-shell h3,
+.admin-shell h4,
+.admin-shell h5,
+.admin-shell h6 {
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  color: inherit;
+  letter-spacing: 0;
+}
+
+.admin-shell .glass-panel,
+.admin-panel {
+  border: 1px solid var(--admin-border);
+  border-radius: 0.5rem;
+  background: #ffffff;
+  background-image: none;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  backdrop-filter: none;
+}
+
+.admin-shell .soft-lift:hover {
+  transform: none;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.admin-shell [class~="rounded-2xl"],
+.admin-shell [class~="rounded-3xl"],
+.admin-shell [class~="rounded-[1.5rem]"],
+.admin-shell [class~="rounded-[2rem]"] {
+  border-radius: 0.5rem;
+}
+
+.admin-shell button.soft-lift[class*="bg-rose-500"] {
+  border: 1px solid #0f172a;
+  background: #0f172a;
+  color: #ffffff;
+  box-shadow: none;
+}
+
+.admin-shell button.soft-lift[class*="bg-rose-500"]:hover {
+  background: #1e293b;
+}
+
+.admin-shell button.soft-lift[class*="border-rose-100"] {
+  border-color: #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+}
+
+.admin-input {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  padding: 0.7rem 0.85rem;
+  color: var(--admin-ink);
+  font-size: 0.875rem;
+}
+
+.admin-input::placeholder {
+  color: #94a3b8;
+}
+
+.admin-input:focus {
+  border-color: #64748b;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.14);
+}
+
+.admin-label {
+  display: block;
+  margin-bottom: 0.375rem;
+  color: #334155;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.admin-primary,
+.admin-secondary,
+.admin-icon-button {
+  border-radius: 0.5rem;
+  transition: background-color 160ms ease, border-color 160ms ease, color 160ms ease;
+}
+
+.admin-primary {
+  border: 1px solid #0f172a;
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.admin-primary:hover {
+  background: #1e293b;
+}
+
+.admin-secondary {
+  border: 1px solid #cbd5e1;
+  background: #ffffff;
+  color: #334155;
+}
+
+.admin-secondary:hover,
+.admin-icon-button:hover {
+  background: #f1f5f9;
+}
+
+.admin-icon-button {
+  color: #64748b;
+}
+
+/* Temporary legacy mappings while admin screens are migrated to semantic classes. */
+.admin-shell .font-display {
+  font-family: 'DM Sans', 'Segoe UI', sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.admin-shell .text-rose-950 {
+  color: var(--admin-ink);
+}
+
+.admin-shell .text-rose-600 {
+  color: #475569;
+}
+
+.admin-shell .text-rose-500 {
+  color: #64748b;
+}
+
+.admin-shell .text-cyan {
+  color: #64748b;
+}
+
+.admin-shell .text-mist {
+  color: var(--admin-muted);
+}
+
+.admin-shell [class~="text-mist/90"] {
+  color: rgba(100, 116, 139, 0.9);
+}
+
+.admin-shell [class~="text-mist/70"] {
+  color: rgba(100, 116, 139, 0.7);
+}
+
+.admin-shell [class~="text-mist/60"] {
+  color: rgba(100, 116, 139, 0.6);
+}
+
+.admin-shell .border-rose-100 {
+  border-color: var(--admin-border);
+}
+
+.admin-shell .border-rose-200 {
+  border-color: rgba(148, 163, 184, 0.55);
+}
+
+.admin-shell [class~="border-rose-100/50"] {
+  border-color: rgba(148, 163, 184, 0.35);
+}
+
+.admin-shell .bg-rose-50 {
+  background-color: #f8fafc;
+}
+
+.admin-shell [class~="bg-rose-50/20"] {
+  background-color: rgba(248, 250, 252, 0.6);
+}
+
+.admin-shell [class~="bg-rose-50/60"] {
+  background-color: rgba(248, 250, 252, 0.8);
+}

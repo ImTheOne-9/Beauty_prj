@@ -8,9 +8,9 @@ const solutions = [
     icon: Building2,
     title: 'For Enterprise',
     subtitle: 'Complete suite of beauty tech services and in-store tools.',
-    bg: 'from-rose-50 to-pink-50',
-    iconColor: 'text-rose-600',
-    iconBg: 'bg-rose-100',
+    bg: 'from-brand-paper to-brand-blush',
+    iconColor: 'text-brand-accent',
+    iconBg: 'bg-brand-blush',
   },
   {
     id: 'online',
@@ -70,9 +70,9 @@ export default function SolutionsSection() {
                 <p className="mt-2 text-sm leading-relaxed text-gray-600">{sol.subtitle}</p>
                 <Link
                   to="/scan"
-                  className="mt-4 inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wide text-rose-600 transition hover:gap-2"
+                  className="mt-4 inline-flex items-center gap-1 text-xs font-bold uppercase tracking-wide text-brand-accent transition hover:gap-2"
                 >
-                  Learn more →
+                  {'Learn more ->'}
                 </Link>
                 <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/40" />
               </motion.div>

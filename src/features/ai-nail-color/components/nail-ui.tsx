@@ -16,7 +16,7 @@ export function Reveal({ children, delay = 0 }: { children: React.ReactNode; del
 
 export function Eyebrow({ children }: { children: React.ReactNode }) {
   return (
-    <p className="text-xs font-bold uppercase tracking-[0.3em] text-rose-500">{children}</p>
+    <p className="text-xs font-bold uppercase tracking-[0.24em] text-brand-accent">{children}</p>
   )
 }
 
@@ -33,8 +33,8 @@ export function PinkBtn({
     <button
       className={`rounded-full px-7 py-3 text-sm font-bold uppercase tracking-wide transition hover:scale-[1.02] active:scale-[0.98] ${
         outline
-          ? 'border-2 border-rose-600 text-rose-600 hover:bg-rose-50'
-          : 'bg-rose-600 text-white shadow-lg shadow-rose-500/30 hover:bg-rose-700'
+          ? 'public-secondary'
+          : 'public-primary shadow-lg shadow-brand-accent/30'
       } ${className}`}
     >
       {children}
@@ -44,7 +44,7 @@ export function PinkBtn({
 
 export function ArrowLink({ children }: { children: React.ReactNode }) {
   return (
-    <button className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-rose-600 hover:gap-3 transition-all">
+    <button className="flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-brand-accent hover:gap-3 transition-all">
       {children} <ArrowRight className="h-4 w-4" />
     </button>
   )
@@ -65,7 +65,7 @@ export function SectionHeading({
     <div className={align === 'center' ? 'text-center' : ''}>
       {eyebrow && <Eyebrow>{eyebrow}</Eyebrow>}
       <h2
-        className="mt-3 font-black leading-tight text-gray-900"
+        className="mt-3 font-black leading-tight text-brand-ink"
         style={{
           fontFamily: "'Plus Jakarta Sans', sans-serif",
           fontSize: 'clamp(1.5rem, 2.5vw, 2.2rem)',
@@ -74,7 +74,7 @@ export function SectionHeading({
         {title}
       </h2>
       {subtitle && (
-        <p className="mt-3 text-base leading-relaxed text-gray-600">{subtitle}</p>
+        <p className="mt-3 text-base leading-relaxed text-brand-muted">{subtitle}</p>
       )}
     </div>
   )

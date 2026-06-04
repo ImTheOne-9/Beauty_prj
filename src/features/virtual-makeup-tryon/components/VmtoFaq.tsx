@@ -58,7 +58,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
       >
         <span className="text-sm font-semibold text-gray-900 sm:text-base">{q}</span>
         <ChevronDown
-          className={`h-5 w-5 flex-shrink-0 text-rose-500 transition-transform ${open ? 'rotate-180' : ''}`}
+          className={`h-5 w-5 flex-shrink-0 text-brand-accent transition-transform ${open ? 'rotate-180' : ''}`}
         />
       </button>
       <AnimatePresence initial={false}>

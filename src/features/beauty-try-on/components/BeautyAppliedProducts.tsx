@@ -145,7 +145,7 @@ export default function BeautyAppliedProducts({
     <>
       <div className="min-h-0 flex-1 overflow-y-auto px-4 py-3">
         {appliedProductDetails.length === 0 ? (
-          <div className="py-4 text-sm text-neutral-500">
+          <div className="py-4 text-sm text-studio-muted">
             No products applied
           </div>
         ) : (
@@ -153,11 +153,11 @@ export default function BeautyAppliedProducts({
             {appliedProductDetails.map((product, productIndex) => (
               <div
                 key={product.id || `${product.productId || 'applied'}-${productIndex}`}
-                className={`grid grid-cols-[44px_32px_minmax(0,1fr)_32px_32px_32px] items-start gap-3 rounded-lg px-1 py-2 ${
+                className={`grid grid-cols-[44px_32px_minmax(0,1fr)_32px_32px_32px] items-start gap-3 rounded-lg border border-transparent px-2 py-2 transition hover:border-studio-border hover:bg-studio-subtle/60 ${
                   product.hidden ? 'opacity-50' : ''
                 }`}
               >
-                <div className="flex h-11 w-11 items-center justify-center overflow-hidden bg-neutral-200">
+                <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-md bg-studio-subtle">
                   {product.imageUrl ? (
                     <img
                       src={product.imageUrl}
@@ -170,7 +170,7 @@ export default function BeautyAppliedProducts({
                 <div className="flex h-8 w-8 items-center justify-center">
                   {!product.isSkinSmooth && !product.canChoosePaletteColors && (
                     <span
-                      className="h-8 w-8 rounded-full border border-neutral-200"
+                      className="h-8 w-8 rounded-full border border-studio-border"
                       style={getVariantSwatchStyle(product.colorSlots[0]?.variant)}
                       aria-label={product.color ? `Color ${product.color}` : 'No color configured'}
                       title={product.color ?? 'No color configured'}
@@ -179,30 +179,30 @@ export default function BeautyAppliedProducts({
                 </div>
 
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-neutral-900">
+                  <p className="truncate text-sm font-medium text-studio-ink">
                     {product.brand} {product.name}
                   </p>
                   {(product.variantName || product.texture || product.patternName) && (
-                    <p className="truncate text-xs text-neutral-500">
+                    <p className="truncate text-xs text-studio-muted">
                       {[product.variantName, product.texture, product.patternName].filter(Boolean).join(' / ')}
                     </p>
                   )}
                   {product.canChoosePaletteColors && product.productVariants.length > 0 && (
-                    <div className="mt-2 rounded-md bg-neutral-50">
+                    <div className="mt-2 rounded-md border border-studio-border bg-studio-surface">
                       <button
                         type="button"
                         onClick={() => toggleColorPicker(product.id)}
                         className="flex w-full items-center justify-between gap-2 px-2 py-1.5 text-left"
                         aria-expanded={product.colorsOpen}
                       >
-                        <span className="text-[11px] font-semibold uppercase text-neutral-500">
+                        <span className="text-[11px] font-semibold uppercase text-studio-muted">
                           Colors
                         </span>
                         <span className="flex min-w-0 flex-1 justify-end gap-1">
                           {product.colorSlots.map((slot) => (
                             <span
                               key={slot.index}
-                              className="h-4 w-4 rounded-full border border-white ring-1 ring-neutral-200"
+                              className="h-4 w-4 rounded-full border border-white ring-1 ring-studio-border"
                               style={getVariantSwatchStyle(slot.variant)}
                               title={slot.label}
                             />
@@ -216,14 +216,14 @@ export default function BeautyAppliedProducts({
                       </button>
 
                       {product.colorsOpen && (
-                        <div className="space-y-2 border-t border-neutral-200 p-2">
+                        <div className="space-y-2 border-t border-studio-border p-2">
                           {product.colorSlots.map((slot) => (
                             <div key={slot.index} className="min-w-0">
                               <div className="mb-1 flex min-w-0 items-center justify-between gap-2">
-                                <span className="text-[10px] font-semibold uppercase text-neutral-500">
+                                <span className="text-[10px] font-semibold uppercase text-studio-muted">
                                   Color {slot.index + 1}
                                 </span>
-                                <span className="truncate text-[10px] text-neutral-500">
+                                <span className="truncate text-[10px] text-studio-muted">
                                   {slot.label}
                                 </span>
                               </div>
@@ -237,8 +237,8 @@ export default function BeautyAppliedProducts({
                                       onClick={() => onChangeColor(product.selection, slot.index, variant.id)}
                                       className={`h-6 w-6 rounded-full border-2 transition ${
                                         selected
-                                          ? 'border-black ring-2 ring-black/10'
-                                          : 'border-white shadow-sm ring-1 ring-neutral-200 hover:ring-neutral-400'
+                                          ? 'border-studio-accent ring-2 ring-studio-accent/15'
+                                          : 'border-white shadow-sm ring-1 ring-studio-border hover:ring-zinc-400'
                                       }`}
                                       style={getVariantSwatchStyle(variant)}
                                       aria-label={`Use ${variant.name ?? variant.color_hex} for color ${slot.index + 1}`}
@@ -261,7 +261,7 @@ export default function BeautyAppliedProducts({
                     onOpenPatternPicker(product.selection)
                   }
                   disabled={!product.canChoosePattern}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-30"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full text-studio-ink hover:bg-studio-subtle disabled:cursor-not-allowed disabled:opacity-30"
                   aria-label={product.patternName ? 'Change pattern' : 'Choose pattern'}
                   title={product.patternName ? `Pattern: ${product.patternName}` : 'Choose pattern'}
                 >
@@ -271,7 +271,7 @@ export default function BeautyAppliedProducts({
                 <button
                   type="button"
                   onClick={() => onToggleVisibility(product.id)}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-neutral-100"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full text-studio-ink hover:bg-studio-subtle"
                   aria-label={product.hidden ? 'Show product effect' : 'Hide product effect'}
                   title={product.hidden ? 'Show product effect' : 'Hide product effect'}
                 >
@@ -286,7 +286,7 @@ export default function BeautyAppliedProducts({
                   type="button"
                   onClick={() => onOpenExternal(product.externalUrl)}
                   disabled={!product.externalUrl}
-                  className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-30"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full text-studio-ink hover:bg-studio-subtle disabled:cursor-not-allowed disabled:opacity-30"
                   aria-label="Open product link"
                   title="Open product link"
                 >
@@ -298,8 +298,8 @@ export default function BeautyAppliedProducts({
         )}
       </div>
 
-      <div className="shrink-0 border-t p-4">
-        <button className="w-full rounded-full bg-black py-3 text-sm font-semibold text-white">
+      <div className="shrink-0 border-t border-studio-border p-4">
+        <button className="w-full rounded-lg bg-studio-accent py-3 text-sm font-semibold text-white transition hover:bg-studio-accent/90">
           Add to cart ({appliedProducts.length})
         </button>
 
@@ -318,15 +318,15 @@ export default function BeautyAppliedProducts({
   if (mobile) {
     return (
       <div className="flex h-full min-h-0 flex-col">
-        <div className="shrink-0 border-b px-5 py-4">
+        <div className="shrink-0 border-b border-studio-border px-5 py-4">
           <div className="flex items-center justify-between">
-            <h3 className="font-semibold">
+            <h3 className="font-semibold text-studio-ink">
               Applied products
             </h3>
 
             <button
               onClick={onClear}
-              className="text-sm font-medium"
+              className="text-sm font-medium text-studio-accent hover:text-studio-ink"
             >
               Clear all
             </button>
@@ -340,7 +340,7 @@ export default function BeautyAppliedProducts({
 
   return (
     <div
-      className={`flex min-h-0 flex-col overflow-hidden border-t bg-white transition-all duration-300 ${
+      className={`flex min-h-0 flex-col overflow-hidden border-t border-studio-border bg-studio-surface transition-all duration-300 ${
         expanded
           ? 'flex-[3]'
           : 'h-[72px]'
@@ -350,7 +350,7 @@ export default function BeautyAppliedProducts({
         <div className="flex items-center justify-between">
           <button
             onClick={() => setExpanded(!expanded)}
-            className="flex items-center gap-2 font-semibold"
+            className="flex items-center gap-2 font-semibold text-studio-ink"
           >
             Applied products
             {expanded ? (
@@ -362,7 +362,7 @@ export default function BeautyAppliedProducts({
 
           <button
             onClick={onClear}
-            className="text-sm font-semibold text-neutral-900 hover:text-neutral-500"
+            className="text-sm font-semibold text-studio-accent hover:text-studio-ink"
           >
             Clear all
           </button>

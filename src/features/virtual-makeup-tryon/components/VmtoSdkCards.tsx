@@ -9,9 +9,9 @@ const offerings = [
     description:
       'Our virtual makeover simulator works with major browsers across all platforms, allowing easy integration into your brand sites.',
     cta: 'Learn More',
-    accent: 'from-rose-50 to-pink-50',
-    iconBg: 'bg-rose-100',
-    iconColor: 'text-rose-600',
+    accent: 'from-brand-paper to-brand-blush',
+    iconBg: 'bg-brand-blush',
+    iconColor: 'text-brand-accent',
   },
   {
     id: 'mobile-sdk',
@@ -80,7 +80,7 @@ export default function VmtoSdkCards() {
                   <p className="mt-2 flex-1 text-sm leading-relaxed text-gray-600">
                     {o.description}
                   </p>
-                  <button className="mt-5 inline-flex w-fit items-center gap-1 text-xs font-bold uppercase tracking-wide text-rose-600 transition group-hover:gap-2">
+                  <button className="mt-5 inline-flex w-fit items-center gap-1 text-xs font-bold uppercase tracking-wide text-brand-accent transition group-hover:gap-2">
                     {o.cta} →
                   </button>
                 </div>

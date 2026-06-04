@@ -6,12 +6,12 @@ const newsItems = [
   {
     id: 'news-1',
     badge: 'PRODUCT',
-    badgeColor: 'bg-rose-600',
+    badgeColor: 'bg-brand-accent',
     date: 'May 10, 2026',
     title: 'Perfect Corp. Powers AI Virtual Makeup Try-On at Flagship Location',
     excerpt:
       'Revolutionizing in-store beauty experiences with real-time AI shade matching and personalized skin analysis.',
-    imageGradient: 'from-rose-200 to-pink-300',
+    imageGradient: 'from-brand-blush to-brand-paper',
     imgEmoji: '💄',
   },
   {
@@ -115,7 +115,7 @@ export default function NewsSection() {
                       {news.excerpt}
                     </p>
 
-                    <button className="mt-6 self-start rounded-md border-2 border-pink-600 bg-white px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-pink-600 transition hover:bg-pink-600 hover:text-white">
+                    <button className="mt-6 self-start rounded-md border-2 border-brand-accent bg-white px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-brand-accent transition hover:bg-brand-accent hover:text-white">
                       READ MORE
                     </button>
                   </div>
@@ -141,7 +141,7 @@ export default function NewsSection() {
               key={i}
               onClick={() => setCurrent(i)}
               className={`h-2.5 rounded-full transition-all ${
-                i === current ? 'w-8 bg-pink-600' : 'w-2.5 bg-gray-300'
+                i === current ? 'w-8 bg-brand-accent' : 'w-2.5 bg-gray-300'
               }`}
               aria-label={`Go to news ${i + 1}`}
             />
@@ -150,7 +150,7 @@ export default function NewsSection() {
 
         {/* CTA */}
         <div className="mt-10 text-center">
-          <button className="rounded-md bg-pink-600 px-8 py-3.5 text-sm font-bold uppercase tracking-wide text-white shadow-lg transition hover:bg-pink-700">
+          <button className="rounded-md bg-brand-accent px-8 py-3.5 text-sm font-bold uppercase tracking-wide text-white shadow-lg transition hover:bg-brand-deep">
             SEE MORE NEWS
           </button>
         </div>

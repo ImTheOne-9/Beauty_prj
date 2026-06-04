@@ -208,7 +208,7 @@ function AdminSectionTitle({
   return (
     <div>
       <p className="text-xs uppercase tracking-[0.24em] text-slate-500">{eyebrow}</p>
-      <h2 className="mt-2 font-display text-3xl text-slate-900">{title}</h2>
+      <h2 className="mt-2 font-admin text-3xl font-semibold text-admin-ink">{title}</h2>
       <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-500">{description}</p>
     </div>
   )
@@ -231,14 +231,14 @@ function SubForm({ initial, plans, users, onSubmit, isPending }: {
     expires_at: initial?.expires_at ? initial.expires_at.slice(0, 10) : '',
   })
 
-  const inputCls = "w-full rounded-2xl border border-rose-200/80 bg-white/85 px-4 py-3 text-sm text-pearl focus:border-cyan focus:outline-none focus:ring-2 focus:ring-cyan/25"
+  const inputCls = 'admin-input'
 
   return (
     <div className="space-y-3">
       {/* User — chỉ hiện khi tạo mới */}
       {!initial && (
         <div>
-          <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">User</label>
+          <label className="admin-label">User</label>
           <select className={inputCls} value={form.user_id}
             onChange={(e) => setForm(f => ({ ...f, user_id: e.target.value }))}>
             <option value="">Select user...</option>
@@ -251,7 +251,7 @@ function SubForm({ initial, plans, users, onSubmit, isPending }: {
 
       {/* Plan */}
       <div>
-        <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Plan</label>
+        <label className="admin-label">Plan</label>
         <select className={inputCls} value={form.plan_id}
           onChange={(e) => setForm(f => ({ ...f, plan_id: e.target.value }))}>
           <option value="">Select plan...</option>
@@ -265,7 +265,7 @@ function SubForm({ initial, plans, users, onSubmit, isPending }: {
 
       {/* Status */}
       <div>
-        <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Status</label>
+        <label className="admin-label">Status</label>
         <select className={inputCls} value={form.status}
           onChange={(e) => setForm(f => ({ ...f, status: e.target.value }))}>
           <option value="active">Active</option>
@@ -277,15 +277,15 @@ function SubForm({ initial, plans, users, onSubmit, isPending }: {
 
       {/* Started At */}
       <div>
-        <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Started At</label>
+        <label className="admin-label">Started At</label>
         <input type="date" className={inputCls} value={form.started_at}
           onChange={(e) => setForm(f => ({ ...f, started_at: e.target.value }))} />
       </div>
 
       {/* Expires At */}
       <div>
-        <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">
-          Expires At <span className="text-mist font-normal normal-case">(để trống = không hết hạn)</span>
+        <label className="admin-label">
+          Expires At <span className="text-admin-muted font-normal normal-case">(để trống = không hết hạn)</span>
         </label>
         <input type="date" className={inputCls} value={form.expires_at}
           onChange={(e) => setForm(f => ({ ...f, expires_at: e.target.value }))} />
@@ -1011,17 +1011,17 @@ export default function AdminPage() {
   }
 
   return (
-    <section className="section-shell pb-12 admin-shell">
+    <section className="admin-shell section-shell min-h-screen bg-admin-surface pb-12 pt-4">
       <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
         {/* Sidebar Nav */}
-        <aside className="sticky top-[calc(var(--app-header-height)+1rem)] h-fit rounded-[2rem] border border-rose-100 bg-white/80 p-4 shadow-[0_24px_70px_rgba(168,112,134,0.12)] backdrop-blur-xl">
-          <div className="rounded-[1.5rem] border border-rose-100 bg-gradient-to-br from-rose-50 to-white p-4">
-            <div className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-white/80 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.24em] text-rose-600">
+        <aside className="admin-panel sticky top-[calc(var(--app-header-height)+1rem)] h-fit p-3">
+          <div className="rounded-lg border border-admin-border bg-admin-surface p-4">
+            <div className="inline-flex items-center gap-2 rounded-md border border-admin-border bg-white px-2.5 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-admin-accent">
               <ShieldCheck className="h-4 w-4" />
               {getAdminRoleLabel(adminRole)}
             </div>
-            <h1 className="mt-3 font-display text-3xl text-rose-950">Dashboard</h1>
-            <p className="mt-2 text-sm leading-6 text-mist">
+            <h1 className="mt-3 font-admin text-2xl font-semibold text-admin-ink">Dashboard</h1>
+            <p className="mt-2 text-sm leading-6 text-admin-muted">
               Manage product data, skin scan history, and user access roles in real-time.
             </p>
           </div>
@@ -1036,18 +1036,18 @@ export default function AdminPage() {
                   key={section.id}
                   type="button"
                   onClick={() => setActiveSection(section.id)}
-                  className={`w-full rounded-2xl border px-4 py-3 text-left transition ${active
-                    ? 'border-rose-300 bg-rose-50 text-rose-950 shadow-sm'
-                    : 'border-transparent bg-white text-mist hover:border-rose-100 hover:bg-rose-50/60 hover:text-rose-950'
+                  className={`w-full rounded-lg border px-3 py-2.5 text-left transition ${active
+                    ? 'border-admin-border bg-slate-100 text-admin-ink'
+                    : 'border-transparent bg-white text-admin-muted hover:border-admin-border hover:bg-admin-surface hover:text-admin-ink'
                     }`}
                 >
                   <div className="flex items-start gap-3">
-                    <div className={`rounded-xl p-2 ${active ? 'bg-white text-rose-600' : 'bg-rose-50 text-rose-500'}`}>
+                    <div className={`rounded-md p-2 ${active ? 'bg-white text-admin-ink shadow-sm' : 'bg-admin-surface text-admin-muted'}`}>
                       <Icon className="h-4 w-4" />
                     </div>
                     <div className="min-w-0">
                       <p className="font-semibold">{section.label}</p>
-                      <p className="mt-0.5 text-xs leading-5 text-mist">{section.description}</p>
+                      <p className="mt-0.5 text-xs leading-5 text-admin-muted">{section.description}</p>
                     </div>
                   </div>
                 </button>
@@ -1057,7 +1057,7 @@ export default function AdminPage() {
 
           <div className="mt-4 space-y-2">
             <Button
-              className="w-full justify-center"
+              className="admin-primary w-full justify-center"
               onClick={() => {
                 void queryClient.invalidateQueries({ queryKey: ['admin'] })
                 void testPing()
@@ -1066,7 +1066,7 @@ export default function AdminPage() {
               <RefreshCw className="mr-2 h-4 w-4" />
               Refresh Data
             </Button>
-            <Button variant="ghost" className="w-full justify-center" onClick={() => void signOut()}>
+            <Button variant="ghost" className="admin-secondary w-full justify-center" onClick={() => void signOut()}>
               Sign Out
             </Button>
           </div>
@@ -1076,30 +1076,30 @@ export default function AdminPage() {
         <div className="space-y-6">
           {/* Dashboard Welcome Header */}
           {activeSection === 'overview' && (
-            <Card className="border border-rose-100 bg-gradient-to-br from-rose-50 via-white to-amber-50 p-0 overflow-hidden relative">
+            <Card className="relative overflow-hidden border-admin-border bg-white p-0">
               <div className="grid gap-6 p-6 lg:grid-cols-[1.35fr_0.9fr] lg:p-8 relative z-10">
                 <div className="space-y-5">
-                  <div className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-white/90 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-rose-600">
+                  <div className="inline-flex items-center gap-2 rounded-md border border-admin-border bg-admin-surface px-3 py-1 text-xs font-semibold uppercase tracking-[0.16em] text-admin-accent">
                     <Database className="h-4 w-4" />
                     Supabase Platform Connection
                   </div>
                   <div className="space-y-3">
-                    <h2 className="font-display text-4xl text-rose-950 md:text-5xl">
+                    <h2 className="font-admin text-3xl font-semibold text-admin-ink md:text-4xl">
                       Operate the entire beauty platform from one place
                     </h2>
-                    <p className="max-w-2xl text-sm leading-7 text-mist md:text-base">
+                    <p className="max-w-2xl text-sm leading-7 text-admin-muted md:text-base">
                       Real-time Supabase connection is active. Changes to categories, scans, and roles will sync immediately and reflect on the application.
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-3">
-                    <Button onClick={() => setActiveSection('products')}>
+                    <Button className="admin-primary" onClick={() => setActiveSection('products')}>
                       Manage Products
                       <PencilLine className="h-4 w-4" />
                     </Button>
-                    <Button variant="ghost" onClick={() => setActiveSection('scans')}>
+                    <Button variant="ghost" className="admin-secondary" onClick={() => setActiveSection('scans')}>
                       Scans & Simulation
                     </Button>
-                    <Button variant="ghost" onClick={() => setActiveSection('access')}>
+                    <Button variant="ghost" className="admin-secondary" onClick={() => setActiveSection('access')}>
                       Edit User Roles
                     </Button>
                   </div>
@@ -1109,14 +1109,14 @@ export default function AdminPage() {
                     const Icon = card.icon
 
                     return (
-                      <div key={card.label} className="rounded-3xl border border-white/80 bg-white/80 p-4 shadow-sm backdrop-blur">
+                      <div key={card.label} className="rounded-lg border border-admin-border bg-admin-surface p-4">
                         <div className="flex items-start justify-between gap-3">
                           <div>
-                            <p className="text-xs uppercase tracking-[0.2em] text-cyan">{card.label}</p>
-                            <p className="mt-2 font-display text-3xl text-rose-950">{card.value}</p>
-                            <p className="mt-1 text-xs text-mist">{card.hint}</p>
+                            <p className="text-xs uppercase tracking-[0.16em] text-admin-muted">{card.label}</p>
+                            <p className="mt-2 font-admin text-3xl font-semibold text-admin-ink">{card.value}</p>
+                            <p className="mt-1 text-xs text-admin-muted">{card.hint}</p>
                           </div>
-                          <div className="rounded-2xl bg-rose-50 p-3 text-rose-600">
+                          <div className="rounded-md border border-admin-border bg-white p-3 text-admin-accent">
                             <Icon className="h-5 w-5" />
                           </div>
                         </div>
@@ -1125,8 +1125,6 @@ export default function AdminPage() {
                   })}
                 </div>
               </div>
-              {/* Background design accents */}
-              <div className="absolute right-0 bottom-0 top-0 w-1/3 bg-[radial-gradient(circle_at_bottom_right,rgba(254,200,210,0.45),transparent_70%)] pointer-events-none" />
             </Card>
           )}
 
@@ -1135,38 +1133,38 @@ export default function AdminPage() {
             <div className="space-y-6">
               {/* Row 1: System Health & Ping Status */}
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="border border-rose-100 p-5 bg-white flex flex-col justify-between">
+                <Card className="border border-admin-border p-5 bg-white flex flex-col justify-between">
                   <div>
-                    <div className="flex justify-between items-center text-xs uppercase tracking-[0.2em] text-cyan">
+                    <div className="flex justify-between items-center text-xs uppercase tracking-[0.2em] text-admin-accent">
                       <span>Supabase Connection</span>
                       <Wifi className="h-4 w-4 text-emerald-500 animate-pulse" />
                     </div>
-                    <h3 className="mt-3 font-display text-2xl text-rose-950">Online</h3>
-                    <p className="mt-1 text-xs text-mist leading-relaxed">
+                    <h3 className="mt-3 font-admin text-2xl text-admin-ink">Online</h3>
+                    <p className="mt-1 text-xs text-admin-muted leading-relaxed">
                       API is active and accepting CRUD operations.
                     </p>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-rose-50 flex items-center justify-between text-xs">
-                    <span className="text-mist/70">DB Latency:</span>
+                  <div className="mt-4 pt-3 border-t border-admin-border flex items-center justify-between text-xs">
+                    <span className="text-admin-muted">DB Latency:</span>
                     <span className="font-semibold text-emerald-600">
                       {pingStatus === 'pinging' ? '...' : pingTime && pingTime > 0 ? `${pingTime}ms` : 'Ping Failed'}
                     </span>
                   </div>
                 </Card>
 
-                <Card className="border border-rose-100 p-5 bg-white">
-                  <p className="text-xs uppercase tracking-[0.2em] text-cyan">DB Queries</p>
-                  <h3 className="mt-3 font-display text-2xl text-rose-950">
+                <Card className="border border-admin-border p-5 bg-white">
+                  <p className="text-xs uppercase tracking-[0.2em] text-admin-accent">DB Queries</p>
+                  <h3 className="mt-3 font-admin text-2xl text-admin-ink">
                     {scansQuery.data ? scansQuery.data.length + (productsQuery.data?.length ?? 0) : '0'} rows
                   </h3>
-                  <p className="mt-2 text-xs text-mist">
+                  <p className="mt-2 text-xs text-admin-muted">
                     Products, recommendations, and records.
                   </p>
-                  <div className="mt-3 pt-3 border-t border-rose-50 text-right">
+                  <div className="mt-3 pt-3 border-t border-admin-border text-right">
                     <button
                       onClick={testPing}
                       disabled={pingStatus === 'pinging'}
-                      className="text-xs text-rose-600 hover:underline flex items-center justify-end gap-1 ml-auto"
+                      className="text-xs text-admin-accent hover:underline flex items-center justify-end gap-1 ml-auto"
                     >
                       <Activity className="h-3 w-3" />
                       {pingStatus === 'pinging' ? 'Checking...' : 'Check Connection'}
@@ -1174,34 +1172,34 @@ export default function AdminPage() {
                   </div>
                 </Card>
 
-                <Card className="border border-rose-100 p-5 bg-white">
-                  <p className="text-xs uppercase tracking-[0.2em] text-cyan">CPU Simulation</p>
-                  <h3 className="mt-3 font-display text-2xl text-rose-950">14% - 24%</h3>
-                  <div className="w-full bg-rose-50 h-2 rounded-full mt-3 overflow-hidden">
-                    <div className="bg-gradient-to-r from-rose-400 to-pink-500 h-full rounded-full w-[18%]" />
+                <Card className="border border-admin-border p-5 bg-white">
+                  <p className="text-xs uppercase tracking-[0.2em] text-admin-accent">CPU Simulation</p>
+                  <h3 className="mt-3 font-admin text-2xl text-admin-ink">14% - 24%</h3>
+                  <div className="w-full bg-admin-subtle h-2 rounded-full mt-3 overflow-hidden">
+                    <div className="bg-gradient-to-r from-admin-accent to-admin-accent h-full rounded-full w-[18%]" />
                   </div>
-                  <p className="mt-2 text-[10px] text-mist/70">Average server usage</p>
+                  <p className="mt-2 text-[10px] text-admin-muted">Average server usage</p>
                 </Card>
 
-                <Card className="border border-rose-100 p-5 bg-white">
-                  <p className="text-xs uppercase tracking-[0.2em] text-cyan">Memory Load</p>
-                  <h3 className="mt-3 font-display text-2xl text-rose-950">512 MB</h3>
-                  <div className="w-full bg-rose-50 h-2 rounded-full mt-3 overflow-hidden">
+                <Card className="border border-admin-border p-5 bg-white">
+                  <p className="text-xs uppercase tracking-[0.2em] text-admin-accent">Memory Load</p>
+                  <h3 className="mt-3 font-admin text-2xl text-admin-ink">512 MB</h3>
+                  <div className="w-full bg-admin-subtle h-2 rounded-full mt-3 overflow-hidden">
                     <div className="bg-gradient-to-r from-cyan to-teal-400 h-full rounded-full w-[50%]" />
                   </div>
-                  <p className="mt-2 text-[10px] text-mist/70">Used 512MB out of 1024MB allocated</p>
+                  <p className="mt-2 text-[10px] text-admin-muted">Used 512MB out of 1024MB allocated</p>
                 </Card>
               </div>
 
 
               {/* Row 3: Live Audit Logs / Activity Log */}
-              <Card className="border border-rose-100 p-6 bg-white space-y-4">
+              <Card className="border border-admin-border p-6 bg-white space-y-4">
                 <div className="flex justify-between items-center">
                   <div>
-                    <h3 className="font-display text-xl text-rose-950">System Activity</h3>
-                    <p className="text-xs text-mist">Live notifications and activity logs.</p>
+                    <h3 className="font-admin text-xl text-admin-ink">System Activity</h3>
+                    <p className="text-xs text-admin-muted">Live notifications and activity logs.</p>
                   </div>
-                  <span className="text-[10px] bg-rose-50 text-rose-600 px-2.5 py-1 rounded-full uppercase tracking-wider font-bold">
+                  <span className="text-[10px] bg-admin-subtle text-admin-accent px-2.5 py-1 rounded-full uppercase tracking-wider font-bold">
                     Logs
                   </span>
                 </div>
@@ -1209,14 +1207,14 @@ export default function AdminPage() {
                   {systemActivityLog.map((log) => (
                     <div key={log.id} className="py-3 flex justify-between items-start text-xs gap-3">
                       <div className="flex gap-2">
-                        <span className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${log.type === 'success' ? 'bg-emerald-500' : log.type === 'warning' ? 'bg-amber-500' : 'bg-rose-500'
+                        <span className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${log.type === 'success' ? 'bg-emerald-500' : log.type === 'warning' ? 'bg-amber-500' : 'bg-admin-subtle0'
                           }`} />
                         <div>
-                          <p className="font-semibold text-rose-950">{log.user}</p>
-                          <p className="text-mist/90">{log.event}</p>
+                          <p className="font-semibold text-admin-ink">{log.user}</p>
+                          <p className="text-admin-muted">{log.event}</p>
                         </div>
                       </div>
-                      <span className="text-mist/60 whitespace-nowrap">{log.time}</span>
+                      <span className="text-admin-muted whitespace-nowrap">{log.time}</span>
                     </div>
                   ))}
                 </div>
@@ -1228,19 +1226,19 @@ export default function AdminPage() {
           {activeSection === 'products' ? (
             <div className="space-y-4">
               {/* Search & Filters */}
-              <div className="bg-white border border-rose-100 rounded-3xl p-4 flex flex-wrap gap-3 items-center">
+              <div className="bg-white border border-admin-border rounded-3xl p-4 flex flex-wrap gap-3 items-center">
                 <div className="flex-1 relative min-w-[200px]">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-mist" />
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-admin-muted" />
                   <input
                     type="text"
-                    className="w-full rounded-full border border-rose-100 pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-rose-200"
+                    className="w-full rounded-full border border-admin-border pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-admin-accent/20"
                     placeholder="Search products by name or brand..."
                     value={productSearch}
                     onChange={(e) => setProductSearch(e.target.value)}
                   />
                 </div>
                 <select
-                  className="rounded-full border border-rose-100 px-3 py-2 text-sm text-pearl focus:outline-none"
+                  className="rounded-full border border-admin-border px-3 py-2 text-sm text-admin-ink focus:outline-none"
                   value={productCategoryFilter}
                   onChange={(e) => setProductCategoryFilter(e.target.value)}
                 >
@@ -1255,7 +1253,7 @@ export default function AdminPage() {
               </div>
 
               {/* Products Table */}
-              <Card className="border border-rose-100 p-6 bg-white shadow-sm overflow-x-auto">
+              <Card className="border border-admin-border p-6 bg-white shadow-sm overflow-x-auto">
                 <AdminSectionTitle
                   eyebrow="Product List"
                   title="Manage Products"
@@ -1264,7 +1262,7 @@ export default function AdminPage() {
                 <div className="mt-6 overflow-x-auto">
                   <table className="w-full min-w-[960px] text-left border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-rose-100 text-rose-950 font-bold uppercase tracking-wider">
+                      <tr className="border-b border-admin-border text-admin-ink font-bold uppercase tracking-wider">
                         <th className="pb-3 pr-3 w-[72px]">Image</th>
                         <th className="pb-3 px-3 min-w-[200px]">Product</th>
                         <th className="pb-3 px-3">Brand</th>
@@ -1279,47 +1277,47 @@ export default function AdminPage() {
                         const categoryName = categoriesQuery.data?.find((c) => c.id === product.category_id)?.name ?? 'Unknown'
                         const imageSrc = product.image_url?.trim() || PRODUCT_PLACEHOLDER_IMAGE
                         return (
-                          <tr key={product.id} className="hover:bg-rose-50/20 text-rose-950 align-top">
+                          <tr key={product.id} className="hover:bg-admin-subtle text-admin-ink align-top">
                             <td className="py-3 pr-3">
                               <img
                                 src={imageSrc}
                                 alt={product.name}
                                 loading="lazy"
-                                className="h-14 w-14 shrink-0 rounded-xl border border-rose-100 bg-rose-50 object-cover"
+                                className="h-14 w-14 shrink-0 rounded-xl border border-admin-border bg-admin-subtle object-cover"
                                 onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = PRODUCT_PLACEHOLDER_IMAGE }}
                               />
                             </td>
                             <td className="py-3 px-3">
                               <div className="min-w-0 max-w-[280px]">
-                                <p className="font-bold text-sm leading-tight text-rose-950">{product.name}</p>
-                                <p className="mt-1 font-mono text-[10px] text-mist/80 break-all">ID: {product.id}</p>
-                                <p className="mt-1.5 text-[11px] leading-relaxed text-mist whitespace-pre-wrap break-words">
+                                <p className="font-bold text-sm leading-tight text-admin-ink">{product.name}</p>
+                                <p className="mt-1 font-mono text-[10px] text-admin-muted break-all">ID: {product.id}</p>
+                                <p className="mt-1.5 text-[11px] leading-relaxed text-admin-muted whitespace-pre-wrap break-words">
                                   {product.description?.trim() || '—'}
                                 </p>
                               </div>
                             </td>
-                            <td className="py-3 px-3 text-mist whitespace-nowrap">{product.brand?.trim() || '—'}</td>
+                            <td className="py-3 px-3 text-admin-muted whitespace-nowrap">{product.brand?.trim() || '—'}</td>
                             <td className="py-3 px-3">
-                              <p className="font-semibold text-rose-600">{categoryName}</p>
-                              <p className="mt-0.5 font-mono text-[10px] text-mist/70 break-all">{product.category_id}</p>
+                              <p className="font-semibold text-admin-accent">{categoryName}</p>
+                              <p className="mt-0.5 font-mono text-[10px] text-admin-muted break-all">{product.category_id}</p>
                             </td>
-                            <td className="py-3 px-3 text-mist">
+                            <td className="py-3 px-3 text-admin-muted">
                               <div className="space-y-2 min-w-0 max-w-[220px]">
                                 {product.image_url?.trim() ? (
                                   <a href={product.image_url} target="_blank" rel="noreferrer"
-                                    className="inline-flex items-start gap-1 text-[10px] text-cyan-700 hover:underline break-all">
+                                    className="inline-flex items-start gap-1 text-[10px] text-admin-accent hover:underline break-all">
                                     <ExternalLink className="h-3 w-3 shrink-0 mt-0.5" /> Image URL
                                   </a>
                                 ) : <span className="text-[10px]">No image URL</span>}
                                 {product.external_url?.trim() ? (
                                   <a href={product.external_url} target="_blank" rel="noreferrer"
-                                    className="inline-flex items-start gap-1 text-[10px] text-cyan-700 hover:underline break-all">
+                                    className="inline-flex items-start gap-1 text-[10px] text-admin-accent hover:underline break-all">
                                     <ExternalLink className="h-3 w-3 shrink-0 mt-0.5" /> Partner URL
                                   </a>
                                 ) : <span className="text-[10px]">No partner URL</span>}
                               </div>
                             </td>
-                            <td className="py-3 px-3 text-mist whitespace-nowrap">{formatDate(product.created_at)}</td>
+                            <td className="py-3 px-3 text-admin-muted whitespace-nowrap">{formatDate(product.created_at)}</td>
                             <td className="py-3 pl-3 text-right">
                               <div className="flex justify-end gap-1">
                                 <Button size="sm" variant="ghost" onClick={() => openProductModal(product)}>
@@ -1338,18 +1336,18 @@ export default function AdminPage() {
                     </tbody>
                   </table>
                   {paginatedProducts.length === 0 && (
-                    <div className="text-center py-12 text-mist text-sm">
+                    <div className="text-center py-12 text-admin-muted text-sm">
                       No products match the search or category filter.
                     </div>
                   )}
                 </div>
                 {totalProductPages > 1 && (
-                  <div className="flex items-center justify-center gap-4 pt-4 mt-4 border-t border-rose-100">
+                  <div className="flex items-center justify-center gap-4 pt-4 mt-4 border-t border-admin-border">
                     <Button variant="ghost" size="sm" disabled={productPage === 1}
                       onClick={() => setProductPage(p => Math.max(1, p - 1))}>
                       <ChevronLeft className="h-4 w-4 mr-1" /> Prev
                     </Button>
-                    <span className="text-xs font-semibold text-pearl">Page {productPage} of {totalProductPages}</span>
+                    <span className="text-xs font-semibold text-admin-ink">Page {productPage} of {totalProductPages}</span>
                     <Button variant="ghost" size="sm" disabled={productPage === totalProductPages}
                       onClick={() => setProductPage(p => Math.min(totalProductPages, p + 1))}>
                       Next <ChevronRight className="h-4 w-4 ml-1" />
@@ -1385,12 +1383,12 @@ export default function AdminPage() {
           {activeSection === 'categories' ? (
             <div className="space-y-4">
               {/* Header + Add button */}
-              <div className="bg-white border border-rose-100 rounded-3xl p-4 flex flex-wrap gap-3 items-center">
+              <div className="bg-white border border-admin-border rounded-3xl p-4 flex flex-wrap gap-3 items-center">
               <div className="flex-1 relative min-w-[200px]">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-mist" />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-admin-muted" />
                 <input
                   type="text"
-                  className="w-full rounded-full border border-rose-100 pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-rose-200"
+                  className="w-full rounded-full border border-admin-border pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-admin-accent/20"
                   placeholder="Search by name or API key..."
                   value={categorySearch}
                   onChange={(e) => {
@@ -1405,7 +1403,7 @@ export default function AdminPage() {
             </div>
 
               {/* Categories Table */}
-              <Card className="border border-rose-100 p-6 bg-white shadow-sm">
+              <Card className="border border-admin-border p-6 bg-white shadow-sm">
                 <AdminSectionTitle
                   eyebrow="Category List"
                   title="Manage Categories"
@@ -1414,7 +1412,7 @@ export default function AdminPage() {
                 <div className="mt-6 overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-rose-100 text-rose-950 font-bold uppercase tracking-wider">
+                      <tr className="border-b border-admin-border text-admin-ink font-bold uppercase tracking-wider">
                         <th className="pb-3 pr-3">Category Name</th>
                         <th className="pb-3 px-3">API Key</th>
                         <th className="pb-3 px-3">Created At</th>
@@ -1423,10 +1421,10 @@ export default function AdminPage() {
                     </thead>
                     <tbody className="divide-y divide-rose-50">
                       {paginatedCategories.map((category) => (
-                        <tr key={category.id} className="hover:bg-rose-50/20 text-rose-950">
+                        <tr key={category.id} className="hover:bg-admin-subtle text-admin-ink">
                           <td className="py-3 pr-3 font-medium">{category.name}</td>
-                          <td className="py-3 px-3 text-mist">{category.api_category_key}</td>
-                          <td className="py-3 px-3 text-mist">{formatDate(category.created_at)}</td>
+                          <td className="py-3 px-3 text-admin-muted">{category.api_category_key}</td>
+                          <td className="py-3 px-3 text-admin-muted">{formatDate(category.created_at)}</td>
                           <td className="py-3 pl-3 text-right">
                             <div className="flex justify-end gap-2">
                               <Button size="sm" variant="ghost" onClick={() => openCategoryModal(category)}>
@@ -1451,18 +1449,18 @@ export default function AdminPage() {
                     </tbody>
                   </table>
                   {paginatedCategories.length === 0 && (
-                    <p className="mt-4 text-sm text-mist text-center py-4">
+                    <p className="mt-4 text-sm text-admin-muted text-center py-4">
                       No categories available. Click "Add Category" to get started.
                     </p>
                   )}
                 </div>
                 {totalCategoryPages > 1 && (
-                  <div className="flex items-center justify-center gap-4 pt-4 mt-4 border-t border-rose-100">
+                  <div className="flex items-center justify-center gap-4 pt-4 mt-4 border-t border-admin-border">
                     <Button variant="ghost" size="sm" disabled={categoryPage === 1}
                       onClick={() => setCategoryPage(p => Math.max(1, p - 1))}>
                       <ChevronLeft className="h-4 w-4 mr-1" /> Prev
                     </Button>
-                    <span className="text-xs font-semibold text-pearl">Page {categoryPage} of {totalCategoryPages}</span>
+                    <span className="text-xs font-semibold text-admin-ink">Page {categoryPage} of {totalCategoryPages}</span>
                     <Button variant="ghost" size="sm" disabled={categoryPage === totalCategoryPages}
                       onClick={() => setCategoryPage(p => Math.min(totalCategoryPages, p + 1))}>
                       Next <ChevronRight className="h-4 w-4 ml-1" />
@@ -1477,21 +1475,21 @@ export default function AdminPage() {
                   className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
                   onClick={(e) => { if (e.target === e.currentTarget) setCategoryModalOpen(false) }}
                 >
-                  <div className="relative w-full max-w-md rounded-[2rem] border border-rose-100 bg-white p-6 shadow-xl space-y-4">
+                  <div className="relative w-full max-w-md rounded-[2rem] border border-admin-border bg-white p-6 shadow-xl space-y-4">
                     <button
                       onClick={() => setCategoryModalOpen(false)}
-                      className="absolute right-4 top-4 rounded-full p-1.5 text-mist hover:bg-rose-50 transition"
+                      className="absolute right-4 top-4 rounded-full p-1.5 text-admin-muted hover:bg-admin-subtle transition"
                     >
                       <X className="h-4 w-4" />
                     </button>
 
-                    <h2 className="font-display text-xl text-rose-950">
+                    <h2 className="font-admin text-xl text-admin-ink">
                       {categoryForm.id ? 'Edit Category' : 'Add New Category'}
                     </h2>
 
                     <div className="space-y-4">
                       <div>
-                        <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Category Name</label>
+                        <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">Category Name</label>
                         <Input
                           placeholder="e.g. Lipstick"
                           value={categoryForm.name}
@@ -1499,7 +1497,7 @@ export default function AdminPage() {
                         />
                       </div>
                       <div>
-                        <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">API Category Key</label>
+                        <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">API Category Key</label>
                         <Input
                           placeholder="e.g. lip_color"
                           value={categoryForm.apiCategoryKey}
@@ -1508,7 +1506,7 @@ export default function AdminPage() {
                       </div>
 
                       {saveCategoryMutation.error && (
-                        <p className="text-sm text-rose-500">{saveCategoryMutation.error.message}</p>
+                        <p className="text-sm text-admin-accent">{saveCategoryMutation.error.message}</p>
                       )}
 
                       <div className="flex justify-end gap-2 pt-2">
@@ -1536,7 +1534,7 @@ export default function AdminPage() {
           {activeSection === 'product-configs' ? (
             <div className="space-y-4">
               {/* Bảng xem nhanh tất cả configs */}
-              <Card className="border border-rose-100 p-6 bg-white shadow-sm">
+              <Card className="border border-admin-border p-6 bg-white shadow-sm">
                 <AdminSectionTitle
                   eyebrow="Config List"
                   title="All Product Variants"
@@ -1545,7 +1543,7 @@ export default function AdminPage() {
                 <div className="mt-6 overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-rose-100 text-rose-950 font-bold uppercase tracking-wider">
+                      <tr className="border-b border-admin-border text-admin-ink font-bold uppercase tracking-wider">
                         <th className="pb-3 pr-3">Product</th>
                         <th className="pb-3 px-3">Variant</th>
                         <th className="pb-3 px-3">Color</th>
@@ -1555,12 +1553,12 @@ export default function AdminPage() {
                     </thead>
                     <tbody className="divide-y divide-rose-50">
                       {(productConfigsQuery.data ?? []).map((config) => (
-                        <tr key={config.id} className="hover:bg-rose-50/20 text-rose-950 align-top">
+                        <tr key={config.id} className="hover:bg-admin-subtle text-admin-ink align-top">
                           <td className="py-3 pr-3 font-medium">
                             {productLookup.get(config.product_id)?.name ?? 'Unknown'}
                           </td>
                           <td className="py-3 px-3">
-                            <span className="rounded-full bg-rose-50 border border-rose-100 px-2 py-0.5 text-[11px] font-medium text-rose-700 capitalize">
+                            <span className="rounded-full bg-admin-subtle border border-admin-border px-2 py-0.5 text-[11px] font-medium text-admin-accent capitalize">
                               {config.name || 'Default shade'}
                             </span>
                           </td>
@@ -1571,21 +1569,21 @@ export default function AdminPage() {
                                   className="h-4 w-4 rounded-full border border-white shadow-sm shrink-0"
                                   style={{ backgroundColor: config.color_hex }}
                                 />
-                                <span className="font-mono text-[11px] text-mist uppercase">
+                                <span className="font-mono text-[11px] text-admin-muted uppercase">
                                   {config.color_hex}
                                 </span>
                               </div>
                             ) : (
-                              <span className="text-mist">—</span>
+                              <span className="text-admin-muted">—</span>
                             )}
                           </td>
                           <td className="py-3 px-3">
                             {config.texture ? (
-                              <span className="font-mono text-[11px] text-mist capitalize">
+                              <span className="font-mono text-[11px] text-admin-muted capitalize">
                                 {config.texture}
                               </span>
                             ) : (
-                              <span className="text-mist">—</span>
+                              <span className="text-admin-muted">—</span>
                             )}
                           </td>
                           <td className="py-3 pl-3 text-right">
@@ -1623,7 +1621,7 @@ export default function AdminPage() {
                     </tbody>
                   </table>
                   {(productConfigsQuery.data?.length ?? 0) === 0 && (
-                    <div className="text-center py-12 text-mist text-sm">
+                    <div className="text-center py-12 text-admin-muted text-sm">
                       No variants yet. Add variants from the Products tab.
                     </div>
                   )}
@@ -1636,19 +1634,19 @@ export default function AdminPage() {
           {activeSection === 'scans' && (
             <div className="space-y-4">
               {/* Search & filter */}
-              <div className="bg-white border border-rose-100 rounded-3xl p-4 flex flex-wrap gap-3 items-center">
+              <div className="bg-white border border-admin-border rounded-3xl p-4 flex flex-wrap gap-3 items-center">
                 <div className="flex-1 relative min-w-[200px]">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-mist" />
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-admin-muted" />
                   <input
                     type="text"
-                    className="w-full rounded-full border border-rose-100 pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-rose-200"
+                    className="w-full rounded-full border border-admin-border pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-admin-accent/20"
                     placeholder="Search by Scan ID, User UUID or Email..."
                     value={adminScanSearch}
                     onChange={(e) => { setAdminScanSearch(e.target.value); setAdminScanPage(1) }}
                   />
                 </div>
                 <select
-                  className="rounded-full border border-rose-100 px-3 py-2 text-sm text-pearl focus:outline-none"
+                  className="rounded-full border border-admin-border px-3 py-2 text-sm text-admin-ink focus:outline-none"
                   value={adminScanModeFilter}
                   onChange={(e) => { setAdminScanModeFilter(e.target.value as any); setAdminScanPage(1) }}
                 >
@@ -1658,7 +1656,7 @@ export default function AdminPage() {
                 </select>
               </div>
 
-              <Card className="border border-rose-100 p-6 bg-white shadow-sm">
+              <Card className="border border-admin-border p-6 bg-white shadow-sm">
                 <AdminSectionTitle
                   eyebrow="Scan History"
                   title="All Users Scans"
@@ -1668,7 +1666,7 @@ export default function AdminPage() {
                 <div className="mt-6 overflow-x-auto">
                   <table className="w-full min-w-[860px] text-left border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-rose-100 text-rose-950 font-bold uppercase tracking-wider">
+                      <tr className="border-b border-admin-border text-admin-ink font-bold uppercase tracking-wider">
                         <th className="pb-3 pr-3 w-[100px]">Images</th>
                         <th className="pb-3 px-3">Scan ID</th>
                         <th className="pb-3 px-3">Email</th>
@@ -1683,7 +1681,7 @@ export default function AdminPage() {
                         // const enabledEffects = (scan.effects ?? []).filter((e: any) => e.enabled)
                         const email = scan.user_id ? (userLookup.get(scan.user_id)?.email ?? scan.user_id.slice(0, 8) + '...') : 'Guest'
                         return (
-                          <tr key={scan.id} className="hover:bg-rose-50/20 text-rose-950 align-middle">
+                          <tr key={scan.id} className="hover:bg-admin-subtle text-admin-ink align-middle">
                             <td className="py-3 pr-3">
                               <div className="flex gap-1">
                                 {[scan.original_image, scan.image_url].map((url, i) => (
@@ -1691,7 +1689,7 @@ export default function AdminPage() {
                                     key={i}
                                     src={url || 'https://placehold.co/40x40/fce7f3/9f1239?text=?'}
                                     alt={i === 0 ? 'Before' : 'After'}
-                                    className="h-10 w-10 rounded-lg border border-rose-100 object-cover bg-rose-50"
+                                    className="h-10 w-10 rounded-lg border border-admin-border object-cover bg-admin-subtle"
                                   />
                                 ))}
                               </div>
@@ -1699,7 +1697,7 @@ export default function AdminPage() {
                             <td className="py-3 px-3 font-mono font-semibold" title={scan.id}>
                               {scan.id.slice(0, 8)}...
                             </td>
-                            <td className="py-3 px-3 text-mist max-w-[180px] truncate" title={email}>
+                            <td className="py-3 px-3 text-admin-muted max-w-[180px] truncate" title={email}>
                               {email}
                             </td>
                             <td className="py-3 px-3">
@@ -1707,7 +1705,7 @@ export default function AdminPage() {
                                 'text-[10px] font-bold rounded-lg px-2 py-0.5 border',
                                 scan.mode === 'api'
                                   ? 'text-emerald-700 bg-emerald-50/50 border-emerald-100'
-                                  : 'text-rose-600 bg-rose-50/50 border-rose-100',
+                                  : 'text-admin-accent bg-admin-subtle border-admin-border',
                               )}>
                                 {scan.mode === 'api' ? 'API' : 'Demo'}
                               </span>
@@ -1720,8 +1718,8 @@ export default function AdminPage() {
                                     className={cn(
                                       'rounded-full px-2.5 py-0.5 text-[11px] capitalize',
                                       e.enabled
-                                        ? 'bg-rose-50 border border-rose-100 text-rose-600'
-                                        : 'bg-mist/20 border border-mist text-mist',
+                                        ? 'bg-admin-subtle border border-admin-border text-admin-accent'
+                                        : 'bg-admin-subtle border border-admin-border text-admin-muted',
                                     )}
                                   >
                                     {e.category.replace(/_/g, ' ')}
@@ -1730,7 +1728,7 @@ export default function AdminPage() {
                                 ))}
                               </div>
                             </td>
-                            <td className="py-3 px-3 text-mist whitespace-nowrap">
+                            <td className="py-3 px-3 text-admin-muted whitespace-nowrap">
                               {formatDate(scan.created_at)}
                             </td>
                             <td className="py-3 pl-3 text-right">
@@ -1755,16 +1753,16 @@ export default function AdminPage() {
                   </table>
 
                   {paginatedAdminScans.length === 0 && (
-                    <div className="text-center py-12 text-mist text-sm">No scan records found.</div>
+                    <div className="text-center py-12 text-admin-muted text-sm">No scan records found.</div>
                   )}
                 </div>
 
                 {totalAdminScanPages > 1 && (
-                  <div className="flex items-center justify-center gap-4 pt-4 mt-4 border-t border-rose-100">
+                  <div className="flex items-center justify-center gap-4 pt-4 mt-4 border-t border-admin-border">
                     <Button variant="ghost" size="sm" disabled={adminScanPage === 1} onClick={() => setAdminScanPage(p => Math.max(1, p - 1))}>
                       <ChevronLeft className="h-4 w-4 mr-1" /> Prev
                     </Button>
-                    <span className="text-xs font-semibold text-pearl">Page {adminScanPage} of {totalAdminScanPages}</span>
+                    <span className="text-xs font-semibold text-admin-ink">Page {adminScanPage} of {totalAdminScanPages}</span>
                     <Button variant="ghost" size="sm" disabled={adminScanPage === totalAdminScanPages} onClick={() => setAdminScanPage(p => Math.min(totalAdminScanPages, p + 1))}>
                       Next <ChevronRight className="h-4 w-4 ml-1" />
                     </Button>
@@ -1785,8 +1783,8 @@ export default function AdminPage() {
                         label: `Color${labelSuffix}`,
                         value: (
                           <div className="flex items-center gap-2">
-                            <span className="inline-block w-4 h-4 rounded-full border border-mist/20 shadow-sm" style={{ backgroundColor: p.color }} />
-                            <span className="font-mono text-[11px] uppercase text-rose-950 font-semibold">{p.color}</span>
+                            <span className="inline-block w-4 h-4 rounded-full border border-admin-border/20 shadow-sm" style={{ backgroundColor: p.color }} />
+                            <span className="font-mono text-[11px] uppercase text-admin-ink font-semibold">{p.color}</span>
                           </div>
                         ),
                       })
@@ -1802,11 +1800,11 @@ export default function AdminPage() {
                   if (effect.skinSmoothStrength != null) details.push({ label: 'Smoothness Strength', value: `${effect.skinSmoothStrength}%` })
                   if (details.length === 0) return null
                   return (
-                    <div className="mt-3 grid grid-cols-2 gap-3 text-xs border-t border-rose-100/40 pt-2">
+                    <div className="mt-3 grid grid-cols-2 gap-3 text-xs border-t border-admin-border pt-2">
                       {details.map((d, index) => (
                         <div key={index} className="flex flex-col gap-0.5">
-                          <span className="text-[9px] uppercase font-bold text-mist/60 tracking-wider">{d.label}</span>
-                          <span className="text-rose-950 font-semibold">{d.value}</span>
+                          <span className="text-[9px] uppercase font-bold text-admin-muted tracking-wider">{d.label}</span>
+                          <span className="text-admin-ink font-semibold">{d.value}</span>
                         </div>
                       ))}
                     </div>
@@ -1818,10 +1816,10 @@ export default function AdminPage() {
                   className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm"
                   onClick={(e) => { if (e.target === e.currentTarget) setSelectedAdminScan(null) }}
                 >
-                  <div className="relative w-full max-w-5xl overflow-hidden rounded-[2rem] border border-rose-100/60 bg-white shadow-2xl flex flex-col max-h-[90vh]">
+                  <div className="relative w-full max-w-5xl overflow-hidden rounded-[2rem] border border-admin-border bg-white shadow-2xl flex flex-col max-h-[90vh]">
                     <button
                       onClick={() => setSelectedAdminScan(null)}
-                      className="absolute right-5 top-5 z-10 rounded-full p-2 text-mist bg-white/90 hover:bg-rose-50 hover:text-rose-600 transition shadow-sm"
+                      className="absolute right-5 top-5 z-10 rounded-full p-2 text-admin-muted bg-white/90 hover:bg-admin-subtle hover:text-admin-accent transition shadow-sm"
                     >
                       <X className="h-5 w-5" />
                     </button>
@@ -1829,23 +1827,23 @@ export default function AdminPage() {
                     <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-rose-100 overflow-y-auto flex-1">
                       {/* Left Side: Images */}
                       <div className="lg:col-span-5 p-6 md:p-8 space-y-4">
-                        <h3 className="font-display text-lg font-bold text-rose-950">Visual Comparison</h3>
+                        <h3 className="font-admin text-lg font-bold text-admin-ink">Visual Comparison</h3>
                         <div className="grid grid-cols-2 gap-3">
-                          <div className="relative rounded-2xl overflow-hidden bg-rose-50 border border-rose-100 aspect-[3/4]">
+                          <div className="relative rounded-2xl overflow-hidden bg-admin-subtle border border-admin-border aspect-[3/4]">
                             {selectedAdminScan.original_image ? (
                               <img src={selectedAdminScan.original_image} className="h-full w-full object-cover" alt="Before" />
                             ) : (
-                              <div className="absolute inset-0 flex items-center justify-center text-sm text-mist">Before</div>
+                              <div className="absolute inset-0 flex items-center justify-center text-sm text-admin-muted">Before</div>
                             )}
                             <span className="absolute bottom-3 left-3 rounded-full bg-black/55 px-2.5 py-0.5 text-xs font-semibold text-white">Before</span>
                           </div>
-                          <div className="relative rounded-2xl overflow-hidden bg-rose-50 border border-rose-100 aspect-[3/4]">
+                          <div className="relative rounded-2xl overflow-hidden bg-admin-subtle border border-admin-border aspect-[3/4]">
                             {selectedAdminScan.image_url ? (
                               <img src={selectedAdminScan.image_url} className="h-full w-full object-cover" alt="After" />
                             ) : (
-                              <div className="absolute inset-0 flex items-center justify-center text-sm text-mist">After</div>
+                              <div className="absolute inset-0 flex items-center justify-center text-sm text-admin-muted">After</div>
                             )}
-                            <span className="absolute bottom-3 left-3 rounded-full bg-rose-600 px-2.5 py-0.5 text-xs font-semibold text-white">After</span>
+                            <span className="absolute bottom-3 left-3 rounded-full bg-admin-accent px-2.5 py-0.5 text-xs font-semibold text-white">After</span>
                           </div>
                         </div>
                       </div>
@@ -1853,48 +1851,48 @@ export default function AdminPage() {
                       {/* Right Side: Details & All Effects */}
                       <div className="lg:col-span-7 p-6 md:p-8 space-y-6 overflow-y-auto">
                         <div>
-                          <p className="text-[10px] uppercase font-bold tracking-widest text-cyan">Scan Details</p>
-                          <h2 className="mt-1 font-display text-2xl text-rose-950 font-extrabold">Metadata & Effects</h2>
+                          <p className="text-[10px] uppercase font-bold tracking-widest text-admin-accent">Scan Details</p>
+                          <h2 className="mt-1 font-admin text-2xl text-admin-ink font-extrabold">Metadata & Effects</h2>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-4 rounded-2xl bg-rose-50/30 border border-rose-100/50 p-4">
+                        <div className="grid grid-cols-2 gap-4 rounded-2xl bg-admin-subtle border border-admin-border p-4">
                           <div>
-                            <span className="text-[10px] uppercase font-bold text-mist/60 block">Scan ID</span>
-                            <span className="font-mono text-xs text-rose-950 font-semibold break-all">{selectedAdminScan.id}</span>
+                            <span className="text-[10px] uppercase font-bold text-admin-muted block">Scan ID</span>
+                            <span className="font-mono text-xs text-admin-ink font-semibold break-all">{selectedAdminScan.id}</span>
                           </div>
                           <div>
-                            <span className="text-[10px] uppercase font-bold text-mist/60 block">Email</span>
-                            <span className="text-xs text-rose-950 font-semibold break-all">
+                            <span className="text-[10px] uppercase font-bold text-admin-muted block">Email</span>
+                            <span className="text-xs text-admin-ink font-semibold break-all">
                               {selectedAdminScan.user_id ? (userLookup.get(selectedAdminScan.user_id)?.email ?? 'Unknown') : 'Guest'}
                             </span>
                           </div>
                           <div>
-                            <span className="text-[10px] uppercase font-bold text-mist/60 block">Mode</span>
+                            <span className="text-[10px] uppercase font-bold text-admin-muted block">Mode</span>
                             <span className={cn(
                               'inline-block rounded-full px-2 py-0.5 text-[10px] font-bold border mt-0.5 uppercase',
-                              selectedAdminScan.mode === 'api' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-rose-50 text-rose-600 border-rose-100',
+                              selectedAdminScan.mode === 'api' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-admin-subtle text-admin-accent border-admin-border',
                             )}>
                               {selectedAdminScan.mode === 'api' ? 'API' : 'Demo'}
                             </span>
                           </div>
                           <div>
-                            <span className="text-[10px] uppercase font-bold text-mist/60 block">Created</span>
-                            <div className="flex items-center gap-2 text-xs text-rose-950 font-medium mt-0.5">
+                            <span className="text-[10px] uppercase font-bold text-admin-muted block">Created</span>
+                            <div className="flex items-center gap-2 text-xs text-admin-ink font-medium mt-0.5">
                               {formatDate(selectedAdminScan.created_at)}
                             </div>
                           </div>
                         </div>
 
                         <div>
-                          <h3 className="text-xs uppercase font-bold tracking-widest text-mist mb-3">All Makeup Effects</h3>
+                          <h3 className="text-xs uppercase font-bold tracking-widest text-admin-muted mb-3">All Makeup Effects</h3>
                           {allEffects.length === 0 ? (
-                            <p className="text-xs text-mist">No makeup effects recorded for this scan.</p>
+                            <p className="text-xs text-admin-muted">No makeup effects recorded for this scan.</p>
                           ) : (
                             <div className="space-y-4">
                               {allEffects.map((e: any) => (
-                                <div key={e.category} className="rounded-2xl border border-rose-100/60 bg-rose-50/20 p-4 shadow-sm">
+                                <div key={e.category} className="rounded-2xl border border-admin-border bg-admin-subtle p-4 shadow-sm">
                                   <div className="flex items-center justify-between">
-                                    <span className="text-sm font-bold capitalize text-rose-950">
+                                    <span className="text-sm font-bold capitalize text-admin-ink">
                                       {e.category.replace(/_/g, ' ')}
                                     </span>
                                     <span className={cn(
@@ -1925,13 +1923,13 @@ export default function AdminPage() {
           {activeSection === 'access' ? (
             <div className="space-y-4">
               {/* Search + Add */}
-              <div className="bg-white border border-rose-100 rounded-3xl p-4 flex flex-wrap gap-3 items-center">
+              <div className="bg-white border border-admin-border rounded-3xl p-4 flex flex-wrap gap-3 items-center">
                 {/* Search */}
                 <div className="flex-1 relative min-w-[200px]">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-mist" />
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-admin-muted" />
                   <input
                     type="text"
-                    className="w-full rounded-full border border-rose-100 pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-rose-200"
+                    className="w-full rounded-full border border-admin-border pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-admin-accent/20"
                     placeholder="Search by email or name..."
                     value={userSearch}
                     onChange={(e) => setUserSearch(e.target.value)}
@@ -1940,7 +1938,7 @@ export default function AdminPage() {
 
                 {/* Role filter */}
                 <select
-                  className="rounded-full border border-rose-100 px-3 py-2 text-sm text-pearl focus:outline-none"
+                  className="rounded-full border border-admin-border px-3 py-2 text-sm text-admin-ink focus:outline-none"
                   value={userRoleFilter}
                   onChange={(e) => setUserRoleFilter(e.target.value)}
                 >
@@ -1951,7 +1949,7 @@ export default function AdminPage() {
 
                 {/* Plan filter — dynamic từ plansQuery */}
                 <select
-                  className="rounded-full border border-rose-100 px-3 py-2 text-sm text-pearl focus:outline-none"
+                  className="rounded-full border border-admin-border px-3 py-2 text-sm text-admin-ink focus:outline-none"
                   value={userPlanFilter}
                   onChange={(e) => setUserPlanFilter(e.target.value)}
                 >
@@ -1968,7 +1966,7 @@ export default function AdminPage() {
               </div>
 
               {/* Table */}
-              <Card className="border border-rose-100 p-6 bg-white shadow-sm">
+              <Card className="border border-admin-border p-6 bg-white shadow-sm">
                 <AdminSectionTitle
                   eyebrow="User Access Control"
                   title="Manage Users"
@@ -1978,7 +1976,7 @@ export default function AdminPage() {
                 <div className="mt-6 overflow-x-auto">
                   <table className="w-full min-w-[700px] text-left border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-rose-100 text-rose-950 font-bold uppercase tracking-wider">
+                      <tr className="border-b border-admin-border text-admin-ink font-bold uppercase tracking-wider">
                         <th className="pb-3 pr-3">User</th>
                         <th className="pb-3 px-3">Role</th>
                         <th className="pb-3 px-3">Plan</th>
@@ -1990,7 +1988,7 @@ export default function AdminPage() {
                       {filteredUsers.map((item: any) => {
                         const fullName = [item.first_name, item.last_name].filter(Boolean).join(' ')
                         return (
-                          <tr key={item.id} className="hover:bg-rose-50/20 text-rose-950 align-middle">
+                          <tr key={item.id} className="hover:bg-admin-subtle text-admin-ink align-middle">
                             {/* Avatar + name + email */}
                             <td className="py-3 pr-3">
                               <div className="flex items-center gap-3">
@@ -1998,22 +1996,22 @@ export default function AdminPage() {
                                   <img
                                     src={item.avatar_url}
                                     alt={fullName || item.email}
-                                    className="h-9 w-9 rounded-full border border-rose-100 object-cover shrink-0"
+                                    className="h-9 w-9 rounded-full border border-admin-border object-cover shrink-0"
                                     onError={(e) => { e.currentTarget.style.display = 'none' }}
                                   />
                                 ) : (
-                                  <div className="h-9 w-9 rounded-full bg-rose-100 flex items-center justify-center shrink-0 text-rose-500 font-bold text-sm">
+                                  <div className="h-9 w-9 rounded-full bg-admin-subtle flex items-center justify-center shrink-0 text-admin-accent font-bold text-sm">
                                     {(item.email?.[0] ?? '?').toUpperCase()}
                                   </div>
                                 )}
                                 <div className="min-w-0">
-                                  <p className="font-semibold text-rose-950 truncate max-w-[180px]">
-                                    {fullName || <span className="text-mist italic font-normal">No name</span>}
+                                  <p className="font-semibold text-admin-ink truncate max-w-[180px]">
+                                    {fullName || <span className="text-admin-muted italic font-normal">No name</span>}
                                     {item.email?.toLowerCase() === currentAuthUser?.email?.toLowerCase() && (
-                                      <span className="ml-1 text-[9px] bg-cyan/10 text-cyan-700 px-1.5 py-0.5 rounded font-extrabold">You</span>
+                                      <span className="ml-1 text-[9px] bg-admin-accent/10 text-admin-accent px-1.5 py-0.5 rounded font-extrabold">You</span>
                                     )}
                                   </p>
-                                  <p className="text-mist truncate max-w-[180px]" title={item.email}>{item.email}</p>
+                                  <p className="text-admin-muted truncate max-w-[180px]" title={item.email}>{item.email}</p>
                                 </div>
                               </div>
                             </td>
@@ -2023,7 +2021,7 @@ export default function AdminPage() {
                               <span className={cn(
                                 'rounded-lg px-2.5 py-1 text-[10px] font-bold border uppercase tracking-wide',
                                 item.role === 'admin'
-                                  ? 'bg-rose-50 text-rose-600 border-rose-200'
+                                  ? 'bg-admin-subtle text-admin-accent border-admin-border'
                                   : 'bg-gray-50 text-gray-500 border-gray-200',
                               )}>
                                 {item.role ?? 'user'}
@@ -2037,14 +2035,14 @@ export default function AdminPage() {
                                   <span className={cn(
                                     'rounded-lg px-2.5 py-1 text-[10px] font-bold border uppercase tracking-wide',
                                     item.plan.slug === 'pro'
-                                      ? 'bg-cyan/10 text-cyan-700 border-cyan/20'
+                                      ? 'bg-admin-accent/10 text-admin-accent border-admin-accent/20'
                                       : item.plan.slug === 'premium'
                                       ? 'bg-amber-50 text-amber-700 border-amber-100'
                                       : 'bg-gray-50 text-gray-500 border-gray-200',
                                   )}>
                                     {item.plan.name}
                                   </span>
-                                  <p className="mt-1 text-[10px] text-mist">
+                                  <p className="mt-1 text-[10px] text-admin-muted">
                                     ${Number(item.plan.price).toFixed(2)}/{item.plan.billing_interval}
                                   </p>
                                 </div>
@@ -2055,7 +2053,7 @@ export default function AdminPage() {
                               )}
                             </td>
 
-                            <td className="py-3 px-3 text-mist whitespace-nowrap">
+                            <td className="py-3 px-3 text-admin-muted whitespace-nowrap">
                               {new Date(item.updated_at).toLocaleDateString('vi-VN')}
                             </td>
 
@@ -2084,29 +2082,29 @@ export default function AdminPage() {
                     </tbody>
                   </table>
                   {filteredUsers.length === 0 && (
-                    <div className="text-center py-12 text-mist text-sm">No users found.</div>
+                    <div className="text-center py-12 text-admin-muted text-sm">No users found.</div>
                   )}
                 </div>
               </Card>
 
               {/* Role Matrix */}
-              <Card className="border border-rose-100 p-6 bg-white shadow-sm">
+              <Card className="border border-admin-border p-6 bg-white shadow-sm">
                 <AdminSectionTitle
                   eyebrow="Access Matrix"
                   title="Role Module Scopes"
                   description="List of visible modules based on role mapping rules."
                 />
-                <div className="mt-5 space-y-3 text-xs text-rose-950">
+                <div className="mt-5 space-y-3 text-xs text-admin-ink">
                   {[
                     { role: 'Admin', scope: 'Full access to manage users, catalog, scans, recommendations and settings.' },
                     { role: 'User', scope: 'Standard access without admin panels. Can run scans and use subscription benefits.' },
                   ].map((item) => (
-                    <div key={item.role} className="rounded-2xl border border-rose-50 bg-rose-50/20 px-3 py-2.5">
+                    <div key={item.role} className="rounded-2xl border border-admin-border bg-admin-subtle px-3 py-2.5">
                       <p className="font-semibold flex items-center gap-1.5">
-                        <UserCheck className="h-3.5 w-3.5 text-rose-500" />
+                        <UserCheck className="h-3.5 w-3.5 text-admin-accent" />
                         {item.role}
                       </p>
-                      <p className="mt-1 text-[11px] text-mist">{item.scope}</p>
+                      <p className="mt-1 text-[11px] text-admin-muted">{item.scope}</p>
                     </div>
                   ))}
                 </div>
@@ -2118,15 +2116,15 @@ export default function AdminPage() {
                   className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
                   onClick={(e) => { if (e.target === e.currentTarget) setUserModalOpen(false) }}
                 >
-                  <div className="relative w-full max-w-md overflow-y-auto max-h-[90vh] rounded-[2rem] border border-rose-100 bg-white p-6 shadow-xl space-y-4">
+                  <div className="relative w-full max-w-md overflow-y-auto max-h-[90vh] rounded-[2rem] border border-admin-border bg-white p-6 shadow-xl space-y-4">
                     <button
                       onClick={() => setUserModalOpen(false)}
-                      className="absolute right-4 top-4 rounded-full p-1.5 text-mist hover:bg-rose-50 transition"
+                      className="absolute right-4 top-4 rounded-full p-1.5 text-admin-muted hover:bg-admin-subtle transition"
                     >
                       <X className="h-4 w-4" />
                     </button>
 
-                    <h2 className="font-display text-xl text-rose-950">
+                    <h2 className="font-admin text-xl text-admin-ink">
                       {selectedUser ? 'Edit User' : 'Create New User'}
                     </h2>
 
@@ -2135,24 +2133,24 @@ export default function AdminPage() {
                       {selectedUser && (
                         <div className="space-y-3">
                           {/* Avatar preview */}
-                          <div className="flex items-center gap-3 rounded-2xl bg-rose-50/50 border border-rose-100 px-4 py-3">
+                          <div className="flex items-center gap-3 rounded-2xl bg-admin-subtle border border-admin-border px-4 py-3">
                             {selectedUser.avatar_url ? (
                               <img src={selectedUser.avatar_url} alt=""
-                                className="h-10 w-10 rounded-full border border-rose-100 object-cover shrink-0" />
+                                className="h-10 w-10 rounded-full border border-admin-border object-cover shrink-0" />
                             ) : (
-                              <div className="h-10 w-10 rounded-full bg-rose-100 flex items-center justify-center shrink-0 text-rose-500 font-bold">
+                              <div className="h-10 w-10 rounded-full bg-admin-subtle flex items-center justify-center shrink-0 text-admin-accent font-bold">
                                 {(selectedUser.email?.[0] ?? '?').toUpperCase()}
                               </div>
                             )}
                             <div className="min-w-0">
-                              <p className="text-xs text-mist truncate">{selectedUser.email}</p>
+                              <p className="text-xs text-admin-muted truncate">{selectedUser.email}</p>
                             </div>
                           </div>
 
                           {/* Editable name fields */}
                           <div className="grid grid-cols-2 gap-3">
                             <div>
-                              <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">First Name</label>
+                              <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">First Name</label>
                               <Input
                                 placeholder="e.g. Jane"
                                 value={newUserFirstName}
@@ -2160,7 +2158,7 @@ export default function AdminPage() {
                               />
                             </div>
                             <div>
-                              <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Last Name</label>
+                              <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">Last Name</label>
                               <Input
                                 placeholder="e.g. Doe"
                                 value={newUserLastName}
@@ -2173,7 +2171,7 @@ export default function AdminPage() {
 
                       {!selectedUser && (
                         <div>
-                          <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">FirstName</label>
+                          <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">FirstName</label>
                           <Input
                             placeholder="FirstName"
                             value={newUserFirstName}
@@ -2184,7 +2182,7 @@ export default function AdminPage() {
 
                       {!selectedUser && (
                         <div>
-                          <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">LastName</label>
+                          <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">LastName</label>
                           <Input
                             placeholder="LastName"
                             value={newUserLastName}
@@ -2196,7 +2194,7 @@ export default function AdminPage() {
                       {/* Email — chỉ create */}
                       {!selectedUser && (
                         <div>
-                          <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Email</label>
+                          <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">Email</label>
                           <Input
                             placeholder="e.g. client@lumina.ai"
                             value={newUserEmail}
@@ -2208,7 +2206,7 @@ export default function AdminPage() {
                       {/* Password — chỉ create */}
                       {!selectedUser && (
                         <div>
-                          <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Password</label>
+                          <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">Password</label>
                           <Input
                             type="password"
                             placeholder="Minimum 8 characters"
@@ -2220,9 +2218,9 @@ export default function AdminPage() {
 
                       {/* Role */}
                       <div>
-                        <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Access Level</label>
+                        <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">Access Level</label>
                         <select
-                          className="w-full rounded-2xl border border-rose-200/80 bg-white/85 px-4 py-3 text-sm text-pearl focus:border-cyan focus:outline-none focus:ring-2 focus:ring-cyan/25"
+                          className="w-full rounded-2xl border border-admin-border bg-white/85 px-4 py-3 text-sm text-admin-ink focus:border-admin-accent focus:outline-none focus:ring-2 focus:ring-admin-accent/25"
                           value={newUserRole}
                           onChange={(e) => setNewUserRole(e.target.value as any)}
                         >
@@ -2233,9 +2231,9 @@ export default function AdminPage() {
 
                       {/* Plan — select từ danh sách plans thật */}
                       <div>
-                        <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Subscription Plan</label>
+                        <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">Subscription Plan</label>
                         <select
-                          className="w-full rounded-2xl border border-rose-200/80 bg-white/85 px-4 py-3 text-sm text-pearl focus:border-cyan focus:outline-none focus:ring-2 focus:ring-cyan/25"
+                          className="w-full rounded-2xl border border-admin-border bg-white/85 px-4 py-3 text-sm text-admin-ink focus:border-admin-accent focus:outline-none focus:ring-2 focus:ring-admin-accent/25"
                           value={newUserPlanId}
                           onChange={(e) => {
                             setNewUserPlanId(e.target.value)
@@ -2251,7 +2249,7 @@ export default function AdminPage() {
                       </div>
 
                       {createUserRoleMutation.error && (
-                        <p className="text-sm text-rose-500">{createUserRoleMutation.error.message}</p>
+                        <p className="text-sm text-admin-accent">{createUserRoleMutation.error.message}</p>
                       )}
 
                       <div className="flex justify-end gap-2 pt-2">
@@ -2308,7 +2306,7 @@ export default function AdminPage() {
 
               {/* Plans grid */}
               {(plansQuery.data?.length ?? 0) === 0 ? (
-                <div className="rounded-[2rem] border border-dashed border-rose-200 bg-white/80 p-12 text-center text-sm text-mist">
+                <div className="rounded-[2rem] border border-dashed border-admin-border bg-white/80 p-12 text-center text-sm text-admin-muted">
                   No plans yet. Click "Add Plan" to create one.
                 </div>
               ) : (
@@ -2316,16 +2314,16 @@ export default function AdminPage() {
                   {(plansQuery.data ?? []).map((plan: any) => (
                     <div key={plan.id} className={cn(
                       'rounded-2xl border bg-white p-5 space-y-3 transition',
-                      plan.is_active ? 'border-rose-100' : 'border-rose-50 opacity-60',
+                      plan.is_active ? 'border-admin-border' : 'border-admin-border opacity-60',
                     )}>
                       {/* Header */}
                       <div className="flex items-start justify-between gap-2">
                         <div>
-                          <p className="font-semibold text-rose-950">{plan.name}</p>
-                          <p className="text-[11px] text-mist font-mono mt-0.5">slug: {plan.slug}</p>
+                          <p className="font-semibold text-admin-ink">{plan.name}</p>
+                          <p className="text-[11px] text-admin-muted font-mono mt-0.5">slug: {plan.slug}</p>
                         </div>
                         {plan.badge && (
-                          <span className="rounded-full bg-cyan/10 px-2 py-0.5 text-[10px] font-bold text-cyan shrink-0">
+                          <span className="rounded-full bg-admin-accent/10 px-2 py-0.5 text-[10px] font-bold text-admin-accent shrink-0">
                             {plan.badge}
                           </span>
                         )}
@@ -2333,24 +2331,24 @@ export default function AdminPage() {
 
                       {/* Price */}
                       <div className="flex items-baseline gap-1">
-                        <span className="text-2xl font-bold text-rose-950">${Number(plan.price).toFixed(2)}</span>
-                        <span className="text-xs text-mist">/ {plan.billing_interval}</span>
+                        <span className="text-2xl font-bold text-admin-ink">${Number(plan.price).toFixed(2)}</span>
+                        <span className="text-xs text-admin-muted">/ {plan.billing_interval}</span>
                       </div>
 
                       {/* Description */}
                       {plan.description && (
-                        <p className="text-xs text-mist leading-relaxed">{plan.description}</p>
+                        <p className="text-xs text-admin-muted leading-relaxed">{plan.description}</p>
                       )}
 
                       {/* Limits */}
                       <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="rounded-xl bg-rose-50 px-3 py-2">
-                          <p className="text-mist">Scans</p>
-                          <p className="font-semibold text-rose-950">{plan.scan_limit}</p>
+                        <div className="rounded-xl bg-admin-subtle px-3 py-2">
+                          <p className="text-admin-muted">Scans</p>
+                          <p className="font-semibold text-admin-ink">{plan.scan_limit}</p>
                         </div>
-                        <div className="rounded-xl bg-rose-50 px-3 py-2">
-                          <p className="text-mist">History</p>
-                          <p className="font-semibold text-rose-950">{plan.history_days} days</p>
+                        <div className="rounded-xl bg-admin-subtle px-3 py-2">
+                          <p className="text-admin-muted">History</p>
+                          <p className="font-semibold text-admin-ink">{plan.history_days} days</p>
                         </div>
                       </div>
 
@@ -2358,8 +2356,8 @@ export default function AdminPage() {
                       {(plan.features as string[]).length > 0 && (
                         <ul className="space-y-1">
                           {(plan.features as string[]).map((f: string, i: number) => (
-                            <li key={i} className="flex items-center gap-1.5 text-xs text-mist">
-                              <span className="h-1 w-1 rounded-full bg-rose-400 shrink-0" />
+                            <li key={i} className="flex items-center gap-1.5 text-xs text-admin-muted">
+                              <span className="h-1 w-1 shrink-0 rounded-full bg-admin-accent" />
                               {f}
                             </li>
                           ))}
@@ -2367,7 +2365,7 @@ export default function AdminPage() {
                       )}
 
                       {/* Footer */}
-                      <div className="flex items-center justify-between pt-1 border-t border-rose-50">
+                      <div className="flex items-center justify-between pt-1 border-t border-admin-border">
                         <button
                           onClick={() => updatePlanMutation.mutate({ id: plan.id, patch: { is_active: !plan.is_active } })}
                           disabled={updatePlanMutation.isPending}
@@ -2375,7 +2373,7 @@ export default function AdminPage() {
                             'rounded-full px-3 py-1 text-[10px] font-bold border transition',
                             plan.is_active
                               ? 'bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100'
-                              : 'bg-rose-50 text-rose-500 border-rose-100 hover:bg-rose-100',
+                              : 'bg-admin-subtle text-admin-accent border-admin-border hover:bg-admin-subtle',
                           )}
                         >
                           {plan.is_active ? 'Active' : 'Inactive'}
@@ -2420,50 +2418,50 @@ export default function AdminPage() {
                   className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
                   onClick={(e) => { if (e.target === e.currentTarget) setPlanModalOpen(false) }}
                 >
-                  <div className="relative w-full max-w-lg overflow-y-auto max-h-[90vh] rounded-[2rem] border border-rose-100 bg-white p-6 shadow-xl space-y-4">
+                  <div className="relative w-full max-w-lg overflow-y-auto max-h-[90vh] rounded-[2rem] border border-admin-border bg-white p-6 shadow-xl space-y-4">
                     <button
                       onClick={() => setPlanModalOpen(false)}
-                      className="absolute right-4 top-4 rounded-full p-1.5 text-mist hover:bg-rose-50 transition"
+                      className="absolute right-4 top-4 rounded-full p-1.5 text-admin-muted hover:bg-admin-subtle transition"
                     >
                       <X className="h-4 w-4" />
                     </button>
 
-                    <h2 className="font-display text-xl text-rose-950">
+                    <h2 className="font-admin text-xl text-admin-ink">
                       {selectedPlan ? 'Edit Plan' : 'New Plan'}
                     </h2>
 
                     <div className="grid grid-cols-2 gap-3">
                       <div className="col-span-2">
-                        <label className="text-xs text-mist mb-1 block">Name</label>
+                        <label className="text-xs text-admin-muted mb-1 block">Name</label>
                         <Input value={planForm.name}
                           onChange={(e) => setPlanForm((f: any) => ({ ...f, name: e.target.value }))} />
                       </div>
 
                       <div>
-                        <label className="text-xs text-mist mb-1 block">Slug</label>
+                        <label className="text-xs text-admin-muted mb-1 block">Slug</label>
                         <Input placeholder="free / pro / premium"
                           value={planForm.slug}
                           onChange={(e) => setPlanForm((f: any) => ({ ...f, slug: e.target.value }))} />
                       </div>
 
                       <div>
-                        <label className="text-xs text-mist mb-1 block">Badge</label>
+                        <label className="text-xs text-admin-muted mb-1 block">Badge</label>
                         <Input placeholder="MOST POPULAR"
                           value={planForm.badge ?? ''}
                           onChange={(e) => setPlanForm((f: any) => ({ ...f, badge: e.target.value || null }))} />
                       </div>
 
                       <div>
-                        <label className="text-xs text-mist mb-1 block">Price ($)</label>
+                        <label className="text-xs text-admin-muted mb-1 block">Price ($)</label>
                         <Input type="number" min={0} step={0.01}
                           value={planForm.price}
                           onChange={(e) => setPlanForm((f: any) => ({ ...f, price: parseFloat(e.target.value) || 0 }))} />
                       </div>
 
                       <div>
-                        <label className="text-xs text-mist mb-1 block">Billing</label>
+                        <label className="text-xs text-admin-muted mb-1 block">Billing</label>
                         <select
-                          className="w-full rounded-2xl border border-rose-200/80 bg-white/85 px-4 py-3 text-sm text-pearl focus:border-cyan focus:outline-none focus:ring-2 focus:ring-cyan/25"
+                          className="w-full rounded-2xl border border-admin-border bg-white/85 px-4 py-3 text-sm text-admin-ink focus:border-admin-accent focus:outline-none focus:ring-2 focus:ring-admin-accent/25"
                           value={planForm.billing_interval}
                           onChange={(e) => setPlanForm((f: any) => ({ ...f, billing_interval: e.target.value }))}
                         >
@@ -2473,32 +2471,32 @@ export default function AdminPage() {
                       </div>
 
                       <div>
-                        <label className="text-xs text-mist mb-1 block">Scan Limit</label>
+                        <label className="text-xs text-admin-muted mb-1 block">Scan Limit</label>
                         <Input type="number" min={0}
                           value={planForm.scan_limit}
                           onChange={(e) => setPlanForm((f: any) => ({ ...f, scan_limit: parseInt(e.target.value) || 0 }))} />
                       </div>
 
                       <div>
-                        <label className="text-xs text-mist mb-1 block">History Days</label>
+                        <label className="text-xs text-admin-muted mb-1 block">History Days</label>
                         <Input type="number" min={0}
                           value={planForm.history_days}
                           onChange={(e) => setPlanForm((f: any) => ({ ...f, history_days: parseInt(e.target.value) || 0 }))} />
                       </div>
 
                       <div className="col-span-2">
-                        <label className="text-xs text-mist mb-1 block">Description</label>
+                        <label className="text-xs text-admin-muted mb-1 block">Description</label>
                         <textarea rows={2}
-                          className="w-full rounded-2xl border border-rose-200/80 bg-white/80 px-4 py-3 text-sm text-pearl placeholder:text-mist/70 focus:border-cyan focus:outline-none focus:ring-2 focus:ring-cyan/25 resize-none"
+                          className="w-full rounded-2xl border border-admin-border bg-white/80 px-4 py-3 text-sm text-admin-ink placeholder:text-admin-muted focus:border-admin-accent focus:outline-none focus:ring-2 focus:ring-admin-accent/25 resize-none"
                           value={planForm.description ?? ''}
                           onChange={(e) => setPlanForm((f: any) => ({ ...f, description: e.target.value }))} />
                       </div>
 
                       <div className="col-span-2">
-                        <label className="text-xs text-mist mb-1 block">Features</label>
+                        <label className="text-xs text-admin-muted mb-1 block">Features</label>
                         <textarea
                           rows={5}
-                          className="w-full rounded-2xl border border-rose-200/80 bg-white/80 px-4 py-3 text-sm font-mono text-pearl placeholder:text-mist/70 focus:border-cyan focus:outline-none focus:ring-2 focus:ring-cyan/25 resize-none"
+                          className="w-full rounded-2xl border border-admin-border bg-white/80 px-4 py-3 text-sm font-mono text-admin-ink placeholder:text-admin-muted focus:border-admin-accent focus:outline-none focus:ring-2 focus:ring-admin-accent/25 resize-none"
                           placeholder={"Unlimited scans\nPriority support\nAdvanced analytics"}
                           value={(planForm.features as string[]).join('\n')}
                           onChange={(e) => setPlanForm((f: any) => ({
@@ -2515,7 +2513,7 @@ export default function AdminPage() {
                       <div className="col-span-2 flex items-center gap-2">
                         <input type="checkbox" id="is_active" checked={planForm.is_active}
                           onChange={(e) => setPlanForm((f: any) => ({ ...f, is_active: e.target.checked }))} />
-                        <label htmlFor="is_active" className="text-sm text-rose-950">Active (hiển thị cho người dùng)</label>
+                        <label htmlFor="is_active" className="text-sm text-admin-ink">Active (hiển thị cho người dùng)</label>
                       </div>
                     </div>
 
@@ -2547,8 +2545,8 @@ export default function AdminPage() {
           {activeSection === 'api-keys' && (
             <div className="space-y-4">
               {/* Header */}
-              <div className="bg-white border border-rose-100 rounded-3xl p-4 flex items-center justify-between">
-                <p className="text-sm font-semibold text-rose-950">
+              <div className="bg-white border border-admin-border rounded-3xl p-4 flex items-center justify-between">
+                <p className="text-sm font-semibold text-admin-ink">
                   {keysQuery.data?.length ?? 0} key(s) configured
                 </p>
                 <Button onClick={() => {
@@ -2560,7 +2558,7 @@ export default function AdminPage() {
               </div>
 
               {/* Table */}
-              <Card className="border border-rose-100 p-6 bg-white shadow-sm">
+              <Card className="border border-admin-border p-6 bg-white shadow-sm">
                 <AdminSectionTitle
                   eyebrow="API Keys"
                   title="Virtual Makeup AI Keys"
@@ -2569,7 +2567,7 @@ export default function AdminPage() {
                 <div className="mt-6 overflow-x-auto">
                   <table className="w-full text-left border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-rose-100 text-rose-950 font-bold uppercase tracking-wider">
+                      <tr className="border-b border-admin-border text-admin-ink font-bold uppercase tracking-wider">
                         <th className="pb-3 pr-3">Name</th>
                         <th className="pb-3 px-3">Provider</th>
                         <th className="pb-3 px-3">Key Value</th>
@@ -2580,15 +2578,15 @@ export default function AdminPage() {
                     </thead>
                     <tbody className="divide-y divide-rose-50">
                       {(keysQuery.data ?? []).map((key: any) => (
-                        <tr key={key.id} className="hover:bg-rose-50/20 text-rose-950 align-middle">
+                        <tr key={key.id} className="hover:bg-admin-subtle text-admin-ink align-middle">
                           <td className="py-3 pr-3 font-semibold">{key.name}</td>
-                          <td className="py-3 px-3 text-mist">{key.provider}</td>
+                          <td className="py-3 px-3 text-admin-muted">{key.provider}</td>
                           <td className="py-3 px-3 font-mono">
                             <div className="flex items-center gap-2">
-                              <span className="text-mist font-mono tracking-widest">
+                              <span className="text-admin-muted font-mono tracking-widest">
                                 ••••••••••••••••
                               </span>
-                              <span className="text-[10px] text-mist/50 italic">hidden for security</span>
+                              <span className="text-[10px] text-admin-muted italic">hidden for security</span>
                             </div>
                           </td>
                           <td className="py-3 px-3">
@@ -2602,13 +2600,13 @@ export default function AdminPage() {
                                 'rounded-full px-2.5 py-0.5 text-[10px] font-bold border transition',
                                 key.is_active
                                   ? 'bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100'
-                                  : 'bg-rose-50 text-rose-500 border-rose-100 hover:bg-rose-100',
+                                  : 'bg-admin-subtle text-admin-accent border-admin-border hover:bg-admin-subtle',
                               )}
                             >
                               {toggleApiKeyActiveMutation.isPending ? '...' : key.is_active ? 'Active' : 'Inactive'}
                             </button>
                           </td>
-                          <td className="py-3 px-3 text-mist whitespace-nowrap">
+                          <td className="py-3 px-3 text-admin-muted whitespace-nowrap">
                             {formatDate(key.created_at)}
                           </td>
                           <td className="py-3 pl-3 text-right">
@@ -2642,7 +2640,7 @@ export default function AdminPage() {
                     </tbody>
                   </table>
                   {(keysQuery.data?.length ?? 0) === 0 && (
-                    <div className="text-center py-12 text-mist text-sm">
+                    <div className="text-center py-12 text-admin-muted text-sm">
                       No API keys yet. Click "+ Add Key" to add one.
                     </div>
                   )}
@@ -2655,20 +2653,20 @@ export default function AdminPage() {
                   className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
                   onClick={(e) => { if (e.target === e.currentTarget) setApiKeyModalOpen(false) }}
                 >
-                  <div className="relative w-full max-w-md rounded-[2rem] border border-rose-100 bg-white p-6 shadow-xl space-y-4">
+                  <div className="relative w-full max-w-md rounded-[2rem] border border-admin-border bg-white p-6 shadow-xl space-y-4">
                     <button
                       onClick={() => setApiKeyModalOpen(false)}
-                      className="absolute right-4 top-4 rounded-full p-1.5 text-mist hover:bg-rose-50 transition"
+                      className="absolute right-4 top-4 rounded-full p-1.5 text-admin-muted hover:bg-admin-subtle transition"
                     >
                       <X className="h-4 w-4" />
                     </button>
-                    <h2 className="font-display text-xl text-rose-950">
+                    <h2 className="font-admin text-xl text-admin-ink">
                       {apiKeyForm.key_value && keysQuery.data?.some((k: any) => k.key_value === apiKeyForm.key_value)
                         ? 'Edit API Key' : 'Add API Key'}
                     </h2>
                     <div className="space-y-3">
                       <div>
-                        <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Name</label>
+                        <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">Name</label>
                         <Input
                           placeholder="e.g. Production Key"
                           value={apiKeyForm.name}
@@ -2676,7 +2674,7 @@ export default function AdminPage() {
                         />
                       </div>
                       <div>
-                        <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Provider</label>
+                        <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">Provider</label>
                         <Input
                           placeholder="e.g. virtual_makeup_ai"
                           value={apiKeyForm.provider}
@@ -2684,7 +2682,7 @@ export default function AdminPage() {
                         />
                       </div>
                       <div>
-                        <label className="text-xs font-semibold text-rose-950 uppercase tracking-wide block mb-1">Key Value</label>
+                        <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">Key Value</label>
                         <Input
                           type="password"
                           placeholder="Paste your API key here"
@@ -2699,7 +2697,7 @@ export default function AdminPage() {
                           checked={apiKeyForm.is_active}
                           onChange={(e) => setApiKeyForm(f => ({ ...f, is_active: e.target.checked }))}
                         />
-                        <label htmlFor="key_active" className="text-sm text-rose-950">Active</label>
+                        <label htmlFor="key_active" className="text-sm text-admin-ink">Active</label>
                       </div>
                       <div className="flex justify-end gap-2 pt-2">
                         <Button variant="ghost" onClick={() => setApiKeyModalOpen(false)}>Cancel</Button>
@@ -2757,12 +2755,12 @@ export default function AdminPage() {
                 const Icon = item.icon
 
                 return (
-                  <Card key={item.title} className="border border-rose-100 p-5 bg-white flex justify-between items-start gap-3">
+                  <Card key={item.title} className="border border-admin-border p-5 bg-white flex justify-between items-start gap-3">
                     <div>
-                      <p className="text-xs uppercase tracking-[0.2em] text-cyan font-bold">{item.title}</p>
-                      <p className="mt-2 text-xs text-mist leading-relaxed">{item.detail}</p>
+                      <p className="text-xs uppercase tracking-[0.2em] text-admin-accent font-bold">{item.title}</p>
+                      <p className="mt-2 text-xs text-admin-muted leading-relaxed">{item.detail}</p>
                     </div>
-                    <div className="rounded-2xl bg-rose-50 p-2.5 text-rose-600 shrink-0">
+                    <div className="rounded-2xl bg-admin-subtle p-2.5 text-admin-accent shrink-0">
                       <Icon className="h-5 w-5" />
                     </div>
                   </Card>
@@ -2775,9 +2773,9 @@ export default function AdminPage() {
           {activeSection === 'revenue' ? (
             <div className="space-y-6">
               {/* Revenue header */}
-              <Card className="border border-rose-100 p-6 bg-white">
+              <Card className="border border-admin-border p-6 bg-white">
                 <div className="flex justify-between items-center">
-                  <h3 className="font-display text-2xl text-rose-950">Revenue & Orders</h3>
+                  <h3 className="font-admin text-2xl text-admin-ink">Revenue & Orders</h3>
                   <Button
                     onClick={() => simulateOrderMutation.mutate()}
                     disabled={simulateOrderMutation.isPending}
@@ -2791,31 +2789,31 @@ export default function AdminPage() {
 
               {/* Metrics grid */}
               <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                <Card className="border border-rose-100 p-5 bg-white">
-                  <p className="text-xs uppercase text-cyan">Total Revenue</p>
-                  <h4 className="mt-2 font-display text-2xl text-rose-950">
+                <Card className="border border-admin-border p-5 bg-white">
+                  <p className="text-xs uppercase text-admin-accent">Total Revenue</p>
+                  <h4 className="mt-2 font-admin text-2xl text-admin-ink">
                     {revenueStats.totalRevenue.toLocaleString('vi-VN')}₫
                   </h4>
-                  <p className="mt-1 text-xs text-mist">Completed</p>
+                  <p className="mt-1 text-xs text-admin-muted">Completed</p>
                 </Card>
-                <Card className="border border-rose-100 p-5 bg-white">
-                  <p className="text-xs uppercase text-cyan">Pending Revenue</p>
-                  <h4 className="mt-2 font-display text-2xl text-rose-950">
+                <Card className="border border-admin-border p-5 bg-white">
+                  <p className="text-xs uppercase text-admin-accent">Pending Revenue</p>
+                  <h4 className="mt-2 font-admin text-2xl text-admin-ink">
                     {revenueStats.pendingAmount.toLocaleString('vi-VN')}₫
                   </h4>
-                  <p className="mt-1 text-xs text-mist">Pending</p>
+                  <p className="mt-1 text-xs text-admin-muted">Pending</p>
                 </Card>
-                <Card className="border border-rose-100 p-5 bg-white">
-                  <p className="text-xs uppercase text-cyan">Order Count</p>
-                  <h4 className="mt-2 font-display text-2xl text-rose-950">{revenueStats.totalCount}</h4>
-                  <p className="mt-1 text-xs text-mist">Total Orders</p>
+                <Card className="border border-admin-border p-5 bg-white">
+                  <p className="text-xs uppercase text-admin-accent">Order Count</p>
+                  <h4 className="mt-2 font-admin text-2xl text-admin-ink">{revenueStats.totalCount}</h4>
+                  <p className="mt-1 text-xs text-admin-muted">Total Orders</p>
                 </Card>
-                <Card className="border border-rose-100 p-5 bg-white">
-                  <p className="text-xs uppercase text-cyan">Average Order Value</p>
-                  <h4 className="mt-2 font-display text-2xl text-rose-950">
+                <Card className="border border-admin-border p-5 bg-white">
+                  <p className="text-xs uppercase text-admin-accent">Average Order Value</p>
+                  <h4 className="mt-2 font-admin text-2xl text-admin-ink">
                     {(revenueStats.completedCount ? (revenueStats.totalRevenue / revenueStats.completedCount).toFixed(0) : 0).toLocaleString('vi-VN')}₫
                   </h4>
-                  <p className="mt-1 text-xs text-mist">AOV</p>
+                  <p className="mt-1 text-xs text-admin-muted">AOV</p>
                 </Card>
               </div>
 
@@ -2828,7 +2826,7 @@ export default function AdminPage() {
                   className="flex-1"
                 />
                 <select
-                  className="rounded border border-rose-100 px-3 py-1 text-sm"
+                  className="rounded border border-admin-border px-3 py-1 text-sm"
                   value={orderStatusFilter}
                   onChange={(e) => setOrderStatusFilter(e.target.value)}
                 >
@@ -2842,7 +2840,7 @@ export default function AdminPage() {
               {/* Orders table */}
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse text-xs">
-                  <thead className="border-b border-rose-100 text-rose-950 font-bold uppercase">
+                  <thead className="border-b border-admin-border text-admin-ink font-bold uppercase">
                     <tr>
                       <th className="pb-3">Order ID</th>
                       <th className="pb-3">Product</th>
@@ -2853,13 +2851,13 @@ export default function AdminPage() {
                   </thead>
                   <tbody className="divide-y divide-rose-50">
                     {filteredOrders.map((order) => (
-                      <tr key={order.id} className="hover:bg-rose-50/20 text-rose-950">
+                      <tr key={order.id} className="hover:bg-admin-subtle text-admin-ink">
                         <td className="py-2 font-medium">{order.id}</td>
                         <td className="py-2">{order.productName}</td>
                         <td className="py-2">{order.totalPrice.toLocaleString('vi-VN')}₫</td>
                         <td className="py-2">
                           <select
-                            className="rounded border border-rose-100 bg-white px-2 py-1 text-xs"
+                            className="rounded border border-admin-border bg-white px-2 py-1 text-xs"
                             value={order.status}
                             onChange={(e) =>
                               updateOrderStatusMutation.mutate({
@@ -2880,7 +2878,7 @@ export default function AdminPage() {
                               if (confirm(`Delete order ${order.id}?`)) deleteOrderMutation.mutate(order.id);
                             }}
                             disabled={deleteOrderMutation.isPending}
-                            className="text-rose-600 hover:text-rose-800 flex items-center gap-1"
+                            className="text-admin-accent hover:text-admin-accent flex items-center gap-1"
                           >
                             <Trash2 className="h-4 w-4" />
                             Delete
@@ -2893,8 +2891,8 @@ export default function AdminPage() {
               </div>
 
               {/* Category breakdown */}
-              <Card className="border border-rose-100 p-5 bg-white">
-                <h4 className="font-display text-lg text-rose-950 mb-2">Revenue by Category</h4>
+              <Card className="border border-admin-border p-5 bg-white">
+                <h4 className="font-admin text-lg text-admin-ink mb-2">Revenue by Category</h4>
                 <div className="space-y-2">
                   {revenueStats.categoryBreakdown.map((cat) => (
                     <div key={cat.name} className="flex justify-between text-sm">
@@ -2906,8 +2904,8 @@ export default function AdminPage() {
               </Card>
 
               {/* Payment breakdown */}
-              <Card className="border border-rose-100 p-5 bg-white">
-                <h4 className="font-display text-lg text-rose-950 mb-2">Revenue by Payment Method</h4>
+              <Card className="border border-admin-border p-5 bg-white">
+                <h4 className="font-admin text-lg text-admin-ink mb-2">Revenue by Payment Method</h4>
                 <div className="space-y-2">
                   {revenueStats.paymentBreakdown.map((pay) => (
                     <div key={pay.name} className="flex justify-between text-sm">
@@ -2923,18 +2921,18 @@ export default function AdminPage() {
           {activeSection === 'subscriptions' && (
             <div className="space-y-4">
               {/* Search & filter */}
-              <div className="bg-white border border-rose-100 rounded-3xl p-4 flex flex-wrap gap-3 items-center">
+              <div className="bg-white border border-admin-border rounded-3xl p-4 flex flex-wrap gap-3 items-center">
                 <div className="flex-1 relative min-w-[200px]">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-mist" />
+                  <Search className="absolute left-3 top-3 h-4 w-4 text-admin-muted" />
                   <input type="text"
-                    className="w-full rounded-full border border-rose-100 pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-rose-200"
+                    className="w-full rounded-full border border-admin-border pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-admin-accent/20"
                     placeholder="Search by email, UUID or subscription ID..."
                     value={subSearch}
                     onChange={(e) => { setSubSearch(e.target.value); setSubPage(1) }}
                   />
                 </div>
                 <select
-                  className="rounded-full border border-rose-100 px-3 py-2 text-sm focus:outline-none"
+                  className="rounded-full border border-admin-border px-3 py-2 text-sm focus:outline-none"
                   value={subStatusFilter}
                   onChange={(e) => { setSubStatusFilter(e.target.value); setSubPage(1) }}
                 >
@@ -2949,7 +2947,7 @@ export default function AdminPage() {
                 </Button>
               </div>
 
-              <Card className="border border-rose-100 p-6 bg-white shadow-sm">
+              <Card className="border border-admin-border p-6 bg-white shadow-sm">
                 <AdminSectionTitle
                   eyebrow="Subscriptions"
                   title="User Subscriptions"
@@ -2959,7 +2957,7 @@ export default function AdminPage() {
                 <div className="mt-6 overflow-x-auto">
                   <table className="w-full min-w-[800px] text-left border-collapse text-xs">
                     <thead>
-                      <tr className="border-b border-rose-100 text-rose-950 font-bold uppercase tracking-wider">
+                      <tr className="border-b border-admin-border text-admin-ink font-bold uppercase tracking-wider">
                         <th className="pb-3 px-3">Email</th>
                         <th className="pb-3 px-3">Plan</th>
                         <th className="pb-3 px-3">Status</th>
@@ -2975,16 +2973,16 @@ export default function AdminPage() {
                           : 'Guest'
                         const statusColors: Record<string, string> = {
                           active:    'bg-emerald-50 text-emerald-700 border-emerald-100',
-                          cancelled: 'bg-rose-50 text-rose-600 border-rose-100',
+                          cancelled: 'bg-admin-subtle text-admin-accent border-admin-border',
                           expired:   'bg-gray-50 text-gray-500 border-gray-200',
                           pending:   'bg-amber-50 text-amber-700 border-amber-100',
                         }
                         return (
-                          <tr key={sub.id} className="hover:bg-rose-50/20 text-rose-950 align-middle">
+                          <tr key={sub.id} className="hover:bg-admin-subtle text-admin-ink align-middle">
                             <td className="py-3 px-3 max-w-[180px] truncate" title={email}>{email}</td>
                             <td className="py-3 px-3">
                               <p className="font-medium">{sub.plan?.name ?? '—'}</p>
-                              <p className="text-[10px] text-mist font-mono">
+                              <p className="text-[10px] text-admin-muted font-mono">
                                 ${Number(sub.plan?.price ?? 0).toFixed(2)}/{sub.plan?.billing_interval}
                               </p>
                             </td>
@@ -2996,10 +2994,10 @@ export default function AdminPage() {
                                 {sub.status}
                               </span>
                             </td>
-                            <td className="py-3 px-3 text-mist whitespace-nowrap">
+                            <td className="py-3 px-3 text-admin-muted whitespace-nowrap">
                               {formatDate(sub.started_at)}
                             </td>
-                            <td className="py-3 px-3 text-mist whitespace-nowrap">
+                            <td className="py-3 px-3 text-admin-muted whitespace-nowrap">
                               {sub.expires_at ? formatDate(sub.expires_at) : '—'}
                             </td>
                             <td className="py-3 pl-3 text-right">
@@ -3026,17 +3024,17 @@ export default function AdminPage() {
                   </table>
 
                   {paginatedSubs.length === 0 && (
-                    <div className="text-center py-12 text-mist text-sm">No subscriptions found.</div>
+                    <div className="text-center py-12 text-admin-muted text-sm">No subscriptions found.</div>
                   )}
                 </div>
 
                 {totalSubPages > 1 && (
-                  <div className="flex items-center justify-center gap-4 pt-4 mt-4 border-t border-rose-100">
+                  <div className="flex items-center justify-center gap-4 pt-4 mt-4 border-t border-admin-border">
                     <Button variant="ghost" size="sm" disabled={subPage === 1}
                       onClick={() => setSubPage(p => Math.max(1, p - 1))}>
                       <ChevronLeft className="h-4 w-4 mr-1" /> Prev
                     </Button>
-                    <span className="text-xs font-semibold text-pearl">
+                    <span className="text-xs font-semibold text-admin-ink">
                       Page {subPage} of {totalSubPages}
                     </span>
                     <Button variant="ghost" size="sm" disabled={subPage === totalSubPages}
@@ -3053,12 +3051,12 @@ export default function AdminPage() {
                   className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
                   onClick={(e) => { if (e.target === e.currentTarget) setSubModalOpen(false) }}
                 >
-                  <div className="relative w-full max-w-md rounded-[2rem] border border-rose-100 bg-white p-6 shadow-xl space-y-4">
+                  <div className="relative w-full max-w-md rounded-[2rem] border border-admin-border bg-white p-6 shadow-xl space-y-4">
                     <button onClick={() => setSubModalOpen(false)}
-                      className="absolute right-4 top-4 rounded-full p-1.5 text-mist hover:bg-rose-50 transition">
+                      className="absolute right-4 top-4 rounded-full p-1.5 text-admin-muted hover:bg-admin-subtle transition">
                       <X className="h-4 w-4" />
                     </button>
-                    <h2 className="font-display text-xl text-rose-950">
+                    <h2 className="font-admin text-xl text-admin-ink">
                       {selectedSub ? 'Edit Subscription' : 'New Subscription'}
                     </h2>
                     <SubForm

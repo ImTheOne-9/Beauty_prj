@@ -171,8 +171,8 @@ export default function VmtoHowItWorks() {
                 onClick={() => handleSelect(i)}
                 className={`rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wide transition ${
                   active === i
-                    ? 'bg-rose-600 text-white shadow'
-                    : 'text-gray-500 hover:bg-rose-50 hover:text-rose-600'
+                    ? 'bg-brand-accent text-white shadow'
+                    : 'text-gray-500 hover:bg-brand-paper hover:text-brand-accent'
                 }`}
               >
                 {c.label}
@@ -183,7 +183,7 @@ export default function VmtoHowItWorks() {
           {/* Body */}
           <div className="grid grid-cols-1 gap-6 p-6 sm:grid-cols-2 sm:p-8">
             {/* Video preview with prev/next arrows */}
-            <div className="relative overflow-hidden rounded-xl bg-rose-50">
+            <div className="relative overflow-hidden rounded-xl bg-brand-paper">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={cat.id}
@@ -246,7 +246,7 @@ export default function VmtoHowItWorks() {
                 </motion.div>
               </AnimatePresence>
 
-              <button className="mt-6 w-fit rounded-full bg-rose-600 px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-white shadow transition hover:bg-rose-700">
+              <button className="mt-6 w-fit rounded-full bg-brand-accent px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-white shadow transition hover:bg-brand-deep">
                 Try It Now
               </button>
             </div>

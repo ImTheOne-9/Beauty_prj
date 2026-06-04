@@ -38,8 +38,8 @@ export default function VmtoWhyChoose() {
           <ul className="mt-8 space-y-5">
             {reasons.map((r) => (
               <li key={r.title} className="flex gap-3">
-                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-rose-100">
-                  <Check className="h-3 w-3 text-rose-600" strokeWidth={3} />
+                <span className="mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-brand-blush">
+                  <Check className="h-3 w-3 text-brand-accent" strokeWidth={3} />
                 </span>
                 <span className="text-sm leading-relaxed text-gray-600">
                   <span className="font-semibold text-gray-900">{r.title}</span> — {r.body}
@@ -62,7 +62,7 @@ export default function VmtoWhyChoose() {
                 className="h-full w-full object-cover"
               />
             </div>
-            <div className="pointer-events-none absolute -right-4 -top-4 h-24 w-24 rounded-full bg-rose-200/50 blur-2xl" />
+            <div className="pointer-events-none absolute -right-4 -top-4 h-24 w-24 rounded-full bg-brand-blush/70 blur-2xl" />
           </div>
         </Reveal>
       </div>

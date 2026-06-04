@@ -23,7 +23,7 @@ export default function MakeupArHero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="font-display text-3xl font-black leading-tight tracking-tight sm:text-4xl lg:text-5xl text-white"
+            className="font-brand text-3xl font-black leading-tight tracking-tight sm:text-4xl lg:text-5xl text-white"
           >
             Makeup AR
           </motion.h1>
@@ -41,7 +41,7 @@ export default function MakeupArHero() {
               to="/auth"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              className="rounded-md bg-rose-600 px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-rose-500/20 transition hover:bg-rose-700"
+              className="rounded-md bg-brand-accent px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-md shadow-brand-accent/20 transition hover:bg-brand-deep"
             >
               Contact Sales
             </MotionLink>
@@ -49,7 +49,7 @@ export default function MakeupArHero() {
               to="/virtual-makeup-try-on"
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              className="rounded-md border border-gray-300 bg-white px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-gray-700 transition hover:border-rose-400 hover:text-rose-600"
+              className="rounded-md border border-gray-300 bg-white px-6 py-2.5 text-xs font-bold uppercase tracking-wider text-gray-700 transition hover:border-brand-accent hover:text-brand-accent"
             >
               Learn More
             </MotionLink>

@@ -42,7 +42,7 @@ export default function BeautyProductGrid({
 }: Props) {
   if (products.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center rounded-xl border border-dashed p-8 text-center text-sm text-neutral-500">
+      <div className="flex h-full items-center justify-center rounded-lg border border-dashed border-studio-border p-8 text-center text-sm text-studio-muted">
         No products available for this category.
       </div>
     )
@@ -64,9 +64,9 @@ export default function BeautyProductGrid({
           return (
             <article
               key={product.id || `mobile-product-${productIndex}`}
-              className="flex items-center gap-3 border-b pb-4"
+              className="flex items-center gap-3 border-b border-studio-border pb-4"
             >
-              <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-lg border bg-neutral-100">
+              <div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-lg border border-studio-border bg-studio-subtle">
                 {product.image_url ? (
                   <img
                     src={product.image_url}
@@ -77,11 +77,11 @@ export default function BeautyProductGrid({
               </div>
 
               <div className="flex-1">
-                <h3 className="font-bold">
+                <h3 className="font-bold text-studio-ink">
                   {product.brand}
                 </h3>
 
-                <p className="text-sm text-neutral-500">
+                <p className="text-sm text-studio-muted">
                   {product.name}
                 </p>
               </div>
@@ -94,8 +94,8 @@ export default function BeautyProductGrid({
                   disabled={!canApplyWithoutVariant && productVariants.length === 0}
                   className={`rounded-full px-5 py-2 text-sm font-medium ${
                     active
-                      ? 'bg-black text-white'
-                      : 'border'
+                      ? 'bg-studio-accent text-white'
+                      : 'border border-studio-border text-studio-ink'
                   }`}
                 >
                   {active
@@ -106,7 +106,7 @@ export default function BeautyProductGrid({
                   type="button"
                   onClick={() => onOpenExternal(product.external_url)}
                   disabled={!product.external_url}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-studio-border text-studio-ink transition hover:bg-studio-subtle disabled:cursor-not-allowed disabled:opacity-40"
                   aria-label="Open product link"
                   title="Open product link"
                 >
@@ -137,9 +137,9 @@ export default function BeautyProductGrid({
           return (
             <article
               key={product.id || `product-${productIndex}`}
-              className="group rounded-2xl border bg-white p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              className="group rounded-lg border border-studio-border bg-studio-surface p-4 transition-all duration-200 hover:border-zinc-300 hover:shadow-studio"
             >
-              <div className="overflow-hidden rounded-xl bg-neutral-50">
+              <div className="overflow-hidden rounded-md bg-studio-subtle">
                 <div className="flex aspect-square w-full items-center justify-center p-4">
                   {product.image_url ? (
                     <img
@@ -152,11 +152,11 @@ export default function BeautyProductGrid({
               </div>
 
               <div className="mt-4">
-                <h3 className="text-center text-sm font-bold uppercase">
+                <h3 className="text-center text-xs font-bold uppercase tracking-[0.12em] text-studio-ink">
                   {product.brand}
                 </h3>
 
-                <p className="mt-2 text-center text-sm text-neutral-600">
+                <p className="mt-2 line-clamp-2 min-h-10 text-center text-sm leading-5 text-studio-muted">
                   {product.name}
                 </p>
               </div>
@@ -174,8 +174,8 @@ export default function BeautyProductGrid({
                         onClick={() => onToggle(product.id, variant.id)}
                         className={`h-7 w-7 rounded-full border-2 ${
                           selectedVariant
-                            ? 'border-black'
-                            : 'border-white shadow-sm ring-1 ring-neutral-200'
+                            ? 'border-studio-accent ring-2 ring-studio-accent/15'
+                            : 'border-white shadow-sm ring-1 ring-studio-border'
                         }`}
                         style={getVariantSwatchStyle(variant)}
                         aria-label={variant.name ?? variant.color_hex}
@@ -194,8 +194,8 @@ export default function BeautyProductGrid({
                   disabled={!canApplyProduct}
                   className={`rounded-xl py-3 ${
                     active
-                      ? 'bg-black text-white'
-                      : 'border disabled:cursor-not-allowed disabled:opacity-50'
+                      ? 'bg-studio-accent text-white'
+                      : 'border border-studio-border text-studio-ink transition hover:bg-studio-subtle disabled:cursor-not-allowed disabled:opacity-50'
                   }`}
                 >
                   {active
@@ -206,7 +206,7 @@ export default function BeautyProductGrid({
                   type="button"
                   onClick={() => onOpenExternal(product.external_url)}
                   disabled={!product.external_url}
-                  className="inline-flex h-12 items-center justify-center rounded-xl border disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex h-12 items-center justify-center rounded-lg border border-studio-border text-studio-ink transition hover:bg-studio-subtle disabled:cursor-not-allowed disabled:opacity-40"
                   aria-label="Open product link"
                   title="Open product link"
                 >

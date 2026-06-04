@@ -58,7 +58,7 @@ export default function BeautyVirtualMirror({
   return (
     <div
       className={`
-        relative flex min-h-0 flex-col overflow-hidden bg-neutral-100
+        relative flex min-h-0 flex-col overflow-hidden bg-studio-subtle
         h-[55vh]
         lg:h-auto
         transition-all duration-300
@@ -71,7 +71,7 @@ export default function BeautyVirtualMirror({
     >
       <div className="absolute left-4 top-4 z-10 flex gap-2">
         <label
-          className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur transition hover:bg-white"
+          className="inline-flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/70 bg-white/90 text-studio-ink shadow-sm backdrop-blur transition hover:bg-white"
           aria-label="Upload photo"
           title="Upload photo"
         >
@@ -91,7 +91,7 @@ export default function BeautyVirtualMirror({
         <button
           type="button"
           onClick={() => setModelsOpen((value) => !value)}
-          className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur transition hover:bg-white"
+          className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/90 text-studio-ink shadow-sm backdrop-blur transition hover:bg-white"
           aria-label="Choose model"
           aria-expanded={modelsOpen}
           title="Choose model"
@@ -103,7 +103,7 @@ export default function BeautyVirtualMirror({
           <button
             type="button"
             onClick={onClearPhoto}
-            className="rounded-full bg-white p-3 shadow-sm"
+            className="rounded-full border border-white/70 bg-white/90 p-3 text-studio-ink shadow-sm backdrop-blur transition hover:bg-white"
             aria-label="Clear photo"
           >
             <X size={18} />
@@ -116,7 +116,7 @@ export default function BeautyVirtualMirror({
           <button
             type="button"
             onClick={() => setShowOriginal((value) => !value)}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/90 shadow-sm backdrop-blur transition hover:bg-white"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-white/70 bg-white/90 text-studio-ink shadow-sm backdrop-blur transition hover:bg-white"
             aria-label={showOriginal ? 'Show try-on result' : 'Show original photo'}
             title={showOriginal ? 'Show try-on result' : 'Show original photo'}
           >
@@ -132,7 +132,7 @@ export default function BeautyVirtualMirror({
           type="button"
           onClick={onApply}
           disabled={!canApply || isProcessing}
-          className="inline-flex items-center gap-2 rounded-full bg-black px-4 py-3 text-sm font-semibold text-white shadow-sm disabled:cursor-not-allowed disabled:bg-neutral-400"
+          className="inline-flex items-center gap-2 rounded-full bg-studio-accent px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-studio-accent/90 disabled:cursor-not-allowed disabled:bg-zinc-400"
         >
           {isProcessing ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -144,13 +144,13 @@ export default function BeautyVirtualMirror({
       </div>
 
       {modelsOpen && (
-        <div className="absolute left-4 top-20 z-20 w-[min(320px,calc(100%-2rem))] rounded-xl border bg-white/95 p-3 shadow-xl backdrop-blur">
+        <div className="absolute left-4 top-20 z-20 w-[min(320px,calc(100%-2rem))] rounded-lg border border-studio-border bg-white/95 p-3 shadow-studio backdrop-blur">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase text-neutral-500">
+              <p className="text-xs font-semibold uppercase text-studio-muted">
                 Choose model
               </p>
-              <p className="truncate text-sm text-neutral-700">
+              <p className="truncate text-sm text-studio-ink">
                 Select a sample model.
               </p>
             </div>
@@ -158,7 +158,7 @@ export default function BeautyVirtualMirror({
             <button
               type="button"
               onClick={() => setModelsOpen(false)}
-              className="rounded-full p-1 hover:bg-neutral-100"
+              className="rounded-full p-1 hover:bg-studio-subtle"
               aria-label="Close model picker"
             >
               <X size={16} />
@@ -177,7 +177,7 @@ export default function BeautyVirtualMirror({
                     setModelsOpen(false)
                   }}
                   className={`overflow-hidden rounded-lg border bg-white p-0.5 ${
-                    selected ? 'border-black ring-2 ring-black' : 'border-neutral-200'
+                    selected ? 'border-studio-accent ring-2 ring-studio-accent' : 'border-studio-border'
                   }`}
                 >
                   <img
@@ -193,7 +193,7 @@ export default function BeautyVirtualMirror({
       )}
 
       {(validationState === 'checking' || validationState === 'valid' || validationError) && (
-        <div className="absolute inset-x-4 bottom-4 z-10 rounded-xl border bg-white/95 p-3 shadow-sm backdrop-blur">
+        <div className="absolute inset-x-4 bottom-4 z-10 rounded-lg border border-studio-border bg-white/95 p-3 shadow-sm backdrop-blur">
           {validationState === 'checking' && (
             <span className="inline-flex items-center gap-1 text-xs font-semibold text-blue-700">
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -217,7 +217,7 @@ export default function BeautyVirtualMirror({
         </div>
       )}
 
-      <div className="flex min-h-0 flex-1 items-center justify-center bg-neutral-200">
+      <div className="flex min-h-0 flex-1 items-center justify-center bg-zinc-200">
         {previewUrl ? (
           <img
             src={previewUrl}

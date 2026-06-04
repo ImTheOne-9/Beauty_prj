@@ -57,7 +57,7 @@ export default function PlanPage() {
         {/* Header */}
         <div className="rounded-[2.5rem] border border-slate-200/80 bg-white/90 px-7 py-9 text-slate-900 shadow-[0_30px_90px_rgba(15,23,42,0.08)] backdrop-blur">
           <p className="text-[10px] font-semibold uppercase tracking-[0.4em] text-slate-500">Pricing</p>
-          <h1 className="mt-3 font-display text-4xl text-slate-900 md:text-5xl">
+          <h1 className="mt-3 font-ui text-4xl text-slate-900 md:text-5xl">
             Choose a scan plan for your AI journey
           </h1>
           <p className="mt-4 max-w-2xl text-sm text-slate-600">
@@ -117,7 +117,7 @@ export default function PlanPage() {
                     </div>
 
                     {/* Plan name */}
-                    <h2 className="mt-5 font-display text-3xl text-slate-900">{plan.name}</h2>
+                    <h2 className="mt-5 font-ui text-3xl text-slate-900">{plan.name}</h2>
 
                     {/* Price */}
                     <div className="mt-3 space-y-1">

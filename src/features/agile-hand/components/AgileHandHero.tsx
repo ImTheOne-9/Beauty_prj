@@ -37,7 +37,7 @@ export default function AgileHandHero() {
           style={{ fontSize: 'clamp(1.75rem, 4.5vw, 4rem)' }}
         >
           AgileHand™<br />
-          <span className="bg-gradient-to-r from-rose-300 via-pink-400 to-rose-400 bg-clip-text text-transparent">
+          <span className="bg-gradient-to-r from-brand-blush via-brand-accent to-brand-deep bg-clip-text text-transparent">
             Tracking Technology
           </span>
         </motion.h1>
@@ -61,7 +61,7 @@ export default function AgileHandHero() {
         >
           <Link
             to="/auth"
-            className="rounded-full bg-white px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-rose-700 shadow-lg transition hover:bg-rose-50 hover:shadow-rose-200/60"
+            className="rounded-full bg-white px-6 py-2.5 text-xs font-bold uppercase tracking-widest text-brand-accent shadow-lg transition hover:bg-brand-paper hover:shadow-brand-blush/60"
           >
             Contact Us
           </Link>

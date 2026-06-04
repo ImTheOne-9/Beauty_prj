@@ -203,12 +203,12 @@ export function AnimatedNavbar() {
         <Link
           to="/"
           className={cn(
-            'flex-shrink-0 font-display text-2xl font-black tracking-[-0.03em] transition-colors',
-            isTransparent ? 'text-gray-900' : 'text-rose-600',
+            'flex-shrink-0 font-brand text-2xl font-black tracking-[-0.03em] transition-colors',
+            isTransparent ? 'text-gray-900' : 'text-brand-accent',
           )}
           style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
         >
-          BEAUTY<span className={isTransparent ? 'text-rose-500' : 'text-rose-400'}>.</span>AI
+          BEAUTY<span className={isTransparent ? 'text-brand-accent' : 'text-brand-accent'}>.</span>AI
         </Link>
 
         {/* Desktop nav items */}
@@ -232,10 +232,10 @@ export function AnimatedNavbar() {
                       className={cn(
                         'flex items-center gap-0.5 rounded px-3 py-1.5 text-sm font-medium transition-colors',
                         isActive
-                          ? 'text-rose-600'
+                          ? 'text-brand-accent'
                           : isTransparent
-                            ? 'text-gray-800 hover:text-rose-600'
-                            : 'text-gray-700 hover:text-rose-600',
+                            ? 'text-gray-800 hover:text-brand-accent'
+                            : 'text-gray-700 hover:text-brand-accent',
                       )}
                     >
                       {item.label}
@@ -253,8 +253,8 @@ export function AnimatedNavbar() {
                       className={cn(
                         'flex items-center gap-0.5 rounded px-3 py-1.5 text-sm font-medium transition-colors',
                         isTransparent
-                          ? 'text-gray-800 hover:text-rose-600'
-                          : 'text-gray-700 hover:text-rose-600',
+                          ? 'text-gray-800 hover:text-brand-accent'
+                          : 'text-gray-700 hover:text-brand-accent',
                       )}
                     >
                       {item.label}
@@ -265,10 +265,10 @@ export function AnimatedNavbar() {
                     className={cn(
                       'flex items-center gap-0.5 rounded px-3 py-1.5 text-sm font-medium transition-colors',
                       isActive
-                        ? 'text-rose-600'
+                        ? 'text-brand-accent'
                         : isTransparent
-                          ? 'text-gray-800 hover:text-rose-600'
-                          : 'text-gray-700 hover:text-rose-600',
+                          ? 'text-gray-800 hover:text-brand-accent'
+                          : 'text-gray-700 hover:text-brand-accent',
                     )}
                     onClick={() => setActiveMenu(isActive ? null : item.label)}
                   >
@@ -300,7 +300,7 @@ export function AnimatedNavbar() {
                           key={menuItem.label}
                           to={menuItem.to}
                           onClick={() => setActiveMenu(null)}
-                          className="block px-5 py-2.5 text-sm text-gray-700 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                          className="block px-5 py-2.5 text-sm text-gray-700 hover:bg-brand-paper hover:text-brand-accent transition-colors"
                           style={{ fontFamily: 'DM Sans, sans-serif' }}
                         >
                           {menuItem.label}
@@ -334,14 +334,14 @@ export function AnimatedNavbar() {
                 onClick={() => navigate('/auth')}
                 className={cn(
                   'text-sm font-medium transition-colors px-2 py-1',
-                  isTransparent ? 'text-gray-800 hover:text-rose-600' : 'text-gray-700 hover:text-rose-600',
+                  isTransparent ? 'text-gray-800 hover:text-brand-accent' : 'text-gray-700 hover:text-brand-accent',
                 )}
               >
                 Sign In
               </button>
               <button
                 onClick={() => navigate('/scan')}
-                className="rounded-md bg-rose-600 px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-rose-700 shadow-sm"
+                className="rounded-md bg-brand-accent px-4 py-1.5 text-sm font-semibold text-white transition hover:bg-brand-deep shadow-sm"
               >
                 Try For Free
               </button>
@@ -417,7 +417,7 @@ export function AnimatedNavbar() {
                           <Link
                             to={item.to}
                             onClick={() => setActiveMenu(null)}
-                            className="text-xs text-gray-600 hover:text-rose-600 transition-colors leading-snug block"
+                            className="text-xs text-gray-600 hover:text-brand-accent transition-colors leading-snug block"
                             style={{ fontFamily: 'DM Sans, sans-serif' }}
                           >
                             {item.label}
@@ -439,11 +439,11 @@ export function AnimatedNavbar() {
                     className={cn(
                       'text-sm font-semibold transition-colors',
                       action.isPrimary &&
-                        'rounded-md bg-rose-600 px-5 py-2 text-white hover:bg-rose-700',
+                        'rounded-md bg-brand-accent px-5 py-2 text-white hover:bg-brand-deep',
                       action.isOutline &&
-                        'rounded-md border border-gray-300 px-5 py-2 text-gray-700 hover:border-rose-400 hover:text-rose-600',
+                        'rounded-md border border-gray-300 px-5 py-2 text-gray-700 hover:border-brand-accent hover:text-brand-accent',
                       action.isText &&
-                        'text-gray-700 hover:text-rose-600 px-2',
+                        'text-gray-700 hover:text-brand-accent px-2',
                     )}
                     style={{ fontFamily: 'DM Sans, sans-serif' }}
                   >
@@ -487,7 +487,7 @@ export function AnimatedNavbar() {
                           <Link
                             to={item.to}
                             onClick={() => setActiveMenu(null)}
-                            className="text-xs text-gray-600 hover:text-rose-600 transition-colors leading-snug block"
+                            className="text-xs text-gray-600 hover:text-brand-accent transition-colors leading-snug block"
                             style={{ fontFamily: 'DM Sans, sans-serif' }}
                           >
                             {item.label}
@@ -507,9 +507,9 @@ export function AnimatedNavbar() {
                     onClick={() => setActiveMenu(null)}
                     className={cn(
                       'text-sm font-semibold transition-colors',
-                      action.isPrimary && 'rounded-md bg-rose-600 px-5 py-2 text-white hover:bg-rose-700',
-                      action.isOutline && 'rounded-md border border-gray-300 px-5 py-2 text-gray-700 hover:border-rose-400 hover:text-rose-600',
-                      action.isText && 'text-gray-700 hover:text-rose-600 px-2',
+                      action.isPrimary && 'rounded-md bg-brand-accent px-5 py-2 text-white hover:bg-brand-deep',
+                      action.isOutline && 'rounded-md border border-gray-300 px-5 py-2 text-gray-700 hover:border-brand-accent hover:text-brand-accent',
+                      action.isText && 'text-gray-700 hover:text-brand-accent px-2',
                     )}
                     style={{ fontFamily: 'DM Sans, sans-serif' }}
                   >
@@ -546,7 +546,7 @@ export function AnimatedNavbar() {
                 <Link
                   to="/"
                   onClick={() => setMobileOpen(false)}
-                  className="font-display text-xl font-black text-rose-600"
+                  className="font-brand text-xl font-black text-brand-accent"
                   style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                 >
                   BEAUTY.AI
@@ -557,8 +557,8 @@ export function AnimatedNavbar() {
               </div>
 
               {user && (
-                <div className="mb-4 flex items-center justify-between rounded-xl border border-rose-100 bg-rose-50/50 px-3 py-2">
-                  <p className="text-xs font-semibold text-rose-900">Account</p>
+                <div className="mb-4 flex items-center justify-between rounded-xl border border-brand-blush bg-brand-paper px-3 py-2">
+                  <p className="text-xs font-semibold text-brand-ink">Account</p>
                   <UserAccountMenu onNavigate={() => setMobileOpen(false)} />
                 </div>
               )}
@@ -575,7 +575,7 @@ export function AnimatedNavbar() {
                         key={item.label}
                         to={item.requireAuth && !user ? '/auth' : item.to}
                         onClick={() => setMobileOpen(false)}
-                        className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                        className="block rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-brand-paper hover:text-brand-accent transition-colors"
                       >
                         {item.label}
                       </Link>
@@ -585,11 +585,11 @@ export function AnimatedNavbar() {
                   return (
                     <div key={item.label}>
                       <button
-                        className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                        className="flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-sm font-medium text-gray-800 hover:bg-brand-paper hover:text-brand-accent transition-colors"
                         onClick={() => setMobileExpandedMenu(isExpanded ? null : item.label)}
                       >
                         {item.label}
-                        <ChevronDown className={cn('h-4 w-4 transition-transform duration-200', isExpanded ? 'rotate-180 text-rose-600' : '')} />
+                        <ChevronDown className={cn('h-4 w-4 transition-transform duration-200', isExpanded ? 'rotate-180 text-brand-accent' : '')} />
                       </button>
 
                       <AnimatePresence>
@@ -608,7 +608,7 @@ export function AnimatedNavbar() {
                                     key={menuItem.label}
                                     to={menuItem.to}
                                     onClick={() => setMobileOpen(false)}
-                                    className="block rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                                    className="block rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-brand-paper hover:text-brand-accent transition-colors"
                                   >
                                     {menuItem.label}
                                   </Link>
@@ -628,7 +628,7 @@ export function AnimatedNavbar() {
                                         key={menuItem.label}
                                         to={menuItem.to}
                                         onClick={() => setMobileOpen(false)}
-                                        className="block rounded-lg px-3 py-1.5 text-sm text-gray-600 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                                        className="block rounded-lg px-3 py-1.5 text-sm text-gray-600 hover:bg-brand-paper hover:text-brand-accent transition-colors"
                                       >
                                         {menuItem.label}
                                       </Link>
@@ -649,7 +649,7 @@ export function AnimatedNavbar() {
                                         key={menuItem.label}
                                         to={menuItem.to}
                                         onClick={() => setMobileOpen(false)}
-                                        className="block rounded-lg px-3 py-1.5 text-sm text-gray-600 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                                        className="block rounded-lg px-3 py-1.5 text-sm text-gray-600 hover:bg-brand-paper hover:text-brand-accent transition-colors"
                                       >
                                         {menuItem.label}
                                       </Link>
@@ -671,14 +671,14 @@ export function AnimatedNavbar() {
                       <Link
                         to="/auth"
                         onClick={() => setMobileOpen(false)}
-                        className="block rounded-lg border border-gray-200 px-4 py-2.5 text-center text-sm font-medium text-gray-700 hover:border-rose-300 hover:text-rose-600 transition-colors"
+                        className="block rounded-lg border border-gray-200 px-4 py-2.5 text-center text-sm font-medium text-gray-700 hover:border-brand-blush hover:text-brand-accent transition-colors"
                       >
                         Sign In
                       </Link>
                       <Link
                         to="/scan"
                         onClick={() => setMobileOpen(false)}
-                        className="block rounded-lg bg-rose-600 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-rose-700 transition-colors"
+                        className="block rounded-lg bg-brand-accent px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-brand-deep transition-colors"
                       >
                         Try For Free
                       </Link>
@@ -686,7 +686,7 @@ export function AnimatedNavbar() {
                   ) : (
                     <button
                       onClick={() => { signOut(); setMobileOpen(false) }}
-                      className="block w-full rounded-lg bg-rose-600 px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-rose-700 transition-colors"
+                      className="block w-full rounded-lg bg-brand-accent px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-brand-deep transition-colors"
                     >
                       Đăng xuất
                     </button>

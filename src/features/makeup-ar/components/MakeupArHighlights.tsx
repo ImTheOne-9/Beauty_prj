@@ -46,7 +46,7 @@ export default function MakeupArHighlights() {
       <div className="mx-auto max-w-[1400px] px-8 space-y-12">
         {/* Title */}
         <div className="text-left">
-          <h2 className="font-display text-2xl font-black tracking-tight sm:text-3xl lg:text-[2.25rem]">
+          <h2 className="font-brand text-2xl font-black tracking-tight sm:text-3xl lg:text-[2.25rem]">
             4 Highlights of Makeup AR Tech
           </h2>
         </div>
@@ -75,7 +75,7 @@ export default function MakeupArHighlights() {
                   
                   {/* Decorative face mesh overlay to simulate tracking */}
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-30">
-                    <svg viewBox="0 0 100 100" className="w-48 h-48 text-rose-500" stroke="currentColor" strokeWidth={1} fill="none">
+                    <svg viewBox="0 0 100 100" className="w-48 h-48 text-brand-accent" stroke="currentColor" strokeWidth={1} fill="none">
                       <ellipse cx="50" cy="50" rx="35" ry="42" />
                       <line x1="15" y1="50" x2="85" y2="50" />
                       <line x1="50" y1="8" x2="50" y2="92" />
@@ -98,7 +98,7 @@ export default function MakeupArHighlights() {
                   key={idx}
                   className={`rounded-2xl border transition-all duration-300 overflow-hidden ${
                     isOpen 
-                      ? 'border-rose-500/20 bg-white shadow-md' 
+                      ? 'border-brand-accent/20 bg-white shadow-md'
                       : 'border-slate-200 bg-white/50 hover:bg-white'
                   }`}
                 >
@@ -108,16 +108,16 @@ export default function MakeupArHighlights() {
                     className="w-full px-6 py-5 flex items-center justify-between text-left"
                   >
                     <div className="flex items-center gap-4">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-rose-50">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-paper">
                         <img src={item.icon} alt="" className="h-6 w-6 object-contain" />
                       </div>
-                      <span className="font-display text-base font-bold text-slate-900">
+                      <span className="font-brand text-base font-bold text-slate-900">
                         {item.title}
                       </span>
                     </div>
                     <ChevronDown
                       className={`h-5 w-5 text-slate-400 transition-transform duration-300 ${
-                        isOpen ? 'rotate-180 text-rose-500' : ''
+                        isOpen ? 'rotate-180 text-brand-accent' : ''
                       }`}
                     />
                   </button>
@@ -133,10 +133,10 @@ export default function MakeupArHighlights() {
                       
                       <Link
                         to={item.linkTo}
-                        className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-rose-600 hover:text-rose-700 transition group"
+                        className="inline-flex items-center gap-2 text-xs font-black uppercase tracking-[0.18em] text-brand-accent hover:text-brand-accent transition group"
                       >
                         <span>{item.linkText}</span>
-                        <span className="flex h-6 w-6 items-center justify-center rounded-full border border-rose-500 transition group-hover:bg-rose-500 group-hover:text-white">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full border border-brand-accent transition group-hover:bg-brand-paper0 group-hover:text-white">
                           <svg viewBox="0 0 16 16" fill="none" className="h-2.5 w-2.5" stroke="currentColor" strokeWidth={2}>
                             <path d="M3 8h10M9 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
                           </svg>

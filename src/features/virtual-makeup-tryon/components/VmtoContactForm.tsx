@@ -35,7 +35,7 @@ const solutions = [
 ]
 
 const fieldClass =
-  'w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition focus:border-rose-400 focus:ring-2 focus:ring-rose-100'
+  'w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition focus:border-brand-accent focus:ring-2 focus:ring-brand-blush'
 const labelClass = 'mb-1.5 block text-xs font-semibold text-gray-700'
 
 export default function VmtoContactForm() {
@@ -94,22 +94,22 @@ export default function VmtoContactForm() {
               <div>
                 <label className={labelClass} htmlFor="firstName">First Name *</label>
                 <input id="firstName" className={fieldClass} value={form.firstName} onChange={update('firstName')} />
-                {errors.firstName && <p className="mt-1 text-xs text-rose-600">{errors.firstName}</p>}
+                {errors.firstName && <p className="mt-1 text-xs text-brand-accent">{errors.firstName}</p>}
               </div>
               <div>
                 <label className={labelClass} htmlFor="lastName">Last Name *</label>
                 <input id="lastName" className={fieldClass} value={form.lastName} onChange={update('lastName')} />
-                {errors.lastName && <p className="mt-1 text-xs text-rose-600">{errors.lastName}</p>}
+                {errors.lastName && <p className="mt-1 text-xs text-brand-accent">{errors.lastName}</p>}
               </div>
               <div>
                 <label className={labelClass} htmlFor="email">Business Email *</label>
                 <input id="email" type="email" className={fieldClass} value={form.email} onChange={update('email')} />
-                {errors.email && <p className="mt-1 text-xs text-rose-600">{errors.email}</p>}
+                {errors.email && <p className="mt-1 text-xs text-brand-accent">{errors.email}</p>}
               </div>
               <div>
                 <label className={labelClass} htmlFor="company">Company Name *</label>
                 <input id="company" className={fieldClass} value={form.company} onChange={update('company')} />
-                {errors.company && <p className="mt-1 text-xs text-rose-600">{errors.company}</p>}
+                {errors.company && <p className="mt-1 text-xs text-brand-accent">{errors.company}</p>}
               </div>
               <div>
                 <label className={labelClass} htmlFor="jobTitle">Job Title</label>
@@ -144,18 +144,18 @@ export default function VmtoContactForm() {
                 type="checkbox"
                 checked={form.agree}
                 onChange={update('agree')}
-                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-400"
+                className="mt-0.5 h-4 w-4 rounded border-gray-300 text-brand-accent focus:ring-brand-accent"
               />
               <span className="text-xs leading-relaxed text-gray-600">
                 I agree to the processing of my personal data in accordance with the
                 Privacy Policy and consent to be contacted about products and services.
               </span>
             </label>
-            {errors.agree && <p className="mt-1 text-xs text-rose-600">{errors.agree}</p>}
+            {errors.agree && <p className="mt-1 text-xs text-brand-accent">{errors.agree}</p>}
 
             <button
               type="submit"
-              className="mt-7 w-full rounded-md bg-rose-600 px-8 py-3.5 text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-rose-500/25 transition hover:bg-rose-700 sm:w-auto"
+              className="mt-7 w-full rounded-md bg-brand-accent px-8 py-3.5 text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-brand-accent/25 transition hover:bg-brand-deep sm:w-auto"
             >
               Submit Request
             </button>

@@ -27,7 +27,7 @@ export default function VmtoBlush() {
           <ul className="mt-6 space-y-4">
             {features.map((f) => (
               <li key={f} className="flex gap-3">
-                <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rose-500" />
+                <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-brand-paper0" />
                 <span className="text-sm leading-relaxed text-gray-600">{f}</span>
               </li>
             ))}

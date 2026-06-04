@@ -22,10 +22,10 @@ export class AppErrorBoundary extends Component<AppErrorBoundaryProps, AppErrorB
   render() {
     if (this.state.hasError) {
       return (
-        <main className="flex min-h-screen items-center justify-center bg-white px-6 text-center text-pearl">
+        <main className="flex min-h-screen items-center justify-center bg-white px-6 text-center text-brand-ink">
           <div className="glass-panel max-w-lg rounded-3xl p-8">
-            <h1 className="font-display text-3xl font-bold">AI Beauty Platform</h1>
-            <p className="mt-4 text-mist">Something unexpected happened. Refresh to continue your scan journey.</p>
+            <h1 className="font-brand text-3xl font-bold">AI Beauty Platform</h1>
+            <p className="mt-4 text-brand-muted">Something unexpected happened. Refresh to continue your scan journey.</p>
           </div>
         </main>
       )

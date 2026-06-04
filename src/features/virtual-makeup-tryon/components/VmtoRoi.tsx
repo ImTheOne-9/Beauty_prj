@@ -23,7 +23,7 @@ export default function VmtoRoi() {
             <Reveal key={s.brand} delay={i * 0.1}>
               <div className="rounded-2xl border border-gray-100 bg-gray-50 p-8 text-center shadow-sm">
                 <p
-                  className="text-5xl font-black text-rose-600 lg:text-6xl"
+                  className="text-5xl font-black text-brand-accent lg:text-6xl"
                   style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
                 >
                   {s.value}
@@ -39,7 +39,7 @@ export default function VmtoRoi() {
 
         <Reveal delay={0.1}>
           <div className="mt-10 text-center">
-            <button className="rounded-md bg-rose-600 px-8 py-3.5 text-sm font-bold uppercase tracking-wide text-white shadow-lg transition hover:bg-rose-700">
+            <button className="rounded-md bg-brand-accent px-8 py-3.5 text-sm font-bold uppercase tracking-wide text-white shadow-lg transition hover:bg-brand-deep">
               Contact Us to Learn More
             </button>
           </div>

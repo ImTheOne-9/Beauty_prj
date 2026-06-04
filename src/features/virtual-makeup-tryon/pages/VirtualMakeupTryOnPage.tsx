@@ -38,7 +38,7 @@ export default function VirtualMakeupTryOnPage() {
   }, [])
 
   return (
-    <main ref={pageRef} className="min-h-screen overflow-x-hidden bg-white">
+    <main ref={pageRef} className="public-shell min-h-screen overflow-x-hidden bg-white">
       <VmtoHero />
       <VmtoHowItWorks />
       <VmtoBlush />

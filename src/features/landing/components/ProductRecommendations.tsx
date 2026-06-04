@@ -30,15 +30,15 @@ export default function ProductRecommendations() {
     <div className="space-y-6">
       <div className="flex items-end justify-between gap-4">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-cyan-600">Recommended</p>
-          <h3 className="mt-2 font-display text-3xl font-extrabold text-rose-950">Curated Luxury Picks</h3>
-          <p className="mt-2 max-w-2xl text-sm text-rose-700">Here is a temporary hardcoded reference layout so you can immediately see the product direction.</p>
+          <p className="text-xs font-semibold uppercase tracking-[0.35em] text-brand-accent">Recommended</p>
+          <h3 className="mt-2 font-brand text-3xl font-extrabold text-brand-ink">Curated Luxury Picks</h3>
+          <p className="mt-2 max-w-2xl text-sm text-brand-muted">Here is a temporary hardcoded reference layout so you can immediately see the product direction.</p>
         </div>
       </div>
 
       <div className="rounded-[1.75rem] border border-white/40 bg-white/55 p-4 shadow-[0_24px_60px_rgba(255,192,203,0.12)] backdrop-blur-sm">
         {products.length === 0 ? (
-          <div className="rounded-[1.5rem] border border-rose-100/50 bg-white/80 p-8 text-center text-sm text-mist">
+          <div className="rounded-[1.5rem] border border-brand-blush bg-brand-surface/85 p-8 text-center text-sm text-brand-muted">
             No products have been added yet. Please update the product catalog in the admin page.
           </div>
         ) : (

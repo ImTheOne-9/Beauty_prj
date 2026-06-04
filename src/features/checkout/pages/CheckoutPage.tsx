@@ -69,7 +69,7 @@ export default function CheckoutPage() {
 
         <div className="rounded-[2.5rem] border border-slate-200/80 bg-white/90 px-7 py-9 text-slate-900 shadow-[0_30px_90px_rgba(15,23,42,0.08)] backdrop-blur">
           <p className="text-[10px] font-semibold uppercase tracking-[0.4em] text-slate-500">Pricing</p>
-          <h1 className="mt-3 font-display text-4xl text-slate-900 md:text-5xl">
+          <h1 className="mt-3 font-ui text-4xl text-slate-900 md:text-5xl">
             Choose a scan plan for your AI journey
           </h1>
           <p className="mt-4 max-w-2xl text-sm text-slate-600">Flexible options for individuals and teams with more scans, deeper insights, and longer history.</p>
@@ -84,7 +84,7 @@ export default function CheckoutPage() {
               }`}
             >
               {plan.highlight ? (
-                <div className="pointer-events-none absolute inset-0 rounded-[2rem] border border-rose-300/40 bg-[linear-gradient(160deg,rgba(255,255,255,0.9),rgba(255,235,243,0.55))]" />
+                <div className="pointer-events-none absolute inset-0 rounded-[2rem] border border-app-border bg-[linear-gradient(160deg,rgba(255,255,255,0.9),rgba(255,235,243,0.55))]" />
               ) : null}
               <div className="flex items-center justify-between">
                 <span className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-600">
@@ -96,16 +96,16 @@ export default function CheckoutPage() {
                     Current
                   </span>
                 ) : plan.highlight ? (
-                  <span className="rounded-full bg-rose-100 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-rose-700">
+                  <span className="rounded-full bg-app-accent/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-app-accent">
                     Best value
                   </span>
                 ) : null}
               </div>
 
               <div className="relative">
-                <h2 className="mt-5 font-display text-3xl text-slate-900">{plan.name}</h2>
+                <h2 className="mt-5 font-ui text-3xl text-slate-900">{plan.name}</h2>
                 {plan.highlight ? (
-                  <div className="absolute -right-1 -top-6 h-12 w-12 rounded-full bg-rose-200/60 blur-2xl" />
+                  <div className="absolute -right-1 -top-6 h-12 w-12 rounded-full bg-app-accent/10 blur-2xl" />
                 ) : null}
               </div>
               <div className="mt-3 space-y-1">
@@ -128,7 +128,7 @@ export default function CheckoutPage() {
               <Button
                 className={`mt-6 w-full !rounded-full !px-6 !py-3 text-sm font-semibold ${
                   plan.highlight
-                    ? '!bg-rose-500 !text-white hover:!bg-rose-400 shadow-[0_16px_40px_rgba(244,63,94,0.25)]'
+                    ? '!bg-app-accent !text-white hover:!bg-app-accent-hover shadow-[0_16px_40px_rgba(79,70,229,0.18)]'
                     : '!bg-slate-900 !text-white hover:!bg-slate-800'
                 }`}
                 onClick={() => handleSelectPlan(plan.id)}

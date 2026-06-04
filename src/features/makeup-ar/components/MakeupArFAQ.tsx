@@ -20,7 +20,7 @@ export default function MakeupArFAQ() {
     <section className="bg-white py-16 text-slate-900">
       <div className="mx-auto max-w-4xl px-4 space-y-12">
         {/* Title */}
-        <h2 className="text-center font-display text-2xl font-black tracking-tight sm:text-3xl lg:text-[2.25rem]">
+        <h2 className="text-center font-brand text-2xl font-black tracking-tight sm:text-3xl lg:text-[2.25rem]">
           Makeup AR FAQs
         </h2>
 
@@ -37,12 +37,12 @@ export default function MakeupArFAQ() {
                   onClick={() => setOpenIndex(isOpen ? null : idx)}
                   className="w-full py-6 flex items-center justify-between text-left focus:outline-none"
                 >
-                  <h3 className="font-display text-base font-bold text-slate-900">
+                  <h3 className="font-brand text-base font-bold text-slate-900">
                     {faq.q}
                   </h3>
                   <ChevronDown
                     className={`h-5 w-5 text-slate-400 transition-transform duration-300 ${
-                      isOpen ? 'rotate-180 text-rose-500' : ''
+                      isOpen ? 'rotate-180 text-brand-accent' : ''
                     }`}
                   />
                 </button>

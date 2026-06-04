@@ -56,13 +56,13 @@ function ComparisonCard({ data }: { data: typeof generalData | typeof oursData }
       {/* Content */}
       <div className="p-5 sm:p-6">
         <h3
-          className={`text-lg font-black ${isBrand ? 'text-rose-600' : 'text-gray-900'}`}
+          className={`text-lg font-black ${isBrand ? 'text-brand-accent' : 'text-gray-900'}`}
           style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
         >
           {data.title}
         </h3>
 
-        <p className={`mt-1 text-xs font-semibold ${isBrand ? 'text-rose-500' : 'text-gray-500'}`}>
+        <p className={`mt-1 text-xs font-semibold ${isBrand ? 'text-brand-accent' : 'text-gray-500'}`}>
           {data.subtitle}
         </p>
 
@@ -75,7 +75,7 @@ function ComparisonCard({ data }: { data: typeof generalData | typeof oursData }
             <li key={p.label} className="flex gap-2.5">
               <span
                 className={`mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full ${
-                  isBrand ? 'bg-rose-600' : 'bg-red-100'
+                  isBrand ? 'bg-brand-accent' : 'bg-red-100'
                 }`}
               >
                 {isBrand ? (
@@ -95,7 +95,7 @@ function ComparisonCard({ data }: { data: typeof generalData | typeof oursData }
           <button
             className={`rounded-md px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-white shadow transition ${
               isBrand
-                ? 'bg-rose-600 hover:bg-rose-700'
+                ? 'bg-brand-accent hover:bg-brand-deep'
                 : 'bg-gray-800 hover:bg-gray-900'
             }`}
           >

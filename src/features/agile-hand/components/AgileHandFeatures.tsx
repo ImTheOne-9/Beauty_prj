@@ -60,7 +60,7 @@ function FeatureSection({ title, desc, link, media, reverse = false, bg = 'bg-wh
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
           className={`flex flex-col justify-center gap-6 px-10 py-14 lg:px-16 ${reverse ? 'lg:order-2' : 'lg:order-1'}`}
         >
-          <h2 className="font-display text-2xl font-black leading-tight tracking-tight text-slate-900 sm:text-3xl lg:text-[2rem]">
+          <h2 className="font-brand text-2xl font-black leading-tight tracking-tight text-slate-900 sm:text-3xl lg:text-[2rem]">
             {title}
           </h2>
           <div className="text-sm leading-relaxed text-slate-500">{desc}</div>
@@ -136,7 +136,7 @@ export default function AgileHandFeatures() {
               {categories.map(({ icon: Icon, label }) => (
                 <div key={label} className="flex flex-col items-center gap-1.5">
                   <div className="flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-slate-50">
-                    <Icon className="h-5 w-5 text-rose-500" />
+                    <Icon className="h-5 w-5 text-brand-accent" />
                   </div>
                   <span className="text-[10px] font-semibold text-slate-600">{label}</span>
                 </div>

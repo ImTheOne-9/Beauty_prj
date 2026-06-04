@@ -32,7 +32,7 @@ export default function AgileHandPage() {
   }, [])
 
   return (
-    <main ref={pageRef} className="min-h-screen overflow-x-hidden bg-slate-950">
+    <main ref={pageRef} className="public-shell min-h-screen overflow-x-hidden bg-slate-950">
       <AgileHandHero />
       <AgileHandFeatures />
     </main>

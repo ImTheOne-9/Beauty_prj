@@ -32,7 +32,7 @@ export default function NailSampling() {
             title={
               <>
                 Efficient Nail Polish and Design Sampling, Including Press-On Nails
-                <sup className="ml-1 text-xs text-rose-500">NEW</sup>
+                <sup className="ml-1 text-xs text-brand-accent">NEW</sup>
               </>
             }
             subtitle="Highly customizable live camera engine that accurately showcases your nail art and nail polish products virtually."
@@ -41,11 +41,11 @@ export default function NailSampling() {
           <ul className="mt-5 space-y-4">
             {samplingFeatures.map((f) => (
               <li key={f.label} className="flex gap-3">
-                <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-rose-600" strokeWidth={3} />
+                <Check className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-accent" strokeWidth={3} />
                 <span className="text-sm leading-relaxed text-gray-700">
                   <strong>{f.label}</strong>
                   {f.badge && (
-                    <sup className="ml-1 rounded bg-rose-500 px-1 py-0.5 text-[8px] font-black text-white">
+                    <sup className="ml-1 rounded bg-brand-paper0 px-1 py-0.5 text-[8px] font-black text-white">
                       {f.badge}
                     </sup>
                   )}

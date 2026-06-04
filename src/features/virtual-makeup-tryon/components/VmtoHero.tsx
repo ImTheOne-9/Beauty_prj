@@ -19,7 +19,7 @@ export default function VmtoHero() {
   const MotionLink = motion.create(Link)
 
   return (
-    <section className="relative w-full overflow-hidden bg-rose-50">
+    <section className="relative w-full overflow-hidden bg-brand-paper">
       {/* Background video — height matches the video's native ~100:23.4 ratio so it isn't upscaled (which caused blur) */}
       <div className="relative w-full" style={{ height: 'clamp(300px, 23.4261vw, 600px)' }}>
         <video
@@ -36,7 +36,7 @@ export default function VmtoHero() {
         <div className="relative z-10 mx-auto flex h-full min-h-[inherit] max-w-[1400px] items-center px-4 py-16 sm:px-6 lg:px-8">
           <div className="max-w-xl [text-shadow:0_1px_12px_rgba(255,255,255,0.6)]">
             <motion.p
-              className="text-xs font-bold uppercase tracking-[0.35em] text-rose-500"
+              className="text-xs font-bold uppercase tracking-[0.35em] text-brand-accent"
               initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
@@ -63,7 +63,7 @@ export default function VmtoHero() {
               Our AI makeup encoders offer a virtually try-on with augmented reality
               technology. Increase customer engagement and boost sales for products by
               creating a makeup look with{' '}
-              <span className="font-semibold text-rose-600">200% increase</span> in
+              <span className="font-semibold text-brand-accent">200% increase</span> in
               conversion rates.
             </motion.p>
 
@@ -77,7 +77,7 @@ export default function VmtoHero() {
                 to="/scan"
                 whileHover={{ scale: 1.03, y: -2 }}
                 whileTap={{ scale: 0.97 }}
-                className="rounded-md bg-rose-600 px-7 py-3 text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-rose-500/30 transition hover:bg-rose-700"
+                className="rounded-md bg-brand-accent px-7 py-3 text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-brand-accent/30 transition hover:bg-brand-deep"
               >
                 Try Web Demo
               </MotionLink>
@@ -85,7 +85,7 @@ export default function VmtoHero() {
                 to="/scan"
                 whileHover={{ scale: 1.03, y: -2 }}
                 whileTap={{ scale: 0.97 }}
-                className="rounded-md border-2 border-gray-300 bg-white/70 px-7 py-3 text-sm font-bold uppercase tracking-wide text-gray-800 backdrop-blur-sm transition hover:border-rose-400 hover:text-rose-600"
+                className="rounded-md border-2 border-gray-300 bg-white/70 px-7 py-3 text-sm font-bold uppercase tracking-wide text-gray-800 backdrop-blur-sm transition hover:border-brand-accent hover:text-brand-accent"
               >
                 Contact Sales
               </MotionLink>

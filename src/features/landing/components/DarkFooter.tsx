@@ -67,7 +67,7 @@ export default function DarkFooter() {
       <div className="mx-auto max-w-[1400px] px-4 py-14 sm:px-6 lg:px-8">
         {/* Logo + tagline */}
         <div className="mb-10 flex flex-col items-start gap-2 border-b border-gray-800 pb-8">
-          <Link to="/" className="font-display text-lg font-black tracking-[0.1em] text-white">
+          <Link to="/" className="font-brand text-lg font-black tracking-[0.1em] text-white">
             ✦ LUMINA AI
           </Link>
           <p className="max-w-md text-sm text-gray-500">
@@ -111,7 +111,7 @@ export default function DarkFooter() {
                 key={label}
                 href={href}
                 aria-label={label}
-                className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-700 text-gray-500 transition hover:border-rose-500 hover:text-rose-400"
+                className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-700 text-gray-500 transition hover:border-brand-accent hover:text-brand-accent"
               >
                 <Icon/>
               </a>

@@ -56,17 +56,17 @@ export function SectionHeader({
   return (
     <div className={isCenter ? 'mx-auto max-w-3xl text-center' : 'max-w-2xl text-left'}>
       {eyebrow && (
-        <p className="text-xs font-bold uppercase tracking-[0.35em] text-rose-500">{eyebrow}</p>
+        <p className="text-xs font-bold uppercase tracking-[0.24em] text-brand-accent">{eyebrow}</p>
       )}
       <h2
-        className="mt-2 font-black leading-tight tracking-tight text-gray-900 text-2xl sm:text-3xl lg:text-[2.5rem]"
+        className="mt-2 font-black leading-tight text-brand-ink text-2xl sm:text-3xl lg:text-[2.5rem]"
         style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
       >
         {title}
       </h2>
       {subtitle && (
         <p
-          className={`mt-4 text-base leading-relaxed text-gray-600 ${
+          className={`mt-4 text-base leading-relaxed text-brand-muted ${
             isCenter ? 'mx-auto max-w-2xl' : ''
           }`}
         >
@@ -93,7 +93,7 @@ export function PrimaryButton({
     <button
       type={type}
       onClick={onClick}
-      className={`rounded-md bg-rose-600 px-7 py-3 text-sm font-bold uppercase tracking-wide text-white shadow-lg shadow-rose-500/25 transition hover:bg-rose-700 ${className}`}
+      className={`public-primary rounded-md px-7 py-3 text-sm font-bold uppercase tracking-wide shadow-lg shadow-brand-accent/25 transition ${className}`}
     >
       {children}
     </button>
@@ -113,7 +113,7 @@ export function OutlineButton({
     <button
       type="button"
       onClick={onClick}
-      className={`rounded-md border-2 border-rose-600 bg-white px-7 py-3 text-sm font-bold uppercase tracking-wide text-rose-600 transition hover:bg-rose-600 hover:text-white ${className}`}
+      className={`public-secondary rounded-md px-7 py-3 text-sm font-bold uppercase tracking-wide transition hover:bg-brand-accent hover:text-white ${className}`}
     >
       {children}
     </button>

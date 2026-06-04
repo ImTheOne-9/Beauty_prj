@@ -48,13 +48,13 @@ export default function VmtoFaceTech() {
           <ul className="mt-6 space-y-3">
             {capabilities.map((c) => (
               <li key={c} className="flex gap-3">
-                <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-rose-400" />
+                <span className="mt-2 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-brand-accent" />
                 <span className="text-sm leading-relaxed text-gray-700">{c}</span>
               </li>
             ))}
           </ul>
           <div className="mt-8">
-            <OutlineButton className="border-rose-500 bg-transparent text-rose-400 hover:bg-rose-500 hover:text-white">
+            <OutlineButton className="border-brand-accent bg-transparent text-brand-accent hover:bg-brand-paper0 hover:text-white">
               Explore the Tech →
             </OutlineButton>
           </div>

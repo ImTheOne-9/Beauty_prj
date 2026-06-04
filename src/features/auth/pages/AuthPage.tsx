@@ -56,11 +56,11 @@ export default function AuthPage() {
       <section className="section-shell pb-12">
         <Card className="mx-auto max-w-md space-y-4 p-8 text-center">
           <div className="flex justify-center">
-            <div className="rounded-full bg-cyan/10 p-4">
-              <MailCheck className="h-8 w-8 text-cyan" />
+            <div className="rounded-full bg-app-accent/10 p-4">
+              <MailCheck className="h-8 w-8 text-app-accent" />
             </div>
           </div>
-          <h1 className="font-display text-2xl text-pearl">Check your email</h1>
+          <h1 className="font-ui text-2xl text-app-ink">Check your email</h1>
           <p className="text-sand/80 text-sm">
             We've sent password reset instructions to {email}.
           </p>
@@ -76,8 +76,8 @@ export default function AuthPage() {
     <section className="section-shell pb-12">
       <Card className="mx-auto max-w-md space-y-6 p-8">
         <div className="space-y-2 text-center">
-          <p className="text-xs uppercase tracking-[0.24em] text-cyan">Authentication</p>
-          <h1 className="font-display text-3xl text-pearl">
+          <p className="text-xs uppercase tracking-[0.24em] text-app-accent">Authentication</p>
+          <h1 className="font-ui text-3xl text-app-ink">
             {mode === 'signin' ? 'Welcome Back' : mode === 'signup' ? 'Create Account' : 'Reset Password'}
           </h1>
           {mode === 'forgot_password' && (
@@ -129,7 +129,7 @@ export default function AuthPage() {
             />
           )}
           {authMutation.error ? (
-            <p className="text-sm text-rose-400 text-center">{authMutation.error.message}</p>
+            <p className="text-sm text-red-500 text-center">{authMutation.error.message}</p>
           ) : null}
           <Button className="w-full" disabled={authMutation.isPending}>
             {authMutation.isPending
@@ -182,14 +182,14 @@ export default function AuthPage() {
               <button
                 type="button"
                 onClick={() => setMode('forgot_password')}
-                className="text-cyan hover:bg-cyan/10 px-3 py-2 rounded-md transition-all"
+                className="text-app-accent hover:bg-app-accent/10 px-3 py-2 rounded-md transition-all"
               >
                 Forgot your password?
               </button>
               <button
                 type="button"
                 onClick={() => setMode('signup')}
-                className="text-sand/70 hover:text-cyan hover:bg-cyan/10 px-3 py-2 rounded-md transition-all"
+                className="text-sand/70 hover:text-app-accent hover:bg-app-accent/10 px-3 py-2 rounded-md transition-all"
               >
                 Don't have an account? Sign up
               </button>
@@ -201,7 +201,7 @@ export default function AuthPage() {
             <button
               type="button"
               onClick={() => setMode('signin')}
-              className="text-sand/70 hover:text-cyan hover:bg-cyan/10 px-3 py-2 rounded-md transition-all"
+              className="text-sand/70 hover:text-app-accent hover:bg-app-accent/10 px-3 py-2 rounded-md transition-all"
             >
               Already have an account? Sign in
             </button>
@@ -212,7 +212,7 @@ export default function AuthPage() {
             <button
               type="button"
               onClick={() => setMode('signin')}
-              className="text-sand/70 hover:text-cyan hover:bg-cyan/10 px-3 py-2 rounded-md transition-all"
+              className="text-sand/70 hover:text-app-accent hover:bg-app-accent/10 px-3 py-2 rounded-md transition-all"
             >
               Remember your password? Sign in
             </button>

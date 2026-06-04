@@ -87,7 +87,7 @@ export function CheckoutModal({ plan, onClose, onSuccess }: Props) {
             <p className="text-xs font-semibold uppercase tracking-widest text-slate-400">
               Xác nhận đăng ký
             </p>
-            <h2 className="mt-2 font-display text-2xl text-slate-900">{plan.name}</h2>
+            <h2 className="mt-2 font-ui text-2xl text-slate-900">{plan.name}</h2>
             <p className="mt-1 text-3xl font-semibold text-slate-900">
               {plan.price === 0 ? (
                 'Miễn phí'
@@ -115,7 +115,7 @@ export function CheckoutModal({ plan, onClose, onSuccess }: Props) {
                 Hủy
               </Button>
               <Button
-                className="flex-1 !rounded-full !bg-rose-500 !text-white hover:!bg-rose-400"
+                className="flex-1 !rounded-full !bg-app-accent !text-white hover:!bg-app-accent-hover"
                 onClick={plan.price === 0 ? handleFreePlan : handleStripePlan}
               >
                 {plan.price === 0 ? 'Dùng miễn phí' : `Thanh toán $${plan.price.toFixed(2)}`}

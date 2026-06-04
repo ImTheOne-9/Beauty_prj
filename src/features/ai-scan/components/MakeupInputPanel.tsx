@@ -160,7 +160,7 @@ export function MakeupInputPanel({
   }
 
   return (
-    <div className="playground-panel flex h-full min-h-0 flex-col overflow-hidden rounded-[1rem] border border-rose-100 bg-white shadow-sm">
+    <div className="playground-panel flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-app-border bg-app-surface shadow-sm">
       <div className="playground-panel-inner min-h-0 flex-1 overflow-y-auto overscroll-contain p-4">
         <form className="flex flex-col gap-6" onSubmit={(event) => event.preventDefault()}>
           {/* User Photo */}
@@ -174,7 +174,7 @@ export function MakeupInputPanel({
                   href="https://docs.perfectcorp.com/reference/makeup_vto/section/overview/file-specs-and-errors"
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex h-6 items-center gap-1 text-sm font-semibold text-cyan-700 underline"
+                  className="inline-flex h-6 items-center gap-1 text-sm font-semibold text-app-accent underline"
                 >
                   More details
                   <ExternalLink className="h-3.5 w-3.5" />
@@ -205,8 +205,8 @@ export function MakeupInputPanel({
             ) : null}
 
             {mode === 'upload' ? (
-              <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-rose-200 bg-rose-50/50 px-4 py-10 text-sm text-mist transition hover:border-cyan/40 hover:bg-rose-50">
-                <Upload className="h-5 w-5 text-rose-500" />
+              <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed border-app-border bg-app-subtle px-4 py-10 text-sm text-app-muted transition hover:border-app-accent hover:bg-app-surface">
+                <Upload className="h-5 w-5 text-app-accent" />
                 Drop or click to upload
                 <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" onChange={handleFile} disabled={validationState === 'checking'} />
               </label>
@@ -225,7 +225,7 @@ export function MakeupInputPanel({
                         disabled={validationState === 'checking'}
                         className={cn(
                           'relative overflow-hidden rounded-lg bg-white p-0.5 transition-all disabled:opacity-50',
-                          selected ? 'ring-[3px] ring-cyan-500' : 'hover:ring-2 hover:ring-cyan/30',
+                          selected ? 'ring-[3px] ring-app-accent' : 'hover:ring-2 hover:ring-app-accent/30',
                         )}
                       >
                         <div className="aspect-[3/4] overflow-hidden rounded-lg">
@@ -239,7 +239,7 @@ export function MakeupInputPanel({
                   <button
                     type="button"
                     onClick={() => setShowAllSamples((value) => !value)}
-                    className="inline-flex items-center gap-1 text-sm font-medium text-cyan-700 underline"
+                    className="inline-flex items-center gap-1 text-sm font-medium text-app-accent underline"
                   >
                     {showAllSamples ? 'Show less' : 'See all'}
                     <ChevronRight className="h-4 w-4" />
@@ -266,7 +266,7 @@ export function MakeupInputPanel({
                       type="button"
                       onClick={handleRetryValidation}
                       disabled={isRetrying || !imageSource}
-                      className="mt-2 text-xs font-semibold text-cyan-700 underline hover:text-cyan-800 disabled:opacity-50"
+                      className="mt-2 text-xs font-semibold text-app-accent underline hover:brightness-90 disabled:opacity-50"
                     >
                       {isRetrying ? 'Retrying...' : 'Retry'}
                     </button>
@@ -276,7 +276,7 @@ export function MakeupInputPanel({
             )}
 
             {imageSource && mode !== 'sample' ? (
-              <div className="overflow-hidden rounded-lg border border-rose-100">
+              <div className="overflow-hidden rounded-lg border border-app-border">
                 <img src={imageSource} alt="Selected" className="aspect-[3/4] w-full object-cover" />
               </div>
             ) : null}
@@ -288,7 +288,7 @@ export function MakeupInputPanel({
             description="Note: If you select other categories without Skin, default skin-smooth values will still be applied for the best AR result."
           >
             <div className="grid gap-2">
-              <label className="mb-1 block text-sm font-semibold text-rose-950">Category</label>
+              <label className="mb-1 block text-sm font-semibold text-app-ink">Category</label>
               <div className="grid grid-cols-2 gap-3">
                 {(categories ?? []).map((category) => {
                   const meta = MAKEUP_CATEGORY_META[category.api_category_key]
@@ -329,7 +329,7 @@ export function MakeupInputPanel({
         </form>
       </div>
 
-      <div className="shrink-0 border-t border-rose-100 bg-white p-4">
+      <div className="shrink-0 border-t border-app-border bg-app-surface p-4">
         <Button
           type="button"
           className="w-full"
@@ -347,13 +347,13 @@ export function MakeupInputPanel({
             : 'Start Processing'}
         </Button>
         {processDisabledReason ? (
-          <p className="mt-3 text-center text-sm text-rose-600">{processDisabledReason}</p>
+          <p className="mt-3 text-center text-sm text-app-accent">{processDisabledReason}</p>
         ) : (
-          <p className="mt-2 text-center text-[10px] text-mist">1 free trial(s) left — configure API for production</p>
+          <p className="mt-2 text-center text-[10px] text-app-muted">1 free trial(s) left — configure API for production</p>
         )}
         <button
           type="button"
-          className="mt-1 w-full text-center text-xs text-cyan-700 underline"
+          className="mt-1 w-full text-center text-xs text-app-accent underline"
           onClick={() => onEffectsChange(cloneDefaults())}
         >
           Reset parameters to default

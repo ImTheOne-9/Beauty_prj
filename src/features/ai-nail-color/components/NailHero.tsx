@@ -37,7 +37,7 @@ export default function NailHero() {
                   Try on colors, styles, acrylic, press ons & shapes in a click. Available
                   on website, apps and all major channels.
                 </p>
-                <p className="mt-2 cursor-pointer text-sm font-semibold text-rose-500 underline underline-offset-2 hover:text-rose-200 transition">
+                <p className="mt-2 cursor-pointer text-sm font-semibold text-brand-accent underline underline-offset-2 hover:text-brand-blush transition">
                   Free customized product demo
                 </p>
               </Reveal>
