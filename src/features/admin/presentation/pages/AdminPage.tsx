@@ -35,6 +35,7 @@ import { adminNavigationSections } from '../config/admin-navigation'
 import { useAdminHealth } from '../hooks/useAdminHealth'
 import { AdminScansSection } from '../components/Adminscanssection'
 import { AdminAccessSection } from '../components/AdminAccessSection'
+import { AdminPlansSection } from '../components/AdminPlansSection'
 // type ApiKeyFormState = {
 //   id: string
 //   name: string
@@ -86,43 +87,6 @@ const emptyCategoryForm: CategoryFormState = {
   apiCategoryKey: '',
 }
 
-// const emptyProductConfigForm: ProductConfigFormState = {
-//   id: '',
-//   productId: '',
-//   hexColor: '#ffffff',
-//   texture: 'Smooth',
-//   colorIntensity: 50,
-//   patternName: '',
-//   extraParams: '{}',
-// }
-
-const EMPTY_PLAN = {
-  name: '',
-  slug: '',
-  price: 0,
-  billing_interval: 'month' as const,
-  scan_limit: 10,
-  history_days: 30,
-  description: '',
-  features: [] as string[],
-  badge: null as string | null,
-  is_active: true,
-}
-// Thêm state để track product đang edit + configs của nó
-
-// const emptyScanForm: ScanFormState = {
-//   id: '',
-//   score: '',
-//   metricsJson: '{}',
-// }
-
-// const emptyRecommendationForm: RecommendationFormState = {
-//   id: '',
-//   scanId: '',
-//   productId: '',
-//   reason: '',
-// }
-
 function formatDate(value: string) {
   return new Date(value).toLocaleString('vi-VN', {
     month: 'short',
@@ -131,35 +95,6 @@ function formatDate(value: string) {
     minute: '2-digit',
   })
 }
-
-// function mapProductForm(product: AdminProductRecord): ProductFormState {
-//   return {
-//     id: product.id,
-//     name: product.name,
-//     description: product.description ?? '',
-//     imageUrl: product.image_url ?? '',
-//     externalUrl: product.external_url ?? '',
-//     categoryId: product.category_id,
-//     brand: product.brand ?? '',
-//   }
-// }
-
-// function mapScanForm(scan: AdminScanRecord): ScanFormState {
-//   return {
-//     id: scan.id,
-//     score: String(scan.score),
-//     metricsJson: JSON.stringify(scan.metrics, null, 2),
-//   }
-// }
-
-// function mapRecommendationForm(recommendation: AdminRecommendationRecord): RecommendationFormState {
-//   return {
-//     id: recommendation.id,
-//     scanId: recommendation.scan_id,
-//     productId: recommendation.product_id,
-//     reason: recommendation.reason,
-//   }
-// }
 
 function SubForm({ initial, plans, users, onSubmit, isPending }: {
   initial: any | null
@@ -262,10 +197,6 @@ export default function AdminPage() {
   const queryClient = useQueryClient()
   const [activeSection, setActiveSection] = useState<AdminSection>('overview')
 
-  // Forms
-  // const [productForm, setProductForm] = useState<ProductFormState>(emptyProductForm)
-  // const [scanForm, setScanForm] = useState<ScanFormState>(emptyScanForm)
-  // const [recommendationForm, setRecommendationForm] = useState<RecommendationFormState>(emptyRecommendationForm)
   const [categoryForm, setCategoryForm] = useState<CategoryFormState>(emptyCategoryForm)
 
   // Filters & Search
@@ -289,10 +220,6 @@ export default function AdminPage() {
   const [orderStatusFilter, setOrderStatusFilter] = useState<string>('All')
 
   // User Manager Form
-
-  const [planModalOpen, setPlanModalOpen] = useState(false)
-  const [planForm, setPlanForm] = useState(EMPTY_PLAN)
-  const [selectedPlan, setSelectedPlan] = useState<any>(null)
 
   const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false)
   const [apiKeyForm, setApiKeyForm] = useState(EMPTY_FORM)
@@ -397,10 +324,6 @@ export default function AdminPage() {
       setActiveSection(tabs[0].id)
     }
   }, [activeSection, tabs])
-
-  // const scanLookup = useMemo(() => {
-  //   return new Map((scansQuery.data ?? []).map((scan) => [scan.id, scan]))
-  // }, [scansQuery.data])
 
   const filteredOrders = useMemo(() => {
     const list = ordersQuery.data ?? []
@@ -1029,258 +952,15 @@ export default function AdminPage() {
             />
           )}
           {activeSection === 'plans' && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <AdminSectionTitle
-                  eyebrow="Subscription Plans"
-                  title="Manage Plans"
-                  description={`${plansQuery.data?.length ?? 0} plan(s) configured.`}
-                />
-                <Button onClick={() => {
-                  setPlanForm(EMPTY_PLAN)
-                  setSelectedPlan(null)
-                  setPlanModalOpen(true)
-                }}>
-                  + Add Plan
-                </Button>
-              </div>
-
-              {/* Plans grid */}
-              {(plansQuery.data?.length ?? 0) === 0 ? (
-                <div className="rounded-[2rem] border border-dashed border-admin-border bg-white/80 p-12 text-center text-sm text-admin-muted">
-                  No plans yet. Click "Add Plan" to create one.
-                </div>
-              ) : (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  {(plansQuery.data ?? []).map((plan: any) => (
-                    <div key={plan.id} className={cn(
-                      'rounded-2xl border bg-white p-5 space-y-3 transition',
-                      plan.is_active ? 'border-admin-border' : 'border-admin-border opacity-60',
-                    )}>
-                      {/* Header */}
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <p className="font-semibold text-admin-ink">{plan.name}</p>
-                          <p className="text-[11px] text-admin-muted font-mono mt-0.5">slug: {plan.slug}</p>
-                        </div>
-                        {plan.badge && (
-                          <span className="rounded-full bg-admin-accent/10 px-2 py-0.5 text-[10px] font-bold text-admin-accent shrink-0">
-                            {plan.badge}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Price */}
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-2xl font-bold text-admin-ink">${Number(plan.price).toFixed(2)}</span>
-                        <span className="text-xs text-admin-muted">/ {plan.billing_interval}</span>
-                      </div>
-
-                      {/* Description */}
-                      {plan.description && (
-                        <p className="text-xs text-admin-muted leading-relaxed">{plan.description}</p>
-                      )}
-
-                      {/* Limits */}
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <div className="rounded-xl bg-admin-subtle px-3 py-2">
-                          <p className="text-admin-muted">Scans</p>
-                          <p className="font-semibold text-admin-ink">{plan.scan_limit}</p>
-                        </div>
-                        <div className="rounded-xl bg-admin-subtle px-3 py-2">
-                          <p className="text-admin-muted">History</p>
-                          <p className="font-semibold text-admin-ink">{plan.history_days} days</p>
-                        </div>
-                      </div>
-
-                      {/* Features */}
-                      {(plan.features as string[]).length > 0 && (
-                        <ul className="space-y-1">
-                          {(plan.features as string[]).map((f: string, i: number) => (
-                            <li key={i} className="flex items-center gap-1.5 text-xs text-admin-muted">
-                              <span className="h-1 w-1 shrink-0 rounded-full bg-admin-accent" />
-                              {f}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-
-                      {/* Footer */}
-                      <div className="flex items-center justify-between pt-1 border-t border-admin-border">
-                        <button
-                          onClick={() => updatePlanMutation.mutate({ id: plan.id, patch: { is_active: !plan.is_active } })}
-                          disabled={updatePlanMutation.isPending}
-                          className={cn(
-                            'rounded-full px-3 py-1 text-[10px] font-bold border transition',
-                            plan.is_active
-                              ? 'bg-emerald-50 text-emerald-700 border-emerald-100 hover:bg-emerald-100'
-                              : 'bg-admin-subtle text-admin-accent border-admin-border hover:bg-admin-subtle',
-                          )}
-                        >
-                          {plan.is_active ? 'Active' : 'Inactive'}
-                        </button>
-                        <div className="flex gap-1">
-                          <Button size="sm" variant="ghost" onClick={() => {
-                            setSelectedPlan(plan)
-                            setPlanForm({
-                              name: plan.name,
-                              slug: plan.slug,
-                              price: plan.price,
-                              billing_interval: plan.billing_interval,
-                              scan_limit: plan.scan_limit,
-                              history_days: plan.history_days,
-                              description: plan.description ?? '',
-                              features: plan.features ?? [],
-                              badge: plan.badge ?? null,
-                              is_active: plan.is_active,
-                            })
-                            setPlanModalOpen(true)
-                          }}>
-                            <PencilLine className="h-4 w-4" />
-                          </Button>
-                          <Button size="sm" variant="ghost"
-                            disabled={deletePlanMutation.isPending}
-                            onClick={() => {
-                              if (confirm(`Delete plan "${plan.name}"?`)) deletePlanMutation.mutate(plan.id)
-                            }}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Create / Edit modal */}
-              {planModalOpen && (
-                <div
-                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
-                  onClick={(e) => { if (e.target === e.currentTarget) setPlanModalOpen(false) }}
-                >
-                  <div className="relative w-full max-w-lg overflow-y-auto max-h-[90vh] rounded-[2rem] border border-admin-border bg-white p-6 shadow-xl space-y-4">
-                    <button
-                      onClick={() => setPlanModalOpen(false)}
-                      className="absolute right-4 top-4 rounded-full p-1.5 text-admin-muted hover:bg-admin-subtle transition"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-
-                    <h2 className="font-admin text-xl text-admin-ink">
-                      {selectedPlan ? 'Edit Plan' : 'New Plan'}
-                    </h2>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="col-span-2">
-                        <label className="text-xs text-admin-muted mb-1 block">Name</label>
-                        <Input value={planForm.name}
-                          onChange={(e) => setPlanForm((f: any) => ({ ...f, name: e.target.value }))} />
-                      </div>
-
-                      <div>
-                        <label className="text-xs text-admin-muted mb-1 block">Slug</label>
-                        <Input placeholder="free / pro / premium"
-                          value={planForm.slug}
-                          onChange={(e) => setPlanForm((f: any) => ({ ...f, slug: e.target.value }))} />
-                      </div>
-
-                      <div>
-                        <label className="text-xs text-admin-muted mb-1 block">Badge</label>
-                        <Input placeholder="MOST POPULAR"
-                          value={planForm.badge ?? ''}
-                          onChange={(e) => setPlanForm((f: any) => ({ ...f, badge: e.target.value || null }))} />
-                      </div>
-
-                      <div>
-                        <label className="text-xs text-admin-muted mb-1 block">Price ($)</label>
-                        <Input type="number" min={0} step={0.01}
-                          value={planForm.price}
-                          onChange={(e) => setPlanForm((f: any) => ({ ...f, price: parseFloat(e.target.value) || 0 }))} />
-                      </div>
-
-                      <div>
-                        <label className="text-xs text-admin-muted mb-1 block">Billing</label>
-                        <select
-                          className="w-full rounded-2xl border border-admin-border bg-white/85 px-4 py-3 text-sm text-admin-ink focus:border-admin-accent focus:outline-none focus:ring-2 focus:ring-admin-accent/25"
-                          value={planForm.billing_interval}
-                          onChange={(e) => setPlanForm((f: any) => ({ ...f, billing_interval: e.target.value }))}
-                        >
-                          <option value="month">Monthly</option>
-                          <option value="year">Yearly</option>
-                        </select>
-                      </div>
-
-                      <div>
-                        <label className="text-xs text-admin-muted mb-1 block">Scan Limit</label>
-                        <Input type="number" min={0}
-                          value={planForm.scan_limit}
-                          onChange={(e) => setPlanForm((f: any) => ({ ...f, scan_limit: parseInt(e.target.value) || 0 }))} />
-                      </div>
-
-                      <div>
-                        <label className="text-xs text-admin-muted mb-1 block">History Days</label>
-                        <Input type="number" min={0}
-                          value={planForm.history_days}
-                          onChange={(e) => setPlanForm((f: any) => ({ ...f, history_days: parseInt(e.target.value) || 0 }))} />
-                      </div>
-
-                      <div className="col-span-2">
-                        <label className="text-xs text-admin-muted mb-1 block">Description</label>
-                        <textarea rows={2}
-                          className="w-full rounded-2xl border border-admin-border bg-white/80 px-4 py-3 text-sm text-admin-ink placeholder:text-admin-muted focus:border-admin-accent focus:outline-none focus:ring-2 focus:ring-admin-accent/25 resize-none"
-                          value={planForm.description ?? ''}
-                          onChange={(e) => setPlanForm((f: any) => ({ ...f, description: e.target.value }))} />
-                      </div>
-
-                      <div className="col-span-2">
-                        <label className="text-xs text-admin-muted mb-1 block">Features</label>
-                        <textarea
-                          rows={5}
-                          className="w-full rounded-2xl border border-admin-border bg-white/80 px-4 py-3 text-sm font-mono text-admin-ink placeholder:text-admin-muted focus:border-admin-accent focus:outline-none focus:ring-2 focus:ring-admin-accent/25 resize-none"
-                          placeholder={"Unlimited scans\nPriority support\nAdvanced analytics"}
-                          value={(planForm.features as string[]).join('\n')}
-                          onChange={(e) => setPlanForm((f: any) => ({
-                            ...f,
-                            features: e.target.value.split('\n'), // không filter để giữ dòng trống khi gõ
-                          }))}
-                          onBlur={(e) => setPlanForm((f: any) => ({
-                            ...f,
-                            features: e.target.value.split('\n').filter(Boolean), // filter khi blur
-                          }))}
-                        />
-                      </div>
-
-                      <div className="col-span-2 flex items-center gap-2">
-                        <input type="checkbox" id="is_active" checked={planForm.is_active}
-                          onChange={(e) => setPlanForm((f: any) => ({ ...f, is_active: e.target.checked }))} />
-                        <label htmlFor="is_active" className="text-sm text-admin-ink">Active (hiển thị cho người dùng)</label>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end gap-2 pt-2">
-                      <Button variant="ghost" onClick={() => setPlanModalOpen(false)}>Cancel</Button>
-                      <Button
-                        disabled={createPlanMutation.isPending || updatePlanMutation.isPending}
-                        onClick={async () => {
-                          if (selectedPlan) {
-                            await updatePlanMutation.mutateAsync({ id: selectedPlan.id, patch: planForm })
-                          } else {
-                            await createPlanMutation.mutateAsync(planForm)
-                          }
-                          setPlanModalOpen(false)
-                        }}
-                      >
-                        {createPlanMutation.isPending || updatePlanMutation.isPending
-                          ? 'Saving...'
-                          : selectedPlan ? 'Save Changes' : 'Create Plan'
-                        }
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
+            <AdminPlansSection
+              plans={plansQuery.data ?? []}
+              isCreating={createPlanMutation.isPending}
+              isUpdating={updatePlanMutation.isPending}
+              isDeleting={deletePlanMutation.isPending}
+              onCreatePlan={(plan) => createPlanMutation.mutateAsync(plan)}
+              onUpdatePlan={(id, patch) => updatePlanMutation.mutateAsync({ id, patch })}
+              onDeletePlan={(id) => deletePlanMutation.mutateAsync(id)}
+            />
           )}
           {/* API KEYS TAB */}
           {activeSection === 'api-keys' && (
