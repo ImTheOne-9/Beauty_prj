@@ -8,7 +8,6 @@ import {
   Trash2,
   Search,
   RefreshCw,
-  UserCheck,
   ChevronLeft,
   ChevronRight,
   X,
@@ -21,7 +20,7 @@ import { useAuth } from '@/features/auth/presentation/hooks/useAuth'
 import { useAuthStore } from '@/features/auth/presentation/store/auth-store'
 import type { AdminProductRecord, AdminProductVariantRecord } from '@/application/dtos/admin'
 import { useDependencies } from '@/app/providers/DependencyProvider'
-import { canAccessAdminSection, getAdminRoleLabel, type AdminSection, type AdminRole } from '@/shared/lib/admin'
+import { canAccessAdminSection, getAdminRoleLabel, type AdminSection } from '@/shared/lib/admin'
 import { parseProductTags } from '@/shared/lib/product-tags'
 import { type Order } from '@/core/entities'
 import { cn } from '@/shared/lib/cn'
@@ -34,7 +33,8 @@ import { AdminSectionTitle } from '../components/AdminSectionTitle'
 import { AdminProductVariantsSection } from '../components/AdminProductVariantsSection'
 import { adminNavigationSections } from '../config/admin-navigation'
 import { useAdminHealth } from '../hooks/useAdminHealth'
-
+import { AdminScansSection } from '../components/Adminscanssection'
+import { AdminAccessSection } from '../components/AdminAccessSection'
 // type ApiKeyFormState = {
 //   id: string
 //   name: string
@@ -277,7 +277,6 @@ export default function AdminPage() {
   const [adminScanSearch, setAdminScanSearch]         = useState('')
   const [adminScanModeFilter, setAdminScanModeFilter] = useState<'all' | 'api' | 'demo'>('all')
   const [adminScanPage, setAdminScanPage]             = useState(1)
-  const [selectedAdminScan, setSelectedAdminScan]     = useState<any>(null)
   const ADMIN_SCAN_PAGE_SIZE = 10
 
   const [userSearch, setUserSearch] = useState('')
@@ -290,9 +289,6 @@ export default function AdminPage() {
   const [orderStatusFilter, setOrderStatusFilter] = useState<string>('All')
 
   // User Manager Form
-  const [newUserEmail, setNewUserEmail] = useState('')
-  const [newUserPassword, setNewUserPassword] = useState('')
-  const [newUserRole, setNewUserRole] = useState<AdminRole | 'user'>('user')
 
   const [planModalOpen, setPlanModalOpen] = useState(false)
   const [planForm, setPlanForm] = useState(EMPTY_PLAN)
@@ -307,12 +303,6 @@ export default function AdminPage() {
   // Modal states — Categories  
   const [categoryModalOpen, setCategoryModalOpen] = useState(false)
   const [categorySearch, setCategorySearch] = useState('')
-
-  const [userModalOpen, setUserModalOpen] = useState(false)
-  const [selectedUser, setSelectedUser] = useState<any>(null)
-  const [newUserPlanId, setNewUserPlanId] = useState<string>('')
-  const [newUserFirstName, setNewUserFirstName] = useState('')
-  const [newUserLastName, setNewUserLastName] = useState('')
 
   const [userRoleFilter, setUserRoleFilter] = useState('all')
   const [userPlanFilter, setUserPlanFilter] = useState('all')
@@ -347,26 +337,6 @@ export default function AdminPage() {
     setCategoryModalOpen(true)
   }
 
-  const openUserModal = (user?: any) => {
-    if (user) {
-      setSelectedUser(user)
-      setNewUserEmail(user.email)
-      setNewUserFirstName(user.first_name || '')
-      setNewUserLastName(user.last_name || '')
-      setNewUserRole(user.role ?? 'user')
-      setNewUserPlanId(user.plan_id ?? '')
-      setNewUserPassword('')
-    } else {
-      setSelectedUser(null)
-      setNewUserEmail('')
-      setNewUserPassword('')
-      setNewUserFirstName('')
-      setNewUserLastName('')
-      setNewUserRole('user')
-      setNewUserPlanId('')
-    }
-    setUserModalOpen(true)
-  }
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' })
   }, [activeSection])
@@ -712,44 +682,6 @@ export default function AdminPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'plans'] }),
   })
 
-
-  // User Manager Mutations
-  const updateUserRoleMutation = useMutation({
-    mutationFn: async ({ userId, role }: { userId: string; role: string }) => {
-      return adminUseCases.updateUserRole(userId, role)
-    },
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['admin', 'profiles'] })
-      await useAuthStore.getState().initialize()
-    },
-  })
-
-  const createUserRoleMutation = useMutation({
-    mutationFn: async () => {
-      if (!newUserEmail || !newUserEmail.includes('@')) {
-        throw new Error('Please enter a valid email address.')
-      }
-      if (!newUserPassword || newUserPassword.length < 8) {
-        throw new Error('Password must be at least 8 characters.')
-      }
-      return adminUseCases.createUserWithRole(
-        newUserEmail,
-        newUserPassword,
-        newUserFirstName,
-        newUserLastName,
-        newUserRole as 'admin' | 'user',
-        newUserPlanId,
-      )
-    },
-    onSuccess: async () => {
-      setNewUserEmail('')
-      setNewUserPassword('')
-      setNewUserPlanId('')
-      setUserModalOpen(false)
-      await queryClient.invalidateQueries({ queryKey: ['admin', 'profiles'] })
-    },
-  })
-
   const deleteUserRoleMutation = useMutation({
     mutationFn: async (userId: string) => {
       return adminUseCases.deleteUserRole(userId)
@@ -1048,661 +980,54 @@ export default function AdminPage() {
 
           {/* SCANS TAB WITH SCAN SIMULATOR */}
           {activeSection === 'scans' && (
-            <div className="space-y-4">
-              {/* Search & filter */}
-              <div className="bg-white border border-admin-border rounded-3xl p-4 flex flex-wrap gap-3 items-center">
-                <div className="flex-1 relative min-w-[200px]">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-admin-muted" />
-                  <input
-                    type="text"
-                    className="w-full rounded-full border border-admin-border pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-admin-accent/20"
-                    placeholder="Search by Scan ID, User UUID or Email..."
-                    value={adminScanSearch}
-                    onChange={(e) => { setAdminScanSearch(e.target.value); setAdminScanPage(1) }}
-                  />
-                </div>
-                <select
-                  className="rounded-full border border-admin-border px-3 py-2 text-sm text-admin-ink focus:outline-none"
-                  value={adminScanModeFilter}
-                  onChange={(e) => { setAdminScanModeFilter(e.target.value as any); setAdminScanPage(1) }}
-                >
-                  <option value="all">All Modes</option>
-                  <option value="api">API Mode</option>
-                  <option value="demo">Demo Mode</option>
-                </select>
-              </div>
-
-              <Card className="border border-admin-border p-6 bg-white shadow-sm">
-                <AdminSectionTitle
-                  eyebrow="Scan History"
-                  title="All Users Scans"
-                  description={`${filteredAdminScans.length} scan record(s) — image preview, user email, applied effects.`}
-                />
-
-                <div className="mt-6 overflow-x-auto">
-                  <table className="w-full min-w-[860px] text-left border-collapse text-xs">
-                    <thead>
-                      <tr className="border-b border-admin-border text-admin-ink font-bold uppercase tracking-wider">
-                        <th className="pb-3 pr-3 w-[100px]">Images</th>
-                        <th className="pb-3 px-3">Scan ID</th>
-                        <th className="pb-3 px-3">Email</th>
-                        <th className="pb-3 px-3">Mode</th>
-                        <th className="pb-3 px-3 min-w-[200px]">Effects</th>
-                        <th className="pb-3 px-3 whitespace-nowrap">Created</th>
-                        <th className="pb-3 pl-3 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-rose-50">
-                      {paginatedAdminScans.map((scan) => {
-                        // const enabledEffects = (scan.effects ?? []).filter((e: any) => e.enabled)
-                        const email = scan.user_id ? (userLookup.get(scan.user_id)?.email ?? scan.user_id.slice(0, 8) + '...') : 'Guest'
-                        return (
-                          <tr key={scan.id} className="hover:bg-admin-subtle text-admin-ink align-middle">
-                            <td className="py-3 pr-3">
-                              <div className="flex gap-1">
-                                {[scan.original_image, scan.image_url].map((url, i) => (
-                                  <img
-                                    key={i}
-                                    src={url || 'https://placehold.co/40x40/fce7f3/9f1239?text=?'}
-                                    alt={i === 0 ? 'Before' : 'After'}
-                                    className="h-10 w-10 rounded-lg border border-admin-border object-cover bg-admin-subtle"
-                                  />
-                                ))}
-                              </div>
-                            </td>
-                            <td className="py-3 px-3 font-mono font-semibold" title={scan.id}>
-                              {scan.id.slice(0, 8)}...
-                            </td>
-                            <td className="py-3 px-3 text-admin-muted max-w-[180px] truncate" title={email}>
-                              {email}
-                            </td>
-                            <td className="py-3 px-3">
-                              <span className={cn(
-                                'text-[10px] font-bold rounded-lg px-2 py-0.5 border',
-                                scan.mode === 'api'
-                                  ? 'text-emerald-700 bg-emerald-50/50 border-emerald-100'
-                                  : 'text-admin-accent bg-admin-subtle border-admin-border',
-                              )}>
-                                {scan.mode === 'api' ? 'API' : 'Demo'}
-                              </span>
-                            </td>
-                            <td className="py-3 px-3">
-                              <div className="flex flex-wrap gap-1.5">
-                                {(scan.effects ?? []).map((e: any) => (
-                                  <span
-                                    key={e.category}
-                                    className={cn(
-                                      'rounded-full px-2.5 py-0.5 text-[11px] capitalize',
-                                      e.enabled
-                                        ? 'bg-admin-subtle border border-admin-border text-admin-accent'
-                                        : 'bg-admin-subtle border border-admin-border text-admin-muted',
-                                    )}
-                                  >
-                                    {e.category.replace(/_/g, ' ')}
-                                    {e.enabled ? ' (Active)' : ' (Disabled)'}
-                                  </span>
-                                ))}
-                              </div>
-                            </td>
-                            <td className="py-3 px-3 text-admin-muted whitespace-nowrap">
-                              {formatDate(scan.created_at)}
-                            </td>
-                            <td className="py-3 pl-3 text-right">
-                              <div className="flex justify-end gap-1">
-                                <Button size="sm" variant="ghost" onClick={() => setSelectedAdminScan(scan)}>
-                                  View
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => { if (confirm('Delete this scan?')) deleteScanMutation.mutate(scan.id) }}
-                                  disabled={deleteScanMutation.isPending}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-
-                  {paginatedAdminScans.length === 0 && (
-                    <div className="text-center py-12 text-admin-muted text-sm">No scan records found.</div>
-                  )}
-                </div>
-
-                {totalAdminScanPages > 1 && (
-                  <div className="flex items-center justify-center gap-4 pt-4 mt-4 border-t border-admin-border">
-                    <Button variant="ghost" size="sm" disabled={adminScanPage === 1} onClick={() => setAdminScanPage(p => Math.max(1, p - 1))}>
-                      <ChevronLeft className="h-4 w-4 mr-1" /> Prev
-                    </Button>
-                    <span className="text-xs font-semibold text-admin-ink">Page {adminScanPage} of {totalAdminScanPages}</span>
-                    <Button variant="ghost" size="sm" disabled={adminScanPage === totalAdminScanPages} onClick={() => setAdminScanPage(p => Math.min(totalAdminScanPages, p + 1))}>
-                      Next <ChevronRight className="h-4 w-4 ml-1" />
-                    </Button>
-                  </div>
-                )}
-              </Card>
-
-              {/* Detail modal — matches RecommendationsPage ScanDetailModal */}
-              {selectedAdminScan && (() => {
-                const allEffects = selectedAdminScan.effects ?? []
-
-                const renderAdminEffectDetails = (effect: any) => {
-                  const details: { label: string; value: React.ReactNode }[] = []
-                  if (effect.palettes && effect.palettes.length > 0) {
-                    effect.palettes.forEach((p: any, i: number) => {
-                      const labelSuffix = effect.palettes.length > 1 ? ` #${i + 1}` : ''
-                      details.push({
-                        label: `Color${labelSuffix}`,
-                        value: (
-                          <div className="flex items-center gap-2">
-                            <span className="inline-block w-4 h-4 rounded-full border border-admin-border/20 shadow-sm" style={{ backgroundColor: p.color }} />
-                            <span className="font-mono text-[11px] uppercase text-admin-ink font-semibold">{p.color}</span>
-                          </div>
-                        ),
-                      })
-                      if (p.texture) details.push({ label: `Texture${labelSuffix}`, value: <span className="capitalize">{p.texture}</span> })
-                      if (p.colorIntensity != null) details.push({ label: `Color Intensity${labelSuffix}`, value: `${p.colorIntensity}%` })
-                      if (p.glowIntensity != null) details.push({ label: `Glow Intensity${labelSuffix}`, value: `${p.glowIntensity}%` })
-                      if (p.shimmerIntensity != null) details.push({ label: `Shimmer Intensity${labelSuffix}`, value: `${p.shimmerIntensity}%` })
-                    })
-                  }
-                  if (effect.pattern?.name) details.push({ label: 'Pattern', value: <span className="capitalize">{effect.pattern.name}</span> })
-                  if (effect.shape?.name) details.push({ label: 'Shape', value: <span className="capitalize">{effect.shape.name}</span> })
-                  if (effect.style?.type) details.push({ label: 'Style', value: <span className="capitalize">{effect.style.type}</span> })
-                  if (effect.skinSmoothStrength != null) details.push({ label: 'Smoothness Strength', value: `${effect.skinSmoothStrength}%` })
-                  if (details.length === 0) return null
-                  return (
-                    <div className="mt-3 grid grid-cols-2 gap-3 text-xs border-t border-admin-border pt-2">
-                      {details.map((d, index) => (
-                        <div key={index} className="flex flex-col gap-0.5">
-                          <span className="text-[9px] uppercase font-bold text-admin-muted tracking-wider">{d.label}</span>
-                          <span className="text-admin-ink font-semibold">{d.value}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )
-                }
-
-                return (
-                <div
-                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4 backdrop-blur-sm"
-                  onClick={(e) => { if (e.target === e.currentTarget) setSelectedAdminScan(null) }}
-                >
-                  <div className="relative w-full max-w-5xl overflow-hidden rounded-[2rem] border border-admin-border bg-white shadow-2xl flex flex-col max-h-[90vh]">
-                    <button
-                      onClick={() => setSelectedAdminScan(null)}
-                      className="absolute right-5 top-5 z-10 rounded-full p-2 text-admin-muted bg-white/90 hover:bg-admin-subtle hover:text-admin-accent transition shadow-sm"
-                    >
-                      <X className="h-5 w-5" />
-                    </button>
-
-                    <div className="grid grid-cols-1 lg:grid-cols-12 divide-y lg:divide-y-0 lg:divide-x divide-rose-100 overflow-y-auto flex-1">
-                      {/* Left Side: Images */}
-                      <div className="lg:col-span-5 p-6 md:p-8 space-y-4">
-                        <h3 className="font-admin text-lg font-bold text-admin-ink">Visual Comparison</h3>
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="relative rounded-2xl overflow-hidden bg-admin-subtle border border-admin-border aspect-[3/4]">
-                            {selectedAdminScan.original_image ? (
-                              <img src={selectedAdminScan.original_image} className="h-full w-full object-cover" alt="Before" />
-                            ) : (
-                              <div className="absolute inset-0 flex items-center justify-center text-sm text-admin-muted">Before</div>
-                            )}
-                            <span className="absolute bottom-3 left-3 rounded-full bg-black/55 px-2.5 py-0.5 text-xs font-semibold text-white">Before</span>
-                          </div>
-                          <div className="relative rounded-2xl overflow-hidden bg-admin-subtle border border-admin-border aspect-[3/4]">
-                            {selectedAdminScan.image_url ? (
-                              <img src={selectedAdminScan.image_url} className="h-full w-full object-cover" alt="After" />
-                            ) : (
-                              <div className="absolute inset-0 flex items-center justify-center text-sm text-admin-muted">After</div>
-                            )}
-                            <span className="absolute bottom-3 left-3 rounded-full bg-admin-accent px-2.5 py-0.5 text-xs font-semibold text-white">After</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Right Side: Details & All Effects */}
-                      <div className="lg:col-span-7 p-6 md:p-8 space-y-6 overflow-y-auto">
-                        <div>
-                          <p className="text-[10px] uppercase font-bold tracking-widest text-admin-accent">Scan Details</p>
-                          <h2 className="mt-1 font-admin text-2xl text-admin-ink font-extrabold">Metadata & Effects</h2>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4 rounded-2xl bg-admin-subtle border border-admin-border p-4">
-                          <div>
-                            <span className="text-[10px] uppercase font-bold text-admin-muted block">Scan ID</span>
-                            <span className="font-mono text-xs text-admin-ink font-semibold break-all">{selectedAdminScan.id}</span>
-                          </div>
-                          <div>
-                            <span className="text-[10px] uppercase font-bold text-admin-muted block">Email</span>
-                            <span className="text-xs text-admin-ink font-semibold break-all">
-                              {selectedAdminScan.user_id ? (userLookup.get(selectedAdminScan.user_id)?.email ?? 'Unknown') : 'Guest'}
-                            </span>
-                          </div>
-                          <div>
-                            <span className="text-[10px] uppercase font-bold text-admin-muted block">Mode</span>
-                            <span className={cn(
-                              'inline-block rounded-full px-2 py-0.5 text-[10px] font-bold border mt-0.5 uppercase',
-                              selectedAdminScan.mode === 'api' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-admin-subtle text-admin-accent border-admin-border',
-                            )}>
-                              {selectedAdminScan.mode === 'api' ? 'API' : 'Demo'}
-                            </span>
-                          </div>
-                          <div>
-                            <span className="text-[10px] uppercase font-bold text-admin-muted block">Created</span>
-                            <div className="flex items-center gap-2 text-xs text-admin-ink font-medium mt-0.5">
-                              {formatDate(selectedAdminScan.created_at)}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div>
-                          <h3 className="text-xs uppercase font-bold tracking-widest text-admin-muted mb-3">All Makeup Effects</h3>
-                          {allEffects.length === 0 ? (
-                            <p className="text-xs text-admin-muted">No makeup effects recorded for this scan.</p>
-                          ) : (
-                            <div className="space-y-4">
-                              {allEffects.map((e: any) => (
-                                <div key={e.category} className="rounded-2xl border border-admin-border bg-admin-subtle p-4 shadow-sm">
-                                  <div className="flex items-center justify-between">
-                                    <span className="text-sm font-bold capitalize text-admin-ink">
-                                      {e.category.replace(/_/g, ' ')}
-                                    </span>
-                                    <span className={cn(
-                                      'rounded-full px-2.5 py-0.5 text-[10px] font-bold uppercase border',
-                                      e.enabled
-                                        ? 'bg-emerald-50 border-emerald-100 text-emerald-700'
-                                        : 'bg-gray-50 border-gray-200 text-gray-400',
-                                    )}>
-                                      {e.enabled ? 'Active' : 'Disabled'}
-                                    </span>
-                                  </div>
-                                  {renderAdminEffectDetails(e)}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                )
-              })()}
-            </div>
+            <AdminScansSection
+              scans={paginatedAdminScans}
+              filteredCount={filteredAdminScans.length}
+              search={adminScanSearch}
+              modeFilter={adminScanModeFilter}
+              page={adminScanPage}
+              totalPages={totalAdminScanPages}
+              isDeleting={deleteScanMutation.isPending}
+              userLookup={userLookup}
+              onSearchChange={(v) => { setAdminScanSearch(v); setAdminScanPage(1) }}
+              onModeFilterChange={(v) => { setAdminScanModeFilter(v); setAdminScanPage(1) }}
+              onPageChange={setAdminScanPage}
+              onDelete={(id) => deleteScanMutation.mutate(id)}
+            />
           )}
 
           {/* ACCESS CONTROL MANAGER */}
-          {activeSection === 'access' ? (
-            <div className="space-y-4">
-              {/* Search + Add */}
-              <div className="bg-white border border-admin-border rounded-3xl p-4 flex flex-wrap gap-3 items-center">
-                {/* Search */}
-                <div className="flex-1 relative min-w-[200px]">
-                  <Search className="absolute left-3 top-3 h-4 w-4 text-admin-muted" />
-                  <input
-                    type="text"
-                    className="w-full rounded-full border border-admin-border pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-admin-accent/20"
-                    placeholder="Search by email or name..."
-                    value={userSearch}
-                    onChange={(e) => setUserSearch(e.target.value)}
-                  />
-                </div>
-
-                {/* Role filter */}
-                <select
-                  className="rounded-full border border-admin-border px-3 py-2 text-sm text-admin-ink focus:outline-none"
-                  value={userRoleFilter}
-                  onChange={(e) => setUserRoleFilter(e.target.value)}
-                >
-                  <option value="all">All Roles</option>
-                  <option value="admin">Admin</option>
-                  <option value="user">User</option>
-                </select>
-
-                {/* Plan filter — dynamic từ plansQuery */}
-                <select
-                  className="rounded-full border border-admin-border px-3 py-2 text-sm text-admin-ink focus:outline-none"
-                  value={userPlanFilter}
-                  onChange={(e) => setUserPlanFilter(e.target.value)}
-                >
-                  <option value="all">All Plans</option>
-                  <option value="">No Plan</option>
-                  {(plansQuery.data ?? []).map((p: any) => (
-                    <option key={p.id} value={p.slug}>{p.name}</option>
-                  ))}
-                </select>
-
-                <Button onClick={() => openUserModal()}>
-                  + Add User
-                </Button>
-              </div>
-
-              {/* Table */}
-              <Card className="border border-admin-border p-6 bg-white shadow-sm">
-                <AdminSectionTitle
-                  eyebrow="User Access Control"
-                  title="Manage Users"
-                  description={`${filteredUsers.length} user(s) — role, plan, and profile details.`}
-                />
-
-                <div className="mt-6 overflow-x-auto">
-                  <table className="w-full min-w-[700px] text-left border-collapse text-xs">
-                    <thead>
-                      <tr className="border-b border-admin-border text-admin-ink font-bold uppercase tracking-wider">
-                        <th className="pb-3 pr-3">User</th>
-                        <th className="pb-3 px-3">Role</th>
-                        <th className="pb-3 px-3">Plan</th>
-                        <th className="pb-3 px-3">Updated At</th>
-                        <th className="pb-3 pl-3 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-rose-50">
-                      {filteredUsers.map((item: any) => {
-                        const fullName = [item.first_name, item.last_name].filter(Boolean).join(' ')
-                        return (
-                          <tr key={item.id} className="hover:bg-admin-subtle text-admin-ink align-middle">
-                            {/* Avatar + name + email */}
-                            <td className="py-3 pr-3">
-                              <div className="flex items-center gap-3">
-                                {item.avatar_url ? (
-                                  <img
-                                    src={item.avatar_url}
-                                    alt={fullName || item.email}
-                                    className="h-9 w-9 rounded-full border border-admin-border object-cover shrink-0"
-                                    onError={(e) => { e.currentTarget.style.display = 'none' }}
-                                  />
-                                ) : (
-                                  <div className="h-9 w-9 rounded-full bg-admin-subtle flex items-center justify-center shrink-0 text-admin-accent font-bold text-sm">
-                                    {(item.email?.[0] ?? '?').toUpperCase()}
-                                  </div>
-                                )}
-                                <div className="min-w-0">
-                                  <p className="font-semibold text-admin-ink truncate max-w-[180px]">
-                                    {fullName || <span className="text-admin-muted italic font-normal">No name</span>}
-                                    {item.email?.toLowerCase() === currentAuthUser?.email?.toLowerCase() && (
-                                      <span className="ml-1 text-[9px] bg-admin-accent/10 text-admin-accent px-1.5 py-0.5 rounded font-extrabold">You</span>
-                                    )}
-                                  </p>
-                                  <p className="text-admin-muted truncate max-w-[180px]" title={item.email}>{item.email}</p>
-                                </div>
-                              </div>
-                            </td>
-
-                            {/* Role badge */}
-                            <td className="py-3 px-3">
-                              <span className={cn(
-                                'rounded-lg px-2.5 py-1 text-[10px] font-bold border uppercase tracking-wide',
-                                item.role === 'admin'
-                                  ? 'bg-admin-subtle text-admin-accent border-admin-border'
-                                  : 'bg-gray-50 text-gray-500 border-gray-200',
-                              )}>
-                                {item.role ?? 'user'}
-                              </span>
-                            </td>
-
-                            {/* Plan badge */}
-                            <td className="py-3 px-3">
-                              {item.plan ? (
-                                <div>
-                                  <span className={cn(
-                                    'rounded-lg px-2.5 py-1 text-[10px] font-bold border uppercase tracking-wide',
-                                    item.plan.slug === 'pro'
-                                      ? 'bg-admin-accent/10 text-admin-accent border-admin-accent/20'
-                                      : item.plan.slug === 'premium'
-                                      ? 'bg-amber-50 text-amber-700 border-amber-100'
-                                      : 'bg-gray-50 text-gray-500 border-gray-200',
-                                  )}>
-                                    {item.plan.name}
-                                  </span>
-                                  <p className="mt-1 text-[10px] text-admin-muted">
-                                    ${Number(item.plan.price).toFixed(2)}/{item.plan.billing_interval}
-                                  </p>
-                                </div>
-                              ) : (
-                                <span className="rounded-lg px-2.5 py-1 text-[10px] font-bold border uppercase bg-gray-50 text-gray-400 border-gray-200">
-                                  No Plan
-                                </span>
-                              )}
-                            </td>
-
-                            <td className="py-3 px-3 text-admin-muted whitespace-nowrap">
-                              {new Date(item.updated_at).toLocaleDateString('vi-VN')}
-                            </td>
-
-                            <td className="py-3 pl-3 text-right">
-                              <div className="flex justify-end gap-1">
-                                <Button size="sm" variant="ghost" onClick={() => openUserModal(item)}>
-                                  <PencilLine className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  onClick={() => {
-                                    if (confirm(`Delete account ${item.email}? This action cannot be undone.`)) {
-                                      deleteUserRoleMutation.mutate(item.id)
-                                    }
-                                  }}
-                                  disabled={deleteUserRoleMutation.isPending}
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </Button>
-                              </div>
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                  {filteredUsers.length === 0 && (
-                    <div className="text-center py-12 text-admin-muted text-sm">No users found.</div>
-                  )}
-                </div>
-              </Card>
-
-              {/* Role Matrix */}
-              <Card className="border border-admin-border p-6 bg-white shadow-sm">
-                <AdminSectionTitle
-                  eyebrow="Access Matrix"
-                  title="Role Module Scopes"
-                  description="List of visible modules based on role mapping rules."
-                />
-                <div className="mt-5 space-y-3 text-xs text-admin-ink">
-                  {[
-                    { role: 'Admin', scope: 'Full access to manage users, catalog, scans, recommendations and settings.' },
-                    { role: 'User', scope: 'Standard access without admin panels. Can run scans and use subscription benefits.' },
-                  ].map((item) => (
-                    <div key={item.role} className="rounded-2xl border border-admin-border bg-admin-subtle px-3 py-2.5">
-                      <p className="font-semibold flex items-center gap-1.5">
-                        <UserCheck className="h-3.5 w-3.5 text-admin-accent" />
-                        {item.role}
-                      </p>
-                      <p className="mt-1 text-[11px] text-admin-muted">{item.scope}</p>
-                    </div>
-                  ))}
-                </div>
-              </Card>
-
-              {/* ─── User Modal ─── */}
-              {userModalOpen && (
-                <div
-                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
-                  onClick={(e) => { if (e.target === e.currentTarget) setUserModalOpen(false) }}
-                >
-                  <div className="relative w-full max-w-md overflow-y-auto max-h-[90vh] rounded-[2rem] border border-admin-border bg-white p-6 shadow-xl space-y-4">
-                    <button
-                      onClick={() => setUserModalOpen(false)}
-                      className="absolute right-4 top-4 rounded-full p-1.5 text-admin-muted hover:bg-admin-subtle transition"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-
-                    <h2 className="font-admin text-xl text-admin-ink">
-                      {selectedUser ? 'Edit User' : 'Create New User'}
-                    </h2>
-
-                    <div className="space-y-4">
-                      {/* Edit mode: avatar + editable name */}
-                      {selectedUser && (
-                        <div className="space-y-3">
-                          {/* Avatar preview */}
-                          <div className="flex items-center gap-3 rounded-2xl bg-admin-subtle border border-admin-border px-4 py-3">
-                            {selectedUser.avatar_url ? (
-                              <img src={selectedUser.avatar_url} alt=""
-                                className="h-10 w-10 rounded-full border border-admin-border object-cover shrink-0" />
-                            ) : (
-                              <div className="h-10 w-10 rounded-full bg-admin-subtle flex items-center justify-center shrink-0 text-admin-accent font-bold">
-                                {(selectedUser.email?.[0] ?? '?').toUpperCase()}
-                              </div>
-                            )}
-                            <div className="min-w-0">
-                              <p className="text-xs text-admin-muted truncate">{selectedUser.email}</p>
-                            </div>
-                          </div>
-
-                          {/* Editable name fields */}
-                          <div className="grid grid-cols-2 gap-3">
-                            <div>
-                              <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">First Name</label>
-                              <Input
-                                placeholder="e.g. Jane"
-                                value={newUserFirstName}
-                                onChange={(e) => setNewUserFirstName(e.target.value)}
-                              />
-                            </div>
-                            <div>
-                              <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">Last Name</label>
-                              <Input
-                                placeholder="e.g. Doe"
-                                value={newUserLastName}
-                                onChange={(e) => setNewUserLastName(e.target.value)}
-                              />
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {!selectedUser && (
-                        <div>
-                          <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">FirstName</label>
-                          <Input
-                            placeholder="FirstName"
-                            value={newUserFirstName}
-                            onChange={(e) => setNewUserFirstName(e.target.value)}
-                          />
-                        </div>
-                      )}
-
-                      {!selectedUser && (
-                        <div>
-                          <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">LastName</label>
-                          <Input
-                            placeholder="LastName"
-                            value={newUserLastName}
-                            onChange={(e) => setNewUserLastName(e.target.value)}
-                          />
-                        </div>
-                      )}
-
-                      {/* Email — chỉ create */}
-                      {!selectedUser && (
-                        <div>
-                          <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">Email</label>
-                          <Input
-                            placeholder="e.g. client@lumina.ai"
-                            value={newUserEmail}
-                            onChange={(e) => setNewUserEmail(e.target.value)}
-                          />
-                        </div>
-                      )}
-
-                      {/* Password — chỉ create */}
-                      {!selectedUser && (
-                        <div>
-                          <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">Password</label>
-                          <Input
-                            type="password"
-                            placeholder="Minimum 8 characters"
-                            value={newUserPassword}
-                            onChange={(e) => setNewUserPassword(e.target.value)}
-                          />
-                        </div>
-                      )}
-
-                      {/* Role */}
-                      <div>
-                        <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">Access Level</label>
-                        <select
-                          className="w-full rounded-2xl border border-admin-border bg-white/85 px-4 py-3 text-sm text-admin-ink focus:border-admin-accent focus:outline-none focus:ring-2 focus:ring-admin-accent/25"
-                          value={newUserRole}
-                          onChange={(e) => setNewUserRole(e.target.value as any)}
-                        >
-                          <option value="admin">Admin</option>
-                          <option value="user">Standard User</option>
-                        </select>
-                      </div>
-
-                      {/* Plan — select từ danh sách plans thật */}
-                      <div>
-                        <label className="text-xs font-semibold text-admin-ink uppercase tracking-wide block mb-1">Subscription Plan</label>
-                        <select
-                          className="w-full rounded-2xl border border-admin-border bg-white/85 px-4 py-3 text-sm text-admin-ink focus:border-admin-accent focus:outline-none focus:ring-2 focus:ring-admin-accent/25"
-                          value={newUserPlanId}
-                          onChange={(e) => {
-                            setNewUserPlanId(e.target.value)
-                          }}
-                        >
-                          <option value="">No Plan</option>
-                          {(plansQuery.data ?? []).map((p: any) => (
-                            <option key={p.id} value={p.id}>
-                              {p.name} — ${Number(p.price).toFixed(2)}/{p.billing_interval}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-
-                      {createUserRoleMutation.error && (
-                        <p className="text-sm text-admin-accent">{createUserRoleMutation.error.message}</p>
-                      )}
-
-                      <div className="flex justify-end gap-2 pt-2">
-                        <Button variant="ghost" onClick={() => setUserModalOpen(false)}>Cancel</Button>
-                        <Button
-                          onClick={async () => {
-                            if (selectedUser) {
-                              await updateUserPlanMutation.mutateAsync({
-                                userId: selectedUser.id,
-                                planId: newUserPlanId,
-                                role: newUserRole,
-                                firstName: newUserFirstName,
-                                lastName: newUserLastName,
-                              })
-                              setUserModalOpen(false)
-                            } else {
-                              await createUserRoleMutation.mutateAsync()
-                              setUserModalOpen(false)
-                            }  // ← đóng else
-                          }}  // ← đóng onClick
-                          disabled={
-                            createUserRoleMutation.isPending ||
-                            updateUserRoleMutation.isPending ||
-                            updateUserPlanMutation.isPending
-                          }
-                        >
-                          {createUserRoleMutation.isPending || updateUserRoleMutation.isPending
-                            ? 'Saving...'
-                            : selectedUser ? 'Save Changes' : 'Create User'}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : null}
+          {activeSection === 'access' && (
+            <AdminAccessSection
+              users={filteredUsers}
+              filteredCount={filteredUsers.length}
+              plans={plansQuery.data ?? []}
+              currentUserEmail={currentAuthUser?.email}
+              search={userSearch}
+              roleFilter={userRoleFilter}
+              planFilter={userPlanFilter}
+              onSearchChange={setUserSearch}
+              onRoleFilterChange={setUserRoleFilter}
+              onPlanFilterChange={setUserPlanFilter}
+              isDeleting={deleteUserRoleMutation.isPending}
+              onDelete={(user) => {
+                if (confirm(`Delete account ${user.email}? This action cannot be undone.`)) {
+                  deleteUserRoleMutation.mutate(user.id)
+                }
+              }}
+              onCreateUser={async ({ email, password, firstName, lastName, role, planId }) => {
+                if (!email || !email.includes('@')) throw new Error('Please enter a valid email address.')
+                if (!password || password.length < 8) throw new Error('Password must be at least 8 characters.')
+                await adminUseCases.createUserWithRole(email, password, firstName, lastName, role as 'admin' | 'user', planId)
+                await queryClient.invalidateQueries({ queryKey: ['admin', 'profiles'] })
+              }}
+              isCreating={false}
+              onUpdateUser={async ({ userId, firstName, lastName, role, planId }) => {
+                await updateUserPlanMutation.mutateAsync({ userId, planId, role, firstName, lastName })
+              }}
+              isUpdating={updateUserPlanMutation.isPending}
+            />
+          )}
           {activeSection === 'plans' && (
             <div className="space-y-4">
               <div className="flex items-center justify-between">
