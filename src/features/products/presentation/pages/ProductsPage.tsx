@@ -10,7 +10,7 @@ import { ChevronLeft, ChevronRight, Search, SlidersHorizontal } from 'lucide-rea
 
 export default function ProductsPage() {
   const { productRepo } = useDependencies()
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: ['catalog', 'products'],
     queryFn: async () => productRepo.getAll(),
   })
@@ -58,6 +58,16 @@ export default function ProductsPage() {
 
   if (isLoading) {
     return <Loader fullScreen label="Loading product catalog" />
+  }
+
+  if (error) {
+    return (
+      <section className="app-shell section-shell min-h-screen bg-app-subtle pb-12 pt-4">
+        <div className="app-panel p-12 text-center text-sm text-app-muted">
+          Cannot load product catalog. Please allow public read access for products, categories, and variants.
+        </div>
+      </section>
+    )
   }
 
   return (

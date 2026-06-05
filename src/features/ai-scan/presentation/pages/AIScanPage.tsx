@@ -167,9 +167,9 @@ export default function AIScanPage() {
             processDisabled={isQuotaExceeded}
             processDisabledReason={
               !user
-                ? 'Đăng nhập để sử dụng tính năng scan.'
+                ? 'Sign in to use the scan feature.'
                 : isQuotaExceeded
-                ? `Bạn đã dùng hết ${scanQuota} lượt scan trong tháng này.`
+                ? `You have used up your ${scanQuota} scan limit for this month.`
                 : undefined
             }
             onImageChange={setImageSource}
