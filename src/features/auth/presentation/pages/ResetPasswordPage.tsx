@@ -6,7 +6,7 @@ import { Input } from '@/shared/components/ui/Input'
 import { Button } from '@/shared/components/ui/Button'
 import { LockKeyhole } from 'lucide-react'
 export default function ResetPasswordPage() {
-  const { authRepo } = useDependencies()
+  const { useCases } = useDependencies()
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -22,7 +22,7 @@ export default function ResetPasswordPage() {
     setIsPending(true)
     setError(null)
     try {
-      await authRepo.updatePassword(password)
+      await useCases.auth.updatePassword(password)
       navigate('/dashboard', { replace: true })
     } catch (err: any) {
       setError(err.message || 'Failed to update password')

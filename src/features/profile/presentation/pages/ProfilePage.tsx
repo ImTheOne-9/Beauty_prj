@@ -27,7 +27,7 @@ function formatDateTime(value?: string | null) {
 
 export default function ProfilePage() {
   const { user, profile, role, isAdmin, displayName, avatarUrl, subscriptionTier, refreshProfile } = useAuth()
-  const { authRepo, storageService } = useDependencies()
+  const { useCases } = useDependencies()
   const userId = user?.id ?? ''
   const fileInputRef = useRef<HTMLInputElement>(null)
   const toast = useToast()
@@ -50,7 +50,7 @@ export default function ProfilePage() {
   const saveProfileMutation = useMutation({
     mutationFn: async () => {
       if (!userId) throw new Error('Please sign in to update your profile.')
-      return authRepo.updateProfile(userId, {
+      return useCases.auth.updateProfile(userId, {
         firstName: firstName.trim() || null,
         lastName: lastName.trim() || null,
       })
@@ -76,9 +76,7 @@ export default function ProfilePage() {
         throw new Error('Image must be smaller than 2MB.')
       }
 
-      const avatarUrl = await storageService.uploadAvatar(userId, file)
-      await authRepo.updateProfile(userId, { avatarUrl })
-      return avatarUrl
+      return useCases.auth.uploadAvatar(userId, file)
     },
     onSuccess: async (avatarUrl) => {
       setPreviewAvatar(`${avatarUrl}?t=${Date.now()}`)

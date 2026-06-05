@@ -9,10 +9,10 @@ import { Button } from '@/shared/components/ui/Button'
 import { ChevronLeft, ChevronRight, Search, SlidersHorizontal } from 'lucide-react'
 
 export default function ProductsPage() {
-  const { productRepo } = useDependencies()
+  const { useCases } = useDependencies()
   const { data, isLoading, error } = useQuery({
     queryKey: ['catalog', 'products'],
-    queryFn: async () => productRepo.getAll(),
+    queryFn: async () => useCases.products.listProducts(),
   })
 
   const [page, setPage] = useState(1)

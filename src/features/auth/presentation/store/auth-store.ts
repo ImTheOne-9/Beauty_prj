@@ -20,7 +20,7 @@ let unsubscribeAuth: (() => void) | null = null
 let initPromise: Promise<void> | null = null
 
 async function resolveProfile(userId: string) {
-  const profile = await dependencies.authRepo.getProfile(userId)
+  const profile = await dependencies.useCases.auth.getProfile(userId)
   const role: UserRole = profile?.role ?? 'guest'
   return { profile, role }
 }
@@ -68,7 +68,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   initialize: async () => {
     if (unsubscribeAuth) {
       try {
-        const session = await dependencies.authRepo.getSession()
+        const session = await dependencies.useCases.auth.getSession()
         if (session?.user) {
           const { profile, role } = await resolveProfile(session.user.id)
           set({ session, user: session.user, profile, role })
@@ -90,7 +90,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     initPromise = (async () => {
       set({ isLoading: true })
       try {
-        const session = await dependencies.authRepo.getSession()
+        const session = await dependencies.useCases.auth.getSession()
         let role: UserRole = 'guest'
         let profile: UserProfile | null = null
 
@@ -108,7 +108,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
           initialized: true,
         })
 
-        const subscription = dependencies.authRepo.onAuthStateChange(async (_event, nextSession) => {
+        const subscription = dependencies.useCases.auth.onAuthStateChange(async (_event, nextSession) => {
           applySessionFromAuthEvent(nextSession)
         })
 
@@ -138,7 +138,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     set({ profile, role })
   },
   signOut: async () => {
-    await dependencies.authRepo.signOut()
+    await dependencies.useCases.auth.signOut()
     set({ session: null, user: null, role: 'guest', profile: null })
   },
 }))

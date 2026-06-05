@@ -44,7 +44,7 @@ const planCards = [
 
 export default function CheckoutPage() {
   const { user, subscriptionTier, refreshProfile } = useAuth()
-  const { authRepo } = useDependencies()
+  const { useCases } = useDependencies()
   const toast = useToast()
 
   const activePlan = subscriptionTier?.toLowerCase() || 'free'
@@ -55,7 +55,7 @@ export default function CheckoutPage() {
     }
 
     try {
-      await authRepo.updateProfile(user.id, {})
+      await useCases.auth.updateProfile(user.id, {})
       await refreshProfile()
       toast.success(`Plan updated: ${planId}`)
     } catch (error) {

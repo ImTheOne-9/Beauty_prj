@@ -10,13 +10,7 @@ import { DEFAULT_MAKEUP_EFFECTS, buildApiEffects } from '@/features/ai-scan/lib/
 import { matchProductsToEffects } from '@/features/ai-scan/lib/makeup-product-matcher'
 import { useMakeupCatalog } from '@/features/ai-scan/presentation/hooks/useMakeupCatalog'
 import { useCategories } from '@/features/ai-scan/presentation/hooks/useCategories'
-import { persistScan } from '@/features/ai-scan/services/scan-persistence-service'
 import { useDependencies } from '@/app/providers/DependencyProvider'
-import {
-  getScanQuotaForRole,
-  getScanUsesThisMonth,
-  registerScanUsage,
-} from '@/features/ai-scan/services/scan-usage-service'
 import type { MakeupEffect, MakeupVtoTaskStatus, ScanResult } from '@/core/entities'
 
 function cloneDefaultEffects(): MakeupEffect[] {
@@ -33,7 +27,7 @@ function cloneDefaultEffects(): MakeupEffect[] {
 export default function AIScanPage() {
   const { user, subscriptionTier, adminRole } = useAuth()
   const toast = useToast()
-  const { makeupVtoService } = useDependencies()
+  const { useCases } = useDependencies()
 
   const [scanCount, setScanCount] = useState(0)
   const [imageSource, setImageSource] = useState('')
@@ -59,14 +53,14 @@ export default function AIScanPage() {
 
   const planId = user ? subscriptionTier : 'guest'
   const isAdminUser = adminRole !== null
-  const scanQuota = isAdminUser ? null : getScanQuotaForRole(planId)
+  const scanQuota = isAdminUser ? null : useCases.scans.getScanQuotaForRole(planId)
   const isQuotaExceeded = !user || (scanQuota !== null && scanCount >= scanQuota)
 
   useEffect(() => {
     let active = true
 
     const refreshScanCount = async () => {
-      const count = await getScanUsesThisMonth(user?.id)
+      const count = await useCases.scans.getScanUsesThisMonth(user?.id)
       if (active) {
         setScanCount(count)
       }
@@ -102,7 +96,7 @@ export default function AIScanPage() {
     mutationFn: async () => {
       setTaskStatus('running')
       setErrorMessage(null)
-      return makeupVtoService.runVirtualTryOn({
+      return useCases.scans.runVirtualTryOn({
         imageSource,
         effects,
         userId: user?.id,
@@ -125,13 +119,13 @@ export default function AIScanPage() {
 
       if (user?.id) {
         try {
-          await persistScan(user.id, scanHistoryEntry)
+          await useCases.scans.persistScan(user.id, scanHistoryEntry)
         } catch (error) {
           console.error('Failed to persist scan history:', error)
           toast.error('Không lưu được lịch sử scan. Vui lòng thử lại sau.')
         }
       }
-      registerScanUsage(user?.id)
+      useCases.scans.registerScanUsage(user?.id)
       setScanCount((prev) => prev + 1)
       toast.success(result.mode === 'demo' ? 'Demo preview ready' : 'Makeup applied successfully')
     },

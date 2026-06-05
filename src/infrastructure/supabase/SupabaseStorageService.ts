@@ -14,12 +14,12 @@ function toStorageError(
   const message = error.message ?? fallback;
   if (message.includes('Bucket not found') || error.statusCode === '404') {
     throw new Error(
-      `Bucket "${bucket}" chưa tồn tại trên Supabase. Vào Supabase → SQL Editor, chạy file ${sqlFile}.`,
+      `Bucket "${bucket}" does not exist on Supabase. Please go to Supabase → SQL Editor and run the ${sqlFile} script.`,
     );
   }
   if (message.includes('row-level security') || error.statusCode === '403') {
     throw new Error(
-      `Không có quyền upload vào "${bucket}". Đăng nhập và chạy ${sqlFile} trong Supabase SQL Editor.`,
+      `Unauthorized to upload to "${bucket}". Please ensure you are logged in and have executed ${sqlFile} in the Supabase SQL Editor.`,
     );
   }
   throw new Error(message);

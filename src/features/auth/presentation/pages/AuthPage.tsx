@@ -8,7 +8,7 @@ import { Card } from '@/shared/components/ui/Card'
 import { MailCheck } from 'lucide-react'
 type AuthMode = 'signin' | 'signup' | 'forgot_password' | 'forgot_password_success'
 export default function AuthPage() {
-  const { authRepo } = useDependencies()
+  const { useCases } = useDependencies()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -23,12 +23,12 @@ export default function AuthPage() {
   const authMutation = useMutation({
     mutationFn: async () => {
       if (mode === 'signin') {
-        await authRepo.signIn(email, password)
+        await useCases.auth.signIn(email, password)
       } else if (mode === 'signup') {
         if (password !== confirmPassword) throw new Error('Passwords do not match')
-        await authRepo.signUp(email, password, firstName, lastName)
+        await useCases.auth.signUp(email, password, firstName, lastName)
       } else if (mode === 'forgot_password') {
-        await authRepo.resetPasswordForEmail(email)
+        await useCases.auth.resetPasswordForEmail(email)
       }
     },
     onSuccess: () => {
@@ -43,7 +43,7 @@ export default function AuthPage() {
   })
 
   const googleMutation = useMutation({
-    mutationFn: () => authRepo.signInWithGoogle()
+    mutationFn: () => useCases.auth.signInWithGoogle()
   })
 
 

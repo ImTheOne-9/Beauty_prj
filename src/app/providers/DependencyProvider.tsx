@@ -12,6 +12,7 @@ import { LocalStorageOrderRepository } from '@/infrastructure/local-storage/Loca
 import { SupabasePlanRepository } from '@/infrastructure/supabase/SupabasePlanRepository';
 import { SupabaseSubscriptionRepository } from '@/infrastructure/supabase/SupabaseSubscriptionRepository';
 import { SupabaseApiKeyRepository } from '@/infrastructure/supabase/SupabaseApiKeyRepository';
+import { SupabaseAdminRepository } from '@/infrastructure/supabase/SupabaseAdminRepository';
 import { SupabaseStorageService } from '@/infrastructure/supabase/SupabaseStorageService';
 import { MakeupArApiService } from '@/infrastructure/supabase/MakeupArApiService';
 import { FaceApiDetector } from '@/infrastructure/supabase/FaceApiDetector';
@@ -21,6 +22,7 @@ import {
   createPlanUseCases,
   createProductUseCases,
   createScanUseCases,
+  createAuthUseCases,
 } from '@/application/use-cases';
 
 const storageService = new SupabaseStorageService();
@@ -39,6 +41,7 @@ const repositories = {
   planRepo: new SupabasePlanRepository(),
   subscriptionRepo: new SupabaseSubscriptionRepository(),
   apiKeyRepo: new SupabaseApiKeyRepository(),
+  adminRepo: new SupabaseAdminRepository(),
   storageService,
   makeupVtoService: new MakeupArApiService(),
   faceDetector: new FaceApiDetector(),
@@ -47,8 +50,9 @@ const repositories = {
 export const dependencies = {
   ...repositories,
   useCases: {
-    admin: createAdminUseCases(),
-    products: createProductUseCases(repositories.productRepo),
+    admin: createAdminUseCases(repositories.adminRepo, repositories),
+    auth: createAuthUseCases(repositories.authRepo, repositories.storageService),
+    products: createProductUseCases(repositories.productRepo, repositories.productVariantRepo),
     catalog: createCatalogUseCases(repositories.categoryRepo, repositories.makeupCatalogRepo),
     plans: createPlanUseCases(repositories.planRepo, repositories.subscriptionRepo, repositories.authRepo),
     scans: createScanUseCases(
@@ -56,6 +60,8 @@ export const dependencies = {
       repositories.recommendationRepo,
       repositories.makeupCatalogRepo,
       repositories.productRepo,
+      repositories.makeupVtoService,
+      repositories.faceDetector,
     ),
   },
 };

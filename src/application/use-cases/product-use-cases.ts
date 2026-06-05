@@ -1,10 +1,17 @@
-import type { IProductRepository } from '@/core/interfaces';
+import type { IProductRepository, IProductVariantRepository } from '@/core/interfaces';
 import type { ProductRecommendation } from '@/core/entities';
 
-export function createProductUseCases(productRepo: IProductRepository) {
+export function createProductUseCases(
+  productRepo: IProductRepository,
+  productVariantRepo: IProductVariantRepository,
+) {
   return {
     async listProducts() {
       return productRepo.getAll();
+    },
+
+    async listProductVariants() {
+      return productVariantRepo.getAll();
     },
 
     async listProductRecommendations(): Promise<ProductRecommendation[]> {

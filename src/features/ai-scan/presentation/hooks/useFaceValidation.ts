@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react'
-import { validateImage } from '@/features/ai-scan/services/face-detection-service'
+import { useDependencies } from '@/app/providers/DependencyProvider'
 
 export type ImageValidationState = 'idle' | 'checking' | 'valid' | 'invalid'
 
@@ -15,6 +15,7 @@ type UseFaceValidationReturn = {
  * Manages the validation state and error messages
  */
 export function useFaceValidation(): UseFaceValidationReturn {
+  const { useCases } = useDependencies()
   const [validationState, setValidationState] = useState<ImageValidationState>('idle')
   const [validationError, setValidationError] = useState<string | null>(null)
 
@@ -23,7 +24,7 @@ export function useFaceValidation(): UseFaceValidationReturn {
     setValidationError(null)
 
     try {
-      const result = await validateImage(imageSource)
+      const result = await useCases.scans.validateFaceImage(imageSource)
 
       if (result.isValid) {
         setValidationState('valid')
@@ -39,7 +40,7 @@ export function useFaceValidation(): UseFaceValidationReturn {
       setValidationError(message)
       return false
     }
-  }, [])
+  }, [useCases.scans])
 
   const resetValidation = useCallback(() => {
     setValidationState('idle')

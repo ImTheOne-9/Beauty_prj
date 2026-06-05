@@ -1,4 +1,12 @@
-import type { IMakeupCatalogRepository, IProductRepository, IRecommendationRepository, IScanRepository } from '@/core/interfaces';
+import type {
+  IMakeupCatalogRepository,
+  IMakeupVtoService,
+  IFaceDetector,
+  IProductRepository,
+  IRecommendationRepository,
+  IScanRepository,
+} from '@/core/interfaces';
+import type { MakeupEffect } from '@/core/entities';
 import type { ScanResult } from '@/shared/lib/types';
 import { env } from '@/config/env';
 import { matchProductsToEffects } from '@/features/ai-scan/lib/makeup-product-matcher';
@@ -28,8 +36,23 @@ export function createScanUseCases(
   recommendationRepo: IRecommendationRepository,
   makeupCatalogRepo: IMakeupCatalogRepository,
   productRepo: IProductRepository,
+  makeupVtoService: IMakeupVtoService,
+  faceDetector: IFaceDetector,
 ) {
   return {
+    runVirtualTryOn(input: {
+      imageSource: string;
+      effects: MakeupEffect[];
+      userId?: string;
+      allowColorOnly?: boolean;
+    }) {
+      return makeupVtoService.runVirtualTryOn(input);
+    },
+
+    validateFaceImage(imageSource: string) {
+      return faceDetector.validateImage(imageSource);
+    },
+
     async getScanHistory(userId?: string) {
       if (userId) {
         const scans = await scanRepo.getScanHistory(userId);

@@ -7,3 +7,4 @@ export type { IOrderRepository } from './IOrderRepository';
 export type { IPlanRepository, ISubscriptionRepository } from './IPlanRepository';
 export type { IApiKeyRepository } from './IApiKeyRepository';
 export type { IMakeupVtoService, IFaceDetector, IStorageService } from './IServices';
+export type { IAdminRepository, AdminProfileWithPlan, UpdateAdminUserProfileInput } from './IAdminRepository';

@@ -27,29 +27,29 @@ import { useAuth } from '@/features/auth/presentation/hooks/useAuth'
 export default function BeautyTryOnPage() {
   const toast = useToast()
   const { user } = useAuth()
-  const { categoryRepo, productRepo, makeupCatalogRepo, productVariantRepo, makeupVtoService } = useDependencies()
+  const { useCases } = useDependencies()
 
   const categoriesQuery = useQuery({
     queryKey: ['categories'],
-    queryFn: () => categoryRepo.getAll(),
+    queryFn: () => useCases.catalog.listCategories(),
     staleTime: 1000 * 60 * 5,
   })
 
   const productsQuery = useQuery({
     queryKey: ['catalog', 'products'],
-    queryFn: () => productRepo.getAll(),
+    queryFn: () => useCases.products.listProducts(),
     staleTime: 1000 * 60 * 5,
   })
 
   const makeupCatalogQuery = useQuery({
     queryKey: ['makeup', 'catalog'],
-    queryFn: () => makeupCatalogRepo.getMakeupCatalog(),
+    queryFn: () => useCases.catalog.listMakeupCatalog(),
     staleTime: 1000 * 60 * 5,
   })
 
   const variantsQuery = useQuery({
     queryKey: ['admin', 'product-configs'],
-    queryFn: () => productVariantRepo.getAll(),
+    queryFn: () => useCases.products.listProductVariants(),
     staleTime: 1000 * 60 * 5,
   })
 
@@ -310,7 +310,7 @@ export default function BeautyTryOnPage() {
       }
 
       setTaskStatus('running')
-      return makeupVtoService.runVirtualTryOn({
+      return useCases.scans.runVirtualTryOn({
         imageSource,
         effects,
         userId: user?.id,
