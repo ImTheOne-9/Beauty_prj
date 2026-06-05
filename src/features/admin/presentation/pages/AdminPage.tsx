@@ -11,6 +11,7 @@ import { AdminScansSection } from '../components/AdminScansSection'
 import { AdminSettingsSection } from '../components/AdminSettingsSection'
 import { AdminSidebar } from '../components/AdminSidebar'
 import { AdminSubscriptionsSection } from '../components/AdminSubscriptionsSection'
+import { ProductWithConfigModal } from '../components/Productwithconfigmodal'
 import { useAdminPageController } from '../hooks/useAdminPageController'
 
 export default function AdminPage() {
@@ -55,18 +56,12 @@ export default function AdminPage() {
               page={admin.productPage}
               totalPages={admin.totalProductPages}
               isDeleting={admin.deleteProductMutation.isPending}
-              modalOpen={admin.productModalOpen}
-              configOnly={admin.configOnlyMode}
-              editingProduct={admin.editingProduct}
-              existingConfigs={admin.existingConfigs}
               onSearchChange={admin.updateProductSearch}
               onCategoryFilterChange={admin.updateProductCategoryFilter}
               onPageChange={admin.updateProductPage}
               onAdd={() => admin.openProductModal()}
               onEdit={admin.openProductModal}
               onDelete={admin.deleteProduct}
-              onModalClose={admin.closeProductModal}
-              onSaved={admin.handleProductSaved}
             />
           ) : null}
 
@@ -186,6 +181,16 @@ export default function AdminPage() {
           {admin.activeSection === 'subscriptions' ? (
             <AdminSubscriptionsSection adminUseCases={admin.adminUseCases} />
           ) : null}
+
+          <ProductWithConfigModal
+            configOnly={admin.configOnlyMode}
+            open={admin.productModalOpen}
+            onClose={admin.closeProductModal}
+            categories={admin.categoriesQuery.data ?? []}
+            initial={admin.editingProduct}
+            existingConfigs={admin.existingConfigs}
+            onSaved={admin.handleProductSaved}
+          />
         </div>
       </div>
     </section>

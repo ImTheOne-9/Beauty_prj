@@ -1,8 +1,7 @@
 import { ExternalLink, PencilLine, Search, Trash2 } from 'lucide-react'
 import { Button } from '@/shared/components/ui/Button'
-import type { AdminProductRecord, AdminProductVariantRecord } from '@/application/dtos/admin'
+import type { AdminProductRecord } from '@/application/dtos/admin'
 import { AdminPagination } from './AdminPagination'
-import { ProductWithConfigModal } from './Productwithconfigmodal'
 import { AdminTableCard } from './AdminTableCard'
 import { AdminToolbar } from './AdminToolbar'
 
@@ -21,18 +20,12 @@ type AdminProductsSectionProps = {
   page: number
   totalPages: number
   isDeleting: boolean
-  modalOpen: boolean
-  configOnly: boolean
-  editingProduct: AdminProductRecord | null
-  existingConfigs: AdminProductVariantRecord[]
   onSearchChange: (value: string) => void
   onCategoryFilterChange: (value: string) => void
   onPageChange: (page: number) => void
   onAdd: () => void
   onEdit: (product: AdminProductRecord) => void
   onDelete: (product: AdminProductRecord) => void
-  onModalClose: () => void
-  onSaved: () => void
 }
 
 const PRODUCT_PLACEHOLDER_IMAGE =
@@ -51,18 +44,12 @@ export function AdminProductsSection({
   page,
   totalPages,
   isDeleting,
-  modalOpen,
-  configOnly,
-  editingProduct,
-  existingConfigs,
   onSearchChange,
   onCategoryFilterChange,
   onPageChange,
   onAdd,
   onEdit,
   onDelete,
-  onModalClose,
-  onSaved,
 }: AdminProductsSectionProps) {
   return (
     <div className="space-y-4">
@@ -138,7 +125,7 @@ export function AdminProductsSection({
                       <div className="min-w-0 max-w-[280px]">
                         <p className="text-sm font-bold leading-tight text-admin-ink">{product.name}</p>
                         <p className="mt-1 break-all font-mono text-[10px] text-admin-muted">ID: {product.id}</p>
-                        <p className="mt-1.5 whitespace-pre-wrap break-words text-[11px] leading-relaxed text-admin-muted">
+                        <p className="mt-1.5 line-clamp-1 break-words text-[11px] leading-relaxed text-admin-muted">
                           {product.description?.trim() || '-'}
                         </p>
                       </div>
@@ -203,15 +190,6 @@ export function AdminProductsSection({
         <AdminPagination page={page} totalPages={totalPages} onPageChange={onPageChange} />
       </AdminTableCard>
 
-      <ProductWithConfigModal
-        configOnly={configOnly}
-        open={modalOpen}
-        onClose={onModalClose}
-        categories={categories}
-        initial={editingProduct}
-        existingConfigs={existingConfigs}
-        onSaved={onSaved}
-      />
     </div>
   )
 }
