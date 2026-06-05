@@ -1,7 +1,7 @@
 import { Activity, Database, PencilLine, Wifi, type LucideIcon } from 'lucide-react'
 import { Button } from '@/shared/components/ui/Button'
 import { Card } from '@/shared/components/ui/Card'
-import type { AdminSection } from '@/shared/lib/admin'
+import type { AdminSection } from '@/core/entities'
 
 type OverviewCard = {
   label: string

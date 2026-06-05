@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { ArrowRight, ShieldCheck, Sparkles, Users } from 'lucide-react'
 import { Card } from '@/shared/components/ui/Card'
 import { useAuth } from '@/features/auth/presentation/hooks/useAuth'
-import { getAdminRoleLabel } from '@/shared/lib/admin'
+import { getAdminRoleLabel } from '@/core/entities'
 
 export default function DashboardPage() {
   const { isAdmin, adminRole } = useAuth()

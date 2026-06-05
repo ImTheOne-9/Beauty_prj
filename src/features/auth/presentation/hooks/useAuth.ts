@@ -1,5 +1,5 @@
 import { useAuthStore } from '@/features/auth/presentation/store/auth-store'
-import { type AdminRole } from '@/shared/lib/admin'
+import { type AdminRole } from '@/core/entities'
 import { getAvatarUrl, getDisplayName } from '@/shared/lib/profile'
 
 export function useAuth() {

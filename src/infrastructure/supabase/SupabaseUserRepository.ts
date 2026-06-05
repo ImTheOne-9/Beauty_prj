@@ -74,7 +74,7 @@ export class SupabaseUserRepository implements IUserRepository {
     }));
   }
 
-  async updateUserRole(userId: string, role: string): Promise<unknown> {
+  async updateUserRole(userId: string, role: string): Promise<AdminUserProfile[]> {
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -83,7 +83,14 @@ export class SupabaseUserRepository implements IUserRepository {
         .select('id, email, role, updated_at')
         .single();
       if (error) throw error;
-      return [{ ...data, created_at: data.updated_at }];
+      return [{
+        id: data.id,
+        email: data.email,
+        role: data.role,
+        subscriptionTier: 'free',
+        updatedAt: data.updated_at,
+        createdAt: data.updated_at,
+      }];
     } catch {
       const users = await this.getUsersWithRoles();
       const updated = users.map((u: any) => u.id === userId ? { ...u, role } : u);
@@ -92,7 +99,7 @@ export class SupabaseUserRepository implements IUserRepository {
     }
   }
 
-  async updateUserSubscriptionTier(userId: string, tier: string): Promise<unknown> {
+  async updateUserSubscriptionTier(userId: string, tier: string): Promise<AdminUserProfile> {
     const { data, error } = await supabase
       .from('profiles')
       .update({ subscription_tier: tier, updated_at: new Date().toISOString() } as any)
@@ -100,7 +107,14 @@ export class SupabaseUserRepository implements IUserRepository {
       .select('id, email, role, updated_at')
       .single();
     if (error) throw error;
-    return { ...data, created_at: data.updated_at };
+    return {
+      id: data.id,
+      email: data.email,
+      role: data.role,
+      subscriptionTier: tier,
+      updatedAt: data.updated_at,
+      createdAt: data.updated_at,
+    };
   }
 
   async createUserWithRole(

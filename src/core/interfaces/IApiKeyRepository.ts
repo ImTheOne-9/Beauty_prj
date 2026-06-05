@@ -5,7 +5,7 @@ import type { ApiKey, CreateApiKeyInput, UpdateApiKeyInput } from '@/core/entiti
  */
 export interface IApiKeyRepository {
   getAll(): Promise<Omit<ApiKey, 'keyValue'>[]>;
-  create(input: CreateApiKeyInput): Promise<unknown>;
-  update(id: string, input: UpdateApiKeyInput): Promise<unknown>;
+  create(input: CreateApiKeyInput): Promise<Omit<ApiKey, 'keyValue'>>;
+  update(id: string, input: UpdateApiKeyInput): Promise<Omit<ApiKey, 'keyValue'>>;
   delete(id: string): Promise<void>;
 }

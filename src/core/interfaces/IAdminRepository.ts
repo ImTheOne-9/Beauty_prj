@@ -1,7 +1,19 @@
 export type AdminProfileWithPlan = {
   id: string;
   email: string;
-  [key: string]: unknown;
+  first_name?: string | null;
+  last_name?: string | null;
+  role?: string;
+  avatar_url?: string | null;
+  plan_id?: string | null;
+  updated_at: string;
+  plan?: {
+    id: string;
+    name: string;
+    slug: string;
+    price: number | string;
+    billing_interval: string;
+  } | null;
 };
 
 export type UpdateAdminUserProfileInput = {

@@ -1,4 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import type { AdminApiKeyRecord } from '@/application/dtos/admin'
+import type { AdminUseCases } from '@/application/use-cases/admin-use-cases'
 
 type AdminApiKeyForm = {
   id: string
@@ -8,7 +10,7 @@ type AdminApiKeyForm = {
   is_active: boolean
 }
 
-export function useAdminApiKeys(adminUseCases: any) {
+export function useAdminApiKeys(adminUseCases: AdminUseCases) {
   const queryClient = useQueryClient()
 
   const keysQuery = useQuery({
@@ -20,9 +22,9 @@ export function useAdminApiKeys(adminUseCases: any) {
     mutationFn: async ({ id, is_active }: { id: string; is_active: boolean }) => {
       if (is_active) {
         const allKeys = keysQuery.data ?? []
-        const otherKeys = allKeys.filter((key: any) => key.id !== id)
+        const otherKeys = allKeys.filter((key: AdminApiKeyRecord) => key.id !== id)
         await Promise.all(
-          otherKeys.map((key: any) => adminUseCases.updateApiKey(key.id, { is_active: false })),
+          otherKeys.map((key: AdminApiKeyRecord) => adminUseCases.updateApiKey(key.id, { is_active: false })),
         )
       }
 

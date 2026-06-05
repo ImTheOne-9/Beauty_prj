@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import type { AdminScanRecord } from '@/application/dtos/admin'
+import type { AdminUseCases } from '@/application/use-cases/admin-use-cases'
 
 export function useAdminScans(
-  adminUseCases: any,
+  adminUseCases: AdminUseCases,
   userLookup: Map<string, { email: string; role: string }>,
 ) {
   const queryClient = useQueryClient()
@@ -19,7 +21,7 @@ export function useAdminScans(
   const filteredAdminScans = useMemo(() => {
     const normalizedSearch = adminScanSearch.toLowerCase()
 
-    return (scansQuery.data ?? []).filter((scan: any) => {
+    return (scansQuery.data ?? []).filter((scan: AdminScanRecord) => {
       const userEmail = scan.user_id ? (userLookup.get(scan.user_id)?.email ?? '') : 'Guest'
       const matchSearch =
         scan.id.toLowerCase().includes(normalizedSearch) ||

@@ -28,8 +28,8 @@ export interface IAuthRepository {
 export interface IUserRepository {
   getProfiles(): Promise<Array<{ id: string; email: string; role: string; updated_at: string }>>;
   getUsersWithRoles(): Promise<AdminUserProfile[]>;
-  updateUserRole(userId: string, role: string): Promise<unknown>;
-  updateUserSubscriptionTier(userId: string, tier: string): Promise<unknown>;
+  updateUserRole(userId: string, role: string): Promise<AdminUserProfile[]>;
+  updateUserSubscriptionTier(userId: string, tier: string): Promise<AdminUserProfile>;
   createUserWithRole(
     email: string,
     password: string,

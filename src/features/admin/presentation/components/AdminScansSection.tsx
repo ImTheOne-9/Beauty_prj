@@ -5,32 +5,7 @@ import { Card } from '@/shared/components/ui/Card'
 import { cn } from '@/shared/lib/cn'
 import { AdminPagination } from './AdminPagination'
 import { AdminSectionTitle } from './AdminSectionTitle'
-
-type ScanEffect = {
-  category: string
-  enabled: boolean
-  palettes?: Array<{
-    color: string
-    texture?: string
-    colorIntensity?: number
-    glowIntensity?: number
-    shimmerIntensity?: number
-  }>
-  pattern?: { name: string }
-  shape?: { name: string }
-  style?: { type: string }
-  skinSmoothStrength?: number
-}
-
-export type AdminScanRecord = {
-  id: string
-  user_id: string | null
-  mode: 'api' | 'demo'
-  original_image: string | null
-  image_url: string | null
-  effects: ScanEffect[]
-  created_at: string
-}
+import type { AdminScanEffect, AdminScanRecord } from '@/application/dtos/admin'
 
 type AdminScansSectionProps = {
   scans: AdminScanRecord[]
@@ -56,7 +31,7 @@ function formatDate(value: string) {
   })
 }
 
-function renderEffectDetails(effect: ScanEffect) {
+function renderEffectDetails(effect: AdminScanEffect) {
   const details: { label: string; value: React.ReactNode }[] = []
 
   if (effect.palettes && effect.palettes.length > 0) {

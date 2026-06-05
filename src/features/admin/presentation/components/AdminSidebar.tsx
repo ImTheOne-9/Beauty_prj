@@ -1,6 +1,6 @@
 import { RefreshCw, ShieldCheck } from 'lucide-react'
 import { Button } from '@/shared/components/ui/Button'
-import { getAdminRoleLabel, type AdminRole, type AdminSection } from '@/shared/lib/admin'
+import { getAdminRoleLabel, type AdminRole, type AdminSection } from '@/core/entities'
 import type { AdminNavigationSection } from '../config/admin-navigation'
 
 type Props = {

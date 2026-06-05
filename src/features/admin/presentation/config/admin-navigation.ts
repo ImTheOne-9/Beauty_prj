@@ -11,7 +11,7 @@ import {
   Users,
   Wrench,
 } from 'lucide-react'
-import type { AdminSection } from '@/shared/lib/admin'
+import type { AdminSection } from '@/core/entities'
 
 export type AdminNavigationSection = {
   id: AdminSection

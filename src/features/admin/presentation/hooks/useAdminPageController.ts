@@ -3,7 +3,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import { Camera, ShieldCheck, Store } from 'lucide-react'
 import { useDependencies } from '@/app/providers/DependencyProvider'
 import { useAuth } from '@/features/auth/presentation/hooks/useAuth'
-import { canAccessAdminSection, getAdminRoleLabel, type AdminSection } from '@/shared/lib/admin'
+import { canAccessAdminSection, getAdminRoleLabel, type AdminSection } from '@/core/entities'
+import type { AdminProductRecord, AdminScanRecord } from '@/application/dtos/admin'
 import { adminNavigationSections } from '../config/admin-navigation'
 import { useAdminAccess } from './useAdminAccess'
 import { useAdminApiKeys } from './useAdminApiKeys'
@@ -20,6 +21,10 @@ function formatDate(value: string) {
     hour: '2-digit',
     minute: '2-digit',
   })
+}
+
+function isEnabledEffect(effect: unknown) {
+  return typeof effect === 'object' && effect !== null && 'enabled' in effect && Boolean(effect.enabled)
 }
 
 export function useAdminPageController() {
@@ -83,8 +88,8 @@ export function useAdminPageController() {
     const logs: Array<{ id: string; user: string; event: string; time: string; type: 'success' | 'info' | 'warning' }> = []
 
     const scanRows = scans.scansQuery.data ?? []
-    scanRows.slice(0, 4).forEach((scan: any) => {
-      const effectCount = (scan.effects ?? []).filter((effect: any) => effect.enabled).length
+    scanRows.slice(0, 4).forEach((scan: AdminScanRecord) => {
+      const effectCount = (scan.effects ?? []).filter(isEnabledEffect).length
       logs.push({
         id: `scan-${scan.id}`,
         user: `User ${scan.user_id?.slice(0, 5) ?? '??'}...`,
@@ -95,7 +100,7 @@ export function useAdminPageController() {
     })
 
     const products = catalog.productsQuery.data ?? []
-    products.slice(0, 3).forEach((product: any) => {
+    products.slice(0, 3).forEach((product: AdminProductRecord) => {
       logs.push({
         id: `prod-${product.id}`,
         user: 'Admin',

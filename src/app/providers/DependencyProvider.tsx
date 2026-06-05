@@ -50,7 +50,7 @@ const repositories = {
 export const dependencies = {
   ...repositories,
   useCases: {
-    admin: createAdminUseCases(repositories.adminRepo, repositories),
+    admin: createAdminUseCases(repositories),
     auth: createAuthUseCases(repositories.authRepo, repositories.storageService),
     products: createProductUseCases(repositories.productRepo, repositories.productVariantRepo),
     catalog: createCatalogUseCases(repositories.categoryRepo, repositories.makeupCatalogRepo),

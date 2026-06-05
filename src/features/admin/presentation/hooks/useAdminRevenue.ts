@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { Order } from '@/core/entities'
+import type { Order, Product } from '@/core/entities'
 import { parseProductTags } from '@/shared/lib/product-tags'
 import type { AdminProductRecord } from '@/application/dtos/admin'
+import type { AdminUseCases } from '@/application/use-cases/admin-use-cases'
 
-export function useAdminRevenue(adminUseCases: any, products: AdminProductRecord[]) {
+export function useAdminRevenue(adminUseCases: AdminUseCases, products: AdminProductRecord[]) {
   const queryClient = useQueryClient()
   const [orderSearch, setOrderSearch] = useState('')
   const [orderStatusFilter, setOrderStatusFilter] = useState<string>('All')
@@ -90,6 +91,16 @@ export function useAdminRevenue(adminUseCases: any, products: AdminProductRecord
       const phone = `098${Math.floor(1000000 + Math.random() * 9000000)}`
       const address = `${Math.floor(Math.random() * 100) + 1} Main St, New York`
       const paymentMethods = ['cod', 'momo', 'visa', 'apple'] as const
+      const productForTags: Product & { tags?: string[] } = {
+        id: product.id,
+        name: product.name,
+        description: product.description,
+        imageUrl: product.image_url,
+        externalUrl: product.external_url,
+        brand: product.brand,
+        categoryId: product.category_id,
+        createdAt: product.created_at,
+      }
 
       const newOrder: Order = {
         id: `BG-${Math.floor(100000 + Math.random() * 900000)}`,
@@ -98,7 +109,7 @@ export function useAdminRevenue(adminUseCases: any, products: AdminProductRecord
         productImage:
           product.image_url ||
           'https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?auto=format&fit=crop&w=400&q=80',
-        productCategory: parseProductTags(product as any).category || 'Serum',
+        productCategory: parseProductTags(productForTags).category || 'Serum',
         quantity,
         price,
         totalPrice: price * quantity,

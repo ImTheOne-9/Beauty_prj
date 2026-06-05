@@ -10,3 +10,5 @@ export { type SubscriptionStatus } from './Subscription';
 export type { Scan, ScanResult, Recommendation, ScanProductRecommendation, SaveRecommendationInput, MakeupPalette, MakeupEffect, MakeupVtoPayload, MakeupCatalogItem, MatchedMakeupProduct, ProductRecommendation, SkinMetric, FaceDetectionResult } from './Scan';
 export { type MakeupTexture, type MakeupVtoTaskStatus } from './Scan';
 export type { ApiKey, CreateApiKeyInput, UpdateApiKeyInput } from './ApiKey';
+export type { AdminRole, AdminSection, AdminAuthUser } from './Admin';
+export { adminSections, getAdminRole, isAdminUser, getAdminSections, canAccessAdminSection, getAdminRoleLabel } from './Admin';

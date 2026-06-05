@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import type { AdminProductRecord, AdminProductVariantRecord } from '@/application/dtos/admin'
+import type { AdminCategoryRecord, AdminProductRecord, AdminProductVariantRecord } from '@/application/dtos/admin'
+import type { AdminUseCases } from '@/application/use-cases/admin-use-cases'
 
 type CategoryFormState = {
   id: string
@@ -14,7 +15,7 @@ const emptyCategoryForm: CategoryFormState = {
   apiCategoryKey: '',
 }
 
-export function useAdminCatalog(adminUseCases: any) {
+export function useAdminCatalog(adminUseCases: AdminUseCases) {
   const queryClient = useQueryClient()
   const [categoryForm, setCategoryForm] = useState<CategoryFormState>(emptyCategoryForm)
   const [productSearch, setProductSearch] = useState('')
@@ -56,7 +57,7 @@ export function useAdminCatalog(adminUseCases: any) {
     const normalizedSearch = productSearch.toLowerCase()
 
     return list.filter((product: AdminProductRecord) => {
-      const categoryName = categoriesQuery.data?.find((category: any) => category.id === product.category_id)?.name ?? ''
+      const categoryName = categoriesQuery.data?.find((category: AdminCategoryRecord) => category.id === product.category_id)?.name ?? ''
       const matchesSearch =
         product.name.toLowerCase().includes(normalizedSearch) ||
         (product.brand?.toLowerCase().includes(normalizedSearch) ?? false)
@@ -77,7 +78,7 @@ export function useAdminCatalog(adminUseCases: any) {
     const normalizedSearch = categorySearch.toLowerCase()
     return normalizedSearch
       ? list.filter(
-          (category: any) =>
+          (category: AdminCategoryRecord) =>
             category.name.toLowerCase().includes(normalizedSearch) ||
             category.api_category_key.toLowerCase().includes(normalizedSearch),
         )

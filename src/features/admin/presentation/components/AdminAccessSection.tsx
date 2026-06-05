@@ -4,7 +4,7 @@ import { Button } from '@/shared/components/ui/Button'
 import { Card } from '@/shared/components/ui/Card'
 import { Input } from '@/shared/components/ui/Input'
 import { cn } from '@/shared/lib/cn'
-import type { AdminRole } from '@/shared/lib/admin'
+import type { AdminRole } from '@/core/entities'
 import { useAdminPagination } from '../hooks/useAdminPagination'
 import { AdminPagination } from './AdminPagination'
 import { AdminSectionTitle } from './AdminSectionTitle'
@@ -20,12 +20,12 @@ type Plan = {
 type UserRecord = {
   id: string
   email: string
-  first_name?: string
-  last_name?: string
+  first_name?: string | null
+  last_name?: string | null
   role?: string
-  avatar_url?: string
+  avatar_url?: string | null
   plan?: Plan | null
-  plan_id?: string
+  plan_id?: string | null
   updated_at: string
 }
 

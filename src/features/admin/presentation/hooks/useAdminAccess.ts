@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuthStore } from '@/features/auth/presentation/store/auth-store'
+import type { AdminProfileWithPlan } from '@/core/interfaces'
+import type { AdminUseCases } from '@/application/use-cases/admin-use-cases'
 
-export function useAdminAccess(adminUseCases: any) {
+export function useAdminAccess(adminUseCases: AdminUseCases) {
   const queryClient = useQueryClient()
   const [userSearch, setUserSearch] = useState('')
   const [userRoleFilter, setUserRoleFilter] = useState('all')
@@ -15,13 +17,15 @@ export function useAdminAccess(adminUseCases: any) {
 
   const userLookup = useMemo(() => {
     const map = new Map<string, { email: string; role: string }>()
-    for (const user of usersQuery.data ?? []) map.set(user.id, user)
+    for (const user of usersQuery.data ?? []) {
+      map.set(user.id, { email: user.email, role: user.role ?? 'user' })
+    }
     return map
   }, [usersQuery.data])
 
   const filteredUsers = useMemo(() => {
     const list = usersQuery.data ?? []
-    return list.filter((user: any) => {
+    return list.filter((user: AdminProfileWithPlan) => {
       const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ').toLowerCase()
       const normalizedSearch = userSearch.toLowerCase()
       const matchSearch = user.email.toLowerCase().includes(normalizedSearch) || fullName.includes(normalizedSearch)

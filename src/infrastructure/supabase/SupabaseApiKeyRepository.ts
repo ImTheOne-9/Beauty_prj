@@ -2,6 +2,24 @@ import type { IApiKeyRepository } from '@/core/interfaces';
 import type { ApiKey, CreateApiKeyInput, UpdateApiKeyInput } from '@/core/entities';
 import { supabase } from '@/infrastructure/supabase/client';
 
+type ApiKeyRow = {
+  id: string;
+  name: string | null;
+  provider: string | null;
+  is_active: boolean;
+  created_at: string;
+};
+
+function mapApiKeyRow(row: ApiKeyRow): Omit<ApiKey, 'keyValue'> {
+  return {
+    id: row.id,
+    name: row.name,
+    provider: row.provider,
+    isActive: row.is_active,
+    createdAt: row.created_at,
+  };
+}
+
 /**
  * Supabase implementation of IApiKeyRepository.
  */
@@ -12,16 +30,10 @@ export class SupabaseApiKeyRepository implements IApiKeyRepository {
       .select('id, name, provider, is_active, created_at, updated_at')
       .order('created_at', { ascending: false });
     if (error) throw error;
-    return ((data as any[]) ?? []).map((row) => ({
-      id: row.id,
-      name: row.name,
-      provider: row.provider,
-      isActive: row.is_active,
-      createdAt: row.created_at,
-    }));
+    return (((data as unknown as ApiKeyRow[]) ?? [])).map(mapApiKeyRow);
   }
 
-  async create(input: CreateApiKeyInput): Promise<unknown> {
+  async create(input: CreateApiKeyInput): Promise<Omit<ApiKey, 'keyValue'>> {
     const { data, error } = await supabase.functions.invoke('manage-api-key', {
       body: {
         action: 'create',
@@ -34,10 +46,10 @@ export class SupabaseApiKeyRepository implements IApiKeyRepository {
       },
     });
     if (error) throw error;
-    return data;
+    return mapApiKeyRow(data as ApiKeyRow);
   }
 
-  async update(id: string, input: UpdateApiKeyInput): Promise<unknown> {
+  async update(id: string, input: UpdateApiKeyInput): Promise<Omit<ApiKey, 'keyValue'>> {
     const payload: Record<string, unknown> = {};
     if (input.name !== undefined) payload.name = input.name;
     if (input.keyValue !== undefined) payload.key_value = input.keyValue;
@@ -48,7 +60,7 @@ export class SupabaseApiKeyRepository implements IApiKeyRepository {
       body: { action: 'update', id, payload },
     });
     if (error) throw error;
-    return data;
+    return mapApiKeyRow(data as ApiKeyRow);
   }
 
   async delete(id: string): Promise<void> {

@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import type { AdminPlanInput, AdminPlanPatch } from '@/application/dtos/admin'
+import type { AdminUseCases } from '@/application/use-cases/admin-use-cases'
 
-export function useAdminPlans(adminUseCases: any) {
+export function useAdminPlans(adminUseCases: AdminUseCases) {
   const queryClient = useQueryClient()
 
   const plansQuery = useQuery({
@@ -9,12 +11,12 @@ export function useAdminPlans(adminUseCases: any) {
   })
 
   const createPlanMutation = useMutation({
-    mutationFn: (plan: any) => adminUseCases.createPlan(plan),
+    mutationFn: (plan: AdminPlanInput) => adminUseCases.createPlan(plan),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'plans'] }),
   })
 
   const updatePlanMutation = useMutation({
-    mutationFn: ({ id, patch }: { id: string; patch: any }) => adminUseCases.updatePlan(id, patch),
+    mutationFn: ({ id, patch }: { id: string; patch: AdminPlanPatch }) => adminUseCases.updatePlan(id, patch),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'plans'] }),
   })
 
@@ -23,8 +25,8 @@ export function useAdminPlans(adminUseCases: any) {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'plans'] }),
   })
 
-  const createPlan = (plan: any) => createPlanMutation.mutateAsync(plan)
-  const updatePlan = (id: string, patch: any) => updatePlanMutation.mutateAsync({ id, patch })
+  const createPlan = (plan: AdminPlanInput) => createPlanMutation.mutateAsync(plan)
+  const updatePlan = (id: string, patch: AdminPlanPatch) => updatePlanMutation.mutateAsync({ id, patch })
   const deletePlan = (id: string) => deletePlanMutation.mutateAsync(id)
 
   return {

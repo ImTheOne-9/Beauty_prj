@@ -8,29 +8,19 @@ import { useAdminPagination } from '../hooks/useAdminPagination'
 import { AdminPagination } from './AdminPagination'
 import { AdminSectionTitle } from './AdminSectionTitle'
 import { useAuthStore } from '@/features/auth/presentation/store/auth-store'
+import type {
+  AdminPlanRecord,
+  AdminSubscriptionInput,
+  AdminSubscriptionPatch,
+  AdminSubscriptionRecord,
+} from '@/application/dtos/admin'
+import type { AdminProfileWithPlan } from '@/core/interfaces'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-type Plan = {
-  id: string
-  name: string
-  price: number | string
-  billing_interval: string
-}
 
 type User = {
   id: string
   email: string
-}
-
-type Subscription = {
-  id: string
-  user_id: string | null
-  plan_id: string
-  plan?: Plan
-  status: 'active' | 'cancelled' | 'expired' | 'pending'
-  started_at: string
-  expires_at: string | null
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -49,7 +39,7 @@ function formatDate(value: string) {
 type SubFormValues = {
   user_id: string
   plan_id: string
-  status: string
+  status: AdminSubscriptionInput['status']
   started_at: string
   expires_at: string
 }
@@ -61,10 +51,10 @@ function SubForm({
   onSubmit,
   isPending,
 }: {
-  initial: Subscription | null
-  plans: Plan[]
+  initial: AdminSubscriptionRecord | null
+  plans: AdminPlanRecord[]
   users: User[]
-  onSubmit: (values: any) => Promise<void>
+  onSubmit: (values: AdminSubscriptionInput | AdminSubscriptionPatch) => Promise<void>
   isPending: boolean
 }) {
   const [form, setForm] = useState<SubFormValues>({
@@ -123,7 +113,7 @@ function SubForm({
         <select
           className={inputCls}
           value={form.status}
-          onChange={(e) => setForm((f) => ({ ...f, status: e.target.value }))}
+          onChange={(e) => setForm((f) => ({ ...f, status: e.target.value as AdminSubscriptionInput['status'] }))}
         >
           <option value="active">Active</option>
           <option value="pending">Pending</option>
@@ -181,12 +171,12 @@ function SubForm({
 
 type AdminSubscriptionsSectionProps = {
   adminUseCases: {
-    getSubscriptions: () => Promise<Subscription[]>
-    createSubscription: (input: any) => Promise<any>
-    updateSubscription: (id: string, patch: any) => Promise<any>
-    cancelSubscription: (id: string) => Promise<any>
-    getPlans: () => Promise<Plan[]>
-    getProfilesWithPlans: () => Promise<User[]>
+    getSubscriptions: () => Promise<AdminSubscriptionRecord[]>
+    createSubscription: (input: AdminSubscriptionInput) => Promise<AdminSubscriptionRecord>
+    updateSubscription: (id: string, patch: AdminSubscriptionPatch) => Promise<AdminSubscriptionRecord>
+    cancelSubscription: (id: string) => Promise<AdminSubscriptionRecord>
+    getPlans: () => Promise<AdminPlanRecord[]>
+    getProfilesWithPlans: () => Promise<AdminProfileWithPlan[]>
   }
 }
 
@@ -206,7 +196,7 @@ export function AdminSubscriptionsSection({ adminUseCases }: AdminSubscriptionsS
   const [search, setSearch]             = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [modalOpen, setModalOpen]       = useState(false)
-  const [selectedSub, setSelectedSub]   = useState<Subscription | null>(null)
+  const [selectedSub, setSelectedSub]   = useState<AdminSubscriptionRecord | null>(null)
 
   // ── Queries ────────────────────────────────────────────────────────────────
   const subscriptionsQuery = useQuery({
@@ -241,12 +231,12 @@ export function AdminSubscriptionsSection({ adminUseCases }: AdminSubscriptionsS
   }
 
   const createSubMutation = useMutation({
-    mutationFn: (input: any) => adminUseCases.createSubscription(input),
+    mutationFn: (input: AdminSubscriptionInput) => adminUseCases.createSubscription(input),
     onSuccess: invalidate,
   })
 
   const updateSubMutation = useMutation({
-    mutationFn: ({ id, patch }: { id: string; patch: any }) =>
+    mutationFn: ({ id, patch }: { id: string; patch: AdminSubscriptionPatch }) =>
       adminUseCases.updateSubscription(id, patch),
     onSuccess: invalidate,
   })
@@ -273,18 +263,18 @@ export function AdminSubscriptionsSection({ adminUseCases }: AdminSubscriptionsS
   const { page, totalPages, paginatedItems, setPage } = useAdminPagination(filtered, 10)
 
   // ── Handlers ───────────────────────────────────────────────────────────────
-  const openModal = (sub: Subscription | null = null) => {
+  const openModal = (sub: AdminSubscriptionRecord | null = null) => {
     setSelectedSub(sub)
     setModalOpen(true)
   }
 
   const closeModal = () => setModalOpen(false)
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: AdminSubscriptionInput | AdminSubscriptionPatch) => {
     if (selectedSub) {
       await updateSubMutation.mutateAsync({ id: selectedSub.id, patch: values })
     } else {
-      await createSubMutation.mutateAsync(values)
+      await createSubMutation.mutateAsync(values as AdminSubscriptionInput)
     }
     closeModal()
   }
