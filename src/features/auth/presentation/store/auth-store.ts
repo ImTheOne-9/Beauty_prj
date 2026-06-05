@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { type Session, type User } from '@supabase/supabase-js'
-import { dependencies } from '@/app/providers/DependencyProvider'
+import { getDependencies } from '@/app/dependencies'
 import type { UserProfile, UserRole } from '@/core/entities'
 
 type AuthStore = {
@@ -20,6 +20,7 @@ let unsubscribeAuth: (() => void) | null = null
 let initPromise: Promise<void> | null = null
 
 async function resolveProfile(userId: string) {
+  const dependencies = getDependencies()
   const profile = await dependencies.useCases.auth.getProfile(userId)
   const role: UserRole = profile?.role ?? 'guest'
   return { profile, role }
@@ -68,6 +69,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   initialize: async () => {
     if (unsubscribeAuth) {
       try {
+        const dependencies = getDependencies()
         const session = await dependencies.useCases.auth.getSession()
         if (session?.user) {
           const { profile, role } = await resolveProfile(session.user.id)
@@ -90,6 +92,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     initPromise = (async () => {
       set({ isLoading: true })
       try {
+        const dependencies = getDependencies()
         const session = await dependencies.useCases.auth.getSession()
         let role: UserRole = 'guest'
         let profile: UserProfile | null = null
@@ -138,6 +141,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
     set({ profile, role })
   },
   signOut: async () => {
+    const dependencies = getDependencies()
     await dependencies.useCases.auth.signOut()
     set({ session: null, user: null, role: 'guest', profile: null })
   },
