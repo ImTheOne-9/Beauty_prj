@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createBrowserRouter, isRouteErrorResponse, RouterProvider, useRouteError } from 'react-router-dom'
 import { Loader } from '@/shared/components/ui/Loader'
 import { AppLayout } from '@/shared/components/layout/AppLayout'
 import { ProtectedRoute } from '@/features/auth/presentation/components/ProtectedRoute'
@@ -22,10 +22,37 @@ const ResetPasswordPage = lazy(() => import('@/features/auth/presentation/pages/
 const AgileHandPage = lazy(() => import('@/features/agile-hand/presentation/pages/AgileHandPage'))
 const MakeupArPage = lazy(() => import('@/features/makeup-ar/presentation/pages/MakeupArPage'))
 
+function RouteErrorPage() {
+  const error = useRouteError()
+  const message = isRouteErrorResponse(error)
+    ? `${error.status} ${error.statusText}`
+    : error instanceof Error
+      ? error.message
+      : 'The page could not be loaded.'
+
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-[var(--ui-surface)] px-6 text-center text-[var(--ui-ink)]">
+      <div className="max-w-lg rounded-2xl border border-[var(--ui-border)] bg-white p-8 shadow-sm">
+        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[var(--ui-accent)]">Route error</p>
+        <h1 className="mt-3 text-2xl font-semibold">This page could not load</h1>
+        <p className="mt-3 break-words text-sm leading-6 text-[var(--ui-muted)]">{message}</p>
+        <button
+          type="button"
+          className="mt-6 rounded-full bg-[var(--ui-ink)] px-5 py-2 text-sm font-semibold text-white"
+          onClick={() => window.location.assign('/')}
+        >
+          Back home
+        </button>
+      </div>
+    </main>
+  )
+}
+
 const router = createBrowserRouter([
   {
     path: '/',
     element: <AppLayout />,
+    errorElement: <RouteErrorPage />,
     children: [
       { path: '/', element: <LandingPage /> },
       { path: '/virtual-makeup-try-on', element: <VirtualMakeupTryOnPage /> },
