@@ -1,3 +1,5 @@
+import type { Category } from './Category';
+
 /**
  * Core Product domain entity.
  * Pure data — no infrastructure dependencies.
@@ -11,6 +13,8 @@ export interface Product {
   brand: string | null;
   categoryId: string;
   createdAt: string;
+  category?: Category | null;
+  variants?: ProductVariant[];
 }
 
 export type CreateProductInput = Omit<Product, 'id' | 'createdAt'>;

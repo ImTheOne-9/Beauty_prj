@@ -36,18 +36,29 @@ export class SupabaseSubscriptionRepository implements ISubscriptionRepository {
       started_at: input.startedAt,
       expires_at: input.expiresAt,
     };
-    const { data, error } = await (supabase as any).from('subscriptions').insert(row).select().single();
+    const { data, error } = await (supabase as any)
+      .from('subscriptions')
+      .insert(row)
+      .select(`*, plan:plans(id, name, slug, price, billing_interval)`)
+      .single();
     if (error) throw error;
     return mapRowToSubscription(data);
   }
 
   async update(id: string, patch: Partial<Subscription>): Promise<Subscription> {
     const row: Record<string, unknown> = {};
+    if (patch.planId !== undefined) row.plan_id = patch.planId;
     if (patch.status !== undefined) row.status = patch.status;
+    if (patch.startedAt !== undefined) row.started_at = patch.startedAt;
     if (patch.cancelledAt !== undefined) row.cancelled_at = patch.cancelledAt;
     if (patch.expiresAt !== undefined) row.expires_at = patch.expiresAt;
 
-    const { data, error } = await (supabase as any).from('subscriptions').update(row).eq('id', id).select().single();
+    const { data, error } = await (supabase as any)
+      .from('subscriptions')
+      .update(row)
+      .eq('id', id)
+      .select(`*, plan:plans(id, name, slug, price, billing_interval)`)
+      .single();
     if (error) throw error;
     return mapRowToSubscription(data);
   }

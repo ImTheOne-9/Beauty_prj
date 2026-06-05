@@ -142,6 +142,7 @@ export interface ProductRecommendation {
   reason: string;
   externalLink: string;
   category: string;
+  brand?: string | null;
   price?: string;
   originalPrice?: string;
   discount?: number;
@@ -150,6 +151,17 @@ export interface ProductRecommendation {
   stock?: number;
   matchScore?: number;
   matchReason?: string;
+  variants?: ProductRecommendationVariant[];
+}
+
+export interface ProductRecommendationVariant {
+  id: string;
+  name?: string | null;
+  colorHex: string;
+  texture?: string | null;
+  shimmerColor?: string | null;
+  imageUrl?: string | null;
+  sku?: string | null;
 }
 
 export interface SkinMetric {

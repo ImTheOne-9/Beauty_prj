@@ -1,7 +1,6 @@
-import { ArrowUpRight, ShoppingCart } from 'lucide-react'
+import { ArrowUpRight, ShoppingBag } from 'lucide-react'
 import { type ProductRecommendation } from '@/shared/lib/types'
 import { Button } from '@/shared/components/ui/Button'
-import { Card } from '@/shared/components/ui/Card'
 import { Modal } from '@/shared/components/ui/Modal'
 import { useEffect, useState } from 'react'
 
@@ -10,10 +9,27 @@ type ProductCardProps = {
   ctaVariant?: 'A' | 'B'
 }
 
+function getVariantSwatchStyle(variant: NonNullable<ProductRecommendation['variants']>[number]) {
+  const color = variant.colorHex || '#e5e7eb'
+  const shimmerColor = variant.shimmerColor?.trim()
+
+  if (shimmerColor) {
+    return {
+      background: `linear-gradient(135deg, ${color} 0 50%, ${shimmerColor} 50% 100%)`,
+    }
+  }
+
+  return { backgroundColor: color }
+}
+
 export function ProductCard({ product, ctaVariant }: ProductCardProps) {
   const [modalOpen, setModalOpen] = useState(false)
   const [secondsLeft, setSecondsLeft] = useState<number | null>(product.stock && product.stock <= 5 ? product.stock * 3600 : null)
   const hasImage = Boolean(product.image?.trim())
+  const visibleVariants = product.variants?.filter((variant) => variant.colorHex?.trim()).slice(0, 6) ?? []
+  const extraVariantCount = Math.max(0, (product.variants?.length ?? 0) - visibleVariants.length)
+  const label = product.brand?.trim() || product.category
+  const showCategory = Boolean(product.brand?.trim() && product.category && product.category !== product.brand)
 
   useEffect(() => {
     let timer: number | undefined
@@ -35,34 +51,56 @@ export function ProductCard({ product, ctaVariant }: ProductCardProps) {
   }
 
   return (
-    <Card className="group flex h-full flex-col overflow-hidden border border-[var(--ui-border)] p-0 transition-all duration-300 hover:border-[var(--ui-accent)]/35 hover:shadow-md">
-      <div className="relative h-52 overflow-hidden bg-[var(--ui-subtle)]">
-        {hasImage ? (
-          <img
-            className="h-full w-full object-cover transition duration-500 group-hover:scale-105"
-            src={product.image}
-            alt={product.name}
-            loading="lazy"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center text-xs font-semibold uppercase tracking-[0.2em] text-[var(--ui-muted)]">
-            No image
-          </div>
-        )}
-        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/25 via-transparent to-transparent opacity-45" />
-      </div>
-      <div className="flex flex-1 flex-col gap-3 p-5 text-[var(--ui-ink)]">
-        <div className="flex justify-between items-center">
-          <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-[var(--ui-accent)]">{product.category}</p>
-          <span className="rounded-lg border border-[var(--ui-accent)]/15 bg-[var(--ui-accent)]/5 px-2 py-0.5 text-[10px] font-bold text-[var(--ui-accent)]">
-            Affiliate Link
-          </span>
+    <article className="group flex h-full flex-col rounded-lg border border-[var(--ui-border)] bg-[var(--ui-surface)] p-4 transition-all duration-200 hover:border-zinc-300 hover:shadow-md">
+      <div className="overflow-hidden rounded-md bg-[var(--ui-subtle)]">
+        <div className="flex aspect-square w-full items-center justify-center p-4">
+          {hasImage ? (
+            <img
+              className="h-full w-full object-contain transition duration-300 group-hover:scale-[1.03]"
+              src={product.image}
+              alt={product.name}
+              loading="lazy"
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-xs font-semibold uppercase tracking-[0.2em] text-[var(--ui-muted)]">
+              No image
+            </div>
+          )}
         </div>
-        <h3 className="font-ui text-xl font-bold leading-snug text-[var(--ui-ink)]">{product.name}</h3>
-        <p className="text-sm leading-relaxed text-[var(--ui-muted)]">{product.description}</p>
-        <p className="rounded-2xl border border-[var(--ui-border)] bg-[var(--ui-subtle)] p-3.5 text-xs font-medium leading-relaxed text-[var(--ui-ink)]">
-          {product.reason}
+      </div>
+
+      <div className="mt-4 flex flex-1 flex-col text-[var(--ui-ink)]">
+        <p className="text-center text-xs font-bold uppercase tracking-[0.14em] text-[var(--ui-accent)]">
+          {label}
         </p>
+        {showCategory ? (
+          <p className="mt-1 text-center text-[11px] font-medium text-[var(--ui-muted)]">{product.category}</p>
+        ) : null}
+        <h3 className="mt-2 line-clamp-2 min-h-12 text-center text-base font-bold leading-6 text-[var(--ui-ink)]">
+          {product.name}
+        </h3>
+        <p className="mt-2 line-clamp-2 min-h-10 text-center text-sm leading-5 text-[var(--ui-muted)]">
+          {product.description || product.reason}
+        </p>
+
+        {visibleVariants.length > 0 ? (
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+            {visibleVariants.map((variant) => (
+              <span
+                key={variant.id}
+                className="h-7 w-7 shrink-0 rounded-full border-2 border-white shadow-sm ring-1 ring-[var(--ui-border)]"
+                style={getVariantSwatchStyle(variant)}
+                title={[variant.name, variant.texture].filter(Boolean).join(' - ') || 'Variant'}
+              />
+            ))}
+            {extraVariantCount > 0 ? (
+              <span className="inline-flex h-7 min-w-7 items-center justify-center rounded-full border border-[var(--ui-border)] px-2 text-[11px] font-semibold text-[var(--ui-muted)]">
+                +{extraVariantCount}
+              </span>
+            ) : null}
+          </div>
+        ) : null}
+
         {product.matchReason ? (
           <div className="mt-2 flex items-center justify-between gap-3">
             <div className="font-mono text-[12px] text-[var(--ui-muted)]">Match: {product.matchReason}</div>
@@ -70,19 +108,19 @@ export function ProductCard({ product, ctaVariant }: ProductCardProps) {
           </div>
         ) : null}
         
-        <div className="mt-auto pt-3">
+        <div className="mt-auto pt-5">
           <a
             href={product.externalLink || '#'}
             target="_blank"
             rel="noopener noreferrer"
-            className={`block w-full py-3.5 text-center text-xs font-extrabold uppercase tracking-wider text-white shadow-md ${
+            className={`block w-full rounded-xl py-3 text-center text-xs font-extrabold uppercase tracking-wider text-white shadow-md ${
               ctaVariant === 'B'
                 ? 'animate-pulse bg-[var(--ui-accent-hover)] shadow-[0_10px_30px_rgba(15,23,42,0.12)]'
                 : 'bg-[var(--ui-accent)] shadow-[0_10px_30px_rgba(15,23,42,0.10)]'
             } hover:brightness-105 active:scale-[0.98] transition-all ${!product.externalLink ? 'pointer-events-none opacity-60' : ''}`}
           >
             <span className="inline-flex items-center justify-center gap-2">
-              <ShoppingCart className="h-4 w-4" />
+              <ShoppingBag className="h-4 w-4" />
               Buy now
               <ArrowUpRight className="h-3.5 w-3.5 opacity-80" />
             </span>
@@ -126,14 +164,14 @@ export function ProductCard({ product, ctaVariant }: ProductCardProps) {
             </div>
             <a href={product.externalLink} target="_blank" rel="noopener noreferrer">
               <Button className={`px-4 py-2 text-sm ${ctaVariant === 'B' ? 'animate-pulse' : ''}`}>
-                <ShoppingCart className="h-4 w-4" /> Buy now
+                <ShoppingBag className="h-4 w-4" /> Buy now
               </Button>
             </a>
           </div>
         </div>
       </Modal>
     ) : null}
-    </Card>
+    </article>
   )
 }
 

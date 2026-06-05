@@ -10,6 +10,8 @@ export interface IPlanRepository {
 
 export interface ISubscriptionRepository {
   getActiveByUserId(userId: string): Promise<Subscription | null>;
+  getAll(): Promise<Subscription[]>;
   create(input: CreateSubscriptionInput): Promise<Subscription>;
+  update(id: string, patch: Partial<Subscription>): Promise<Subscription>;
   cancel(id: string): Promise<Subscription>;
 }

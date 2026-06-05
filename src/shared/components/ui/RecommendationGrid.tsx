@@ -9,7 +9,7 @@ type RecommendationGridProps = {
 
 export function RecommendationGrid({ products, ctaVariant }: RecommendationGridProps) {
   return (
-    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+    <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
       {products.map((product, index) => (
         <motion.div
           key={product.id}

@@ -7,7 +7,8 @@ export interface ParsedProduct extends Omit<ProductRecommendation, 'reason' | 'e
 
 export function parseProductTags(product: Product & { tags?: string[] }): ParsedProduct {
   const tags = product.tags ?? []
-  let category = 'Skincare'
+  const joinedCategory = product.category?.name?.trim()
+  let category = joinedCategory || 'Skincare'
   let price = ''
   let originalPrice = ''
   let discount: number | undefined = undefined
@@ -22,7 +23,7 @@ export function parseProductTags(product: Product & { tags?: string[] }): Parsed
   for (const tag of tags) {
     const trimmed = tag.trim()
     if (trimmed.startsWith('cat:')) {
-      category = trimmed.substring(4).trim()
+      if (!joinedCategory) category = trimmed.substring(4).trim()
     } else if (trimmed.startsWith('price:')) {
       const val = trimmed.substring(6).trim()
       price = val.startsWith('$') ? val : `$${val}`
@@ -39,7 +40,7 @@ export function parseProductTags(product: Product & { tags?: string[] }): Parsed
       reviews = parseInt(trimmed.substring(4).trim(), 10) || 24
     } else {
       cleanTags.push(trimmed)
-      if (!foundFirstPlainTag) {
+      if (!joinedCategory && !foundFirstPlainTag) {
         category = trimmed
         foundFirstPlainTag = true
       }
@@ -57,6 +58,18 @@ export function parseProductTags(product: Product & { tags?: string[] }): Parsed
     image: product.imageUrl ?? '',
     description: product.description ?? '',
     category,
+    brand: product.brand,
+    variants: product.variants
+      ?.filter((variant) => variant.isActive)
+      .map((variant) => ({
+        id: variant.id,
+        name: variant.name,
+        colorHex: variant.colorHex,
+        texture: variant.texture,
+        shimmerColor: variant.shimmerColor,
+        imageUrl: variant.imageUrl,
+        sku: variant.sku,
+      })),
     price,
     originalPrice,
     discount,

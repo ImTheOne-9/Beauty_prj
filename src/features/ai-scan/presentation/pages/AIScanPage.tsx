@@ -152,10 +152,6 @@ export default function AIScanPage() {
         >
           <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-app-accent">AI Makeup Virtual Try-On</p>
           <h1 className="mt-2 font-ui text-3xl font-semibold text-app-ink md:text-4xl">Makeup Studio</h1>
-          <p className="mt-2 max-w-3xl text-sm text-app-muted">
-            Configure makeup on the left, preview results in the center, and browse catalog products matched to your
-            selected colors and categories on the right.
-          </p>
           <p className="mt-4 text-sm text-app-muted">
             Plan: <span className="font-semibold capitalize">{planId}</span> · {scanQuota === null ? 'Unlimited scans' : user ? `${scanCount}/${scanQuota} scans used this month` : 'Sign in to start scanning'}
           </p>

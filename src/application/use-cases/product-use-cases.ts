@@ -16,7 +16,19 @@ export function createProductUseCases(productRepo: IProductRepository) {
         description: product.description ?? '',
         reason: `Catalog pick for ${product.brand ?? 'skincare'}.`,
         externalLink: product.externalUrl ?? '',
-        category: product.brand ?? 'skincare',
+        category: product.category?.name ?? '',
+        brand: product.brand,
+        variants: product.variants
+          ?.filter((variant) => variant.isActive)
+          .map((variant) => ({
+            id: variant.id,
+            name: variant.name,
+            colorHex: variant.colorHex,
+            texture: variant.texture,
+            shimmerColor: variant.shimmerColor,
+            imageUrl: variant.imageUrl,
+            sku: variant.sku,
+          })),
       }));
     },
   };

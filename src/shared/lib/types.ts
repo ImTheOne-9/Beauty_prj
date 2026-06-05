@@ -22,6 +22,7 @@ export type ProductRecommendation = {
   reason: string;
   externalLink: string;
   category: string;
+  brand?: string | null;
   price?: string;
   originalPrice?: string;
   discount?: number; // percent
@@ -30,6 +31,17 @@ export type ProductRecommendation = {
   stock?: number;
   matchScore?: number;
   matchReason?: string;
+  variants?: ProductRecommendationVariant[];
+};
+
+export type ProductRecommendationVariant = {
+  id: string;
+  name?: string | null;
+  colorHex: string;
+  texture?: string | null;
+  shimmerColor?: string | null;
+  imageUrl?: string | null;
+  sku?: string | null;
 };
 
 export type OrderRecord = {

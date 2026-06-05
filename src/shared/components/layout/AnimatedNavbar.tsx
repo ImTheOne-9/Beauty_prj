@@ -63,6 +63,10 @@ const productMenu = {
 
 // ─── Simple dropdown items ───────────────────────────────────────────────────
 const simpleMenus: Record<string, { label: string; to: string }[]> = {
+  Product: [
+    { label: 'Beauty', to: '/beauty-try-on' },
+    { label: 'Nails', to: '/ai-nail-color' },
+  ],
   Technologies: [
     { label: 'AgileHand™', to: '/agile-hand' },
     { label: 'Makeup AR', to: '/makeup-ar' },
@@ -75,7 +79,7 @@ const simpleMenus: Record<string, { label: string; to: string }[]> = {
 // ─── Top-level nav items ─────────────────────────────────────────────────────
 const topNavItems = [
   { label: 'Enterprise', hasMenu: 'enterprise' },
-  { label: 'Product', hasMenu: 'product', to: '/products'}, // 👈 thêm vào đây
+  { label: 'Product', hasMenu: 'simple', to: '/products' },
   { label: 'Technologies', hasMenu: 'simple' },
   { label: 'Pricing', to: '/plans', requireAuth: true },
   { label: 'Blog', to: '/scan' },
@@ -208,7 +212,7 @@ export function AnimatedNavbar() {
           )}
           style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
         >
-          BEAUTY<span className={isTransparent ? 'text-brand-accent' : 'text-brand-accent'}>.</span>AI
+          LUMINA<span className={isTransparent ? 'text-brand-accent' : 'text-brand-accent'}>.</span>AI
         </Link>
 
         {/* Desktop nav items */}
@@ -455,7 +459,7 @@ export function AnimatedNavbar() {
           </motion.div>
         )}
         <AnimatePresence>
-        {activeMenu === 'Product' && (
+        {activeMenu === '__ProductMegaDisabled' && (
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
@@ -569,7 +573,7 @@ export function AnimatedNavbar() {
                   const hasSimple = item.hasMenu === 'simple' && simpleMenus[item.label]
                   const hasEnterprise = item.hasMenu === 'enterprise'
                   const hasProduct = item.hasMenu === 'product'
-                  if (item.to) {
+                  if (item.to && !hasSimple && !hasEnterprise && !hasProduct) {
                     return (
                       <Link
                         key={item.label}

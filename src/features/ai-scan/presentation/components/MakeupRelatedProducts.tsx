@@ -1,4 +1,6 @@
-import { ScanProductGrid } from '@/shared/components/ui/ScanProductGrid'
+import { useEffect, useState } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ProductCard } from '@/shared/components/ui/ProductCard'
 import type { MatchedMakeupProduct, ProductRecommendation } from '@/core/entities'
 
 type MakeupRelatedProductsProps = {
@@ -6,6 +8,8 @@ type MakeupRelatedProductsProps = {
   isLoading: boolean
   activeCategories: string[]
 }
+
+const PAGE_SIZE = 3
 
 function toGridProduct(product: MatchedMakeupProduct): ProductRecommendation & { matchReason: string } {
   return {
@@ -21,6 +25,15 @@ function toGridProduct(product: MatchedMakeupProduct): ProductRecommendation & {
 }
 
 export function MakeupRelatedProducts({ products, isLoading, activeCategories }: MakeupRelatedProductsProps) {
+  const [page, setPage] = useState(1)
+  const gridProducts = products.map(toGridProduct)
+  const totalPages = Math.max(1, Math.ceil(gridProducts.length / PAGE_SIZE))
+  const paginatedProducts = gridProducts.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE)
+
+  useEffect(() => {
+    setPage(1)
+  }, [products.length])
+
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-app-border bg-app-surface shadow-sm">
       <div className="shrink-0 px-4 py-3">
@@ -48,7 +61,39 @@ export function MakeupRelatedProducts({ products, isLoading, activeCategories }:
             </p>
           </div>
         ) : (
-          <ScanProductGrid products={products.map(toGridProduct)} pageSize={4} />
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              {paginatedProducts.map((product) => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+
+            {totalPages > 1 ? (
+              <div className="flex items-center justify-between pt-1">
+                <button
+                  type="button"
+                  onClick={() => setPage((current) => Math.max(1, current - 1))}
+                  disabled={page === 1}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--ui-border)] bg-[var(--ui-surface)] px-3 py-2 text-xs font-bold text-[var(--ui-accent)] transition hover:bg-[var(--ui-subtle)] disabled:pointer-events-none disabled:opacity-30"
+                >
+                  <ChevronLeft className="h-3.5 w-3.5" />
+                  Prev
+                </button>
+                <span className="text-xs font-semibold text-app-muted">
+                  {page} / {totalPages}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
+                  disabled={page === totalPages}
+                  className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--ui-border)] bg-[var(--ui-surface)] px-3 py-2 text-xs font-bold text-[var(--ui-accent)] transition hover:bg-[var(--ui-subtle)] disabled:pointer-events-none disabled:opacity-30"
+                >
+                  Next
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ) : null}
+          </div>
         )}
       </div>
     </div>

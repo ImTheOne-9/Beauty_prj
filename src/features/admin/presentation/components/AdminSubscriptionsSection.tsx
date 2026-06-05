@@ -7,6 +7,7 @@ import { cn } from '@/shared/lib/cn'
 import { useAdminPagination } from '../hooks/useAdminPagination'
 import { AdminPagination } from './AdminPagination'
 import { AdminSectionTitle } from './AdminSectionTitle'
+import { useAuthStore } from '@/features/auth/presentation/store/auth-store'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -231,8 +232,13 @@ export function AdminSubscriptionsSection({ adminUseCases }: AdminSubscriptionsS
   }, [usersQuery.data])
 
   // ── Mutations ──────────────────────────────────────────────────────────────
-  const invalidate = () =>
-    queryClient.invalidateQueries({ queryKey: ['admin', 'subscriptions'] })
+  const invalidate = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ['admin', 'subscriptions'] }),
+      queryClient.invalidateQueries({ queryKey: ['admin', 'profiles'] }),
+    ])
+    await useAuthStore.getState().initialize()
+  }
 
   const createSubMutation = useMutation({
     mutationFn: (input: any) => adminUseCases.createSubscription(input),

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
-import { ScanProductGrid } from '@/shared/components/ui/ScanProductGrid'
+import { Link } from 'react-router-dom'
+import { RecommendationGrid } from '@/shared/components/ui/RecommendationGrid'
 import { parseProductTags } from '@/shared/lib/product-tags'
 import { type ProductRecommendation } from '@/shared/lib/types'
 import { useDependencies } from '@/app/providers/DependencyProvider'
@@ -16,16 +17,7 @@ export default function ProductRecommendations() {
 
   const products: ProductRecommendation[] = (data ?? [])
     .map((product) => {
-      const parsed = parseProductTags({
-        id: product.id,
-        name: product.name,
-        description: product.description,
-        imageUrl: product.imageUrl,
-        externalUrl: product.externalUrl,
-        brand: product.brand,
-        categoryId: product.categoryId,
-        createdAt: product.createdAt,
-      })
+      const parsed = parseProductTags(product)
       const tagLabel = parsed.cleanTags.join(', ') || parsed.category || product.brand || 'core skincare'
       return {
         ...parsed,
@@ -34,7 +26,7 @@ export default function ProductRecommendations() {
         externalLink: product.externalUrl ?? '',
       }
     })
-    .slice(0, 6)
+    .slice(0, 4)
 
   return (
     <div className="space-y-6">
@@ -42,7 +34,9 @@ export default function ProductRecommendations() {
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.35em] text-brand-accent">Recommended</p>
           <h3 className="mt-2 font-brand text-3xl font-extrabold text-brand-ink">Curated Luxury Picks</h3>
-          <p className="mt-2 max-w-2xl text-sm text-brand-muted">Here is a temporary hardcoded reference layout so you can immediately see the product direction.</p>
+          <p className="mt-2 max-w-2xl text-sm text-brand-muted">
+            Explore products from the live catalog with category and shade data.
+          </p>
         </div>
       </div>
 
@@ -52,7 +46,17 @@ export default function ProductRecommendations() {
             No products have been added yet. Please update the product catalog in the admin page.
           </div>
         ) : (
-          <ScanProductGrid products={products} />
+          <>
+            <RecommendationGrid products={products} />
+            <div className="mt-6 flex justify-center">
+              <Link
+                to="/products"
+                className="inline-flex items-center justify-center rounded-xl bg-brand-accent px-6 py-3 text-sm font-bold uppercase tracking-[0.12em] text-white shadow-sm transition hover:bg-brand-deep"
+              >
+                See more
+              </Link>
+            </div>
+          </>
         )}
       </div>
     </div>

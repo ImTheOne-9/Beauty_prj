@@ -710,12 +710,23 @@ export const databaseService = {
       expires_at: created.expiresAt,
       cancelled_at: created.cancelledAt,
       created_at: created.createdAt,
+      plan: created.plan
+        ? {
+            id: created.plan.id,
+            name: created.plan.name,
+            slug: created.plan.slug,
+            price: created.plan.price,
+            billing_interval: created.plan.billingInterval,
+          }
+        : undefined,
     };
   },
 
   async updateSubscription(id: string, patch: any) {
     const updated = await dependencies.subscriptionRepo.update(id, {
+      planId: patch.plan_id,
       status: patch.status,
+      startedAt: patch.started_at,
       expiresAt: patch.expires_at,
       cancelledAt: patch.cancelled_at,
     });
@@ -728,6 +739,15 @@ export const databaseService = {
       expires_at: updated.expiresAt,
       cancelled_at: updated.cancelledAt,
       created_at: updated.createdAt,
+      plan: updated.plan
+        ? {
+            id: updated.plan.id,
+            name: updated.plan.name,
+            slug: updated.plan.slug,
+            price: updated.plan.price,
+            billing_interval: updated.plan.billingInterval,
+          }
+        : undefined,
     };
   },
 
