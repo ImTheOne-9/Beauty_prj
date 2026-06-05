@@ -4,8 +4,10 @@ import { Button } from '@/shared/components/ui/Button'
 import { Card } from '@/shared/components/ui/Card'
 import { Input } from '@/shared/components/ui/Input'
 import { cn } from '@/shared/lib/cn'
-import { AdminSectionTitle } from './AdminSectionTitle'
 import type { AdminRole } from '@/shared/lib/admin'
+import { useAdminPagination } from '../hooks/useAdminPagination'
+import { AdminPagination } from './AdminPagination'
+import { AdminSectionTitle } from './AdminSectionTitle'
 
 type Plan = {
   id: string
@@ -83,6 +85,7 @@ export function AdminAccessSection({
 }: AdminAccessSectionProps) {
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedUser, setSelectedUser] = useState<UserRecord | null>(null)
+  const { page, totalPages, paginatedItems, setPage } = useAdminPagination(users, 10)
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -184,7 +187,7 @@ export function AdminAccessSection({
               </tr>
             </thead>
             <tbody className="divide-y divide-rose-50">
-              {users.map((item) => {
+              {paginatedItems.map((item) => {
                 const fullName = [item.first_name, item.last_name].filter(Boolean).join(' ')
                 return (
                   <tr key={item.id} className="hover:bg-admin-subtle text-admin-ink align-middle">
@@ -281,6 +284,7 @@ export function AdminAccessSection({
             <div className="text-center py-12 text-admin-muted text-sm">No users found.</div>
           )}
         </div>
+        <AdminPagination page={page} totalPages={totalPages} onPageChange={setPage} />
       </Card>
 
       {/* Role Matrix */}

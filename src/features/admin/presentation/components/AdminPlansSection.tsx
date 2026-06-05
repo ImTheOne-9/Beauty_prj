@@ -4,6 +4,8 @@ import { PencilLine, Trash2, X } from 'lucide-react'
 import { Button } from '@/shared/components/ui/Button'
 import { Input } from '@/shared/components/ui/Input'
 import { cn } from '@/shared/lib/cn'
+import { useAdminPagination } from '../hooks/useAdminPagination'
+import { AdminPagination } from './AdminPagination'
 import { AdminSectionTitle } from './AdminSectionTitle'
 
 // SAU — dùng type annotation thay vì as const trên toàn object
@@ -70,6 +72,7 @@ export function AdminPlansSection({
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<Plan | null>(null)
   const [form, setForm] = useState(EMPTY_PLAN)
+  const { page, totalPages, paginatedItems, setPage } = useAdminPagination(plans, 6)
 
   const openCreate = () => {
     setSelectedPlan(null)
@@ -119,12 +122,13 @@ export function AdminPlansSection({
           No plans yet. Click "Add Plan" to create one.
         </div>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {plans.map((plan) => (
-            <div key={plan.id} className={cn(
-              'rounded-2xl border bg-white p-5 space-y-3 transition',
-              plan.is_active ? 'border-admin-border' : 'border-admin-border opacity-60',
-            )}>
+        <div className="space-y-4">
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {paginatedItems.map((plan) => (
+              <div key={plan.id} className={cn(
+                'rounded-2xl border bg-white p-5 space-y-3 transition',
+                plan.is_active ? 'border-admin-border' : 'border-admin-border opacity-60',
+              )}>
               <div className="flex items-start justify-between gap-2">
                 <div>
                   <p className="font-semibold text-admin-ink">{plan.name}</p>
@@ -196,8 +200,10 @@ export function AdminPlansSection({
                   </Button>
                 </div>
               </div>
-            </div>
-          ))}
+              </div>
+            ))}
+          </div>
+          <AdminPagination page={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
       )}
 

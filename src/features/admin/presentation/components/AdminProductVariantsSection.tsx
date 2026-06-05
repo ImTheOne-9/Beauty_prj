@@ -1,8 +1,10 @@
 import { PencilLine, Trash2 } from 'lucide-react'
 import { Button } from '@/shared/components/ui/Button'
-import { Card } from '@/shared/components/ui/Card'
 import type { AdminProductRecord, AdminProductVariantRecord } from '@/application/dtos/admin'
+import { useAdminPagination } from '../hooks/useAdminPagination'
+import { AdminPagination } from './AdminPagination'
 import { AdminSectionTitle } from './AdminSectionTitle'
+import { AdminTableCard } from './AdminTableCard'
 
 type AdminProductVariantsSectionProps = {
   variants: AdminProductVariantRecord[]
@@ -20,10 +22,11 @@ export function AdminProductVariantsSection({
   onDelete,
 }: AdminProductVariantsSectionProps) {
   const productLookup = new Map(products.map((product) => [product.id, product]))
+  const { page, totalPages, paginatedItems, setPage } = useAdminPagination(variants, 10)
 
   return (
     <div className="space-y-4">
-      <Card className="border border-admin-border bg-white p-6 shadow-sm">
+      <AdminTableCard>
         <AdminSectionTitle
           eyebrow="Config List"
           title="All Product Variants"
@@ -42,7 +45,7 @@ export function AdminProductVariantsSection({
               </tr>
             </thead>
             <tbody className="divide-y divide-rose-50">
-              {variants.map((variant) => {
+              {paginatedItems.map((variant) => {
                 const product = productLookup.get(variant.product_id)
 
                 return (
@@ -106,7 +109,8 @@ export function AdminProductVariantsSection({
             </div>
           ) : null}
         </div>
-      </Card>
+        <AdminPagination page={page} totalPages={totalPages} onPageChange={setPage} />
+      </AdminTableCard>
     </div>
   )
 }

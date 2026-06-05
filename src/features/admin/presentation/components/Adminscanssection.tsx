@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import { ChevronLeft, ChevronRight, Search, Trash2, X } from 'lucide-react'
+import { Search, Trash2, X } from 'lucide-react'
 import { Button } from '@/shared/components/ui/Button'
 import { Card } from '@/shared/components/ui/Card'
 import { cn } from '@/shared/lib/cn'
+import { AdminPagination } from './AdminPagination'
 import { AdminSectionTitle } from './AdminSectionTitle'
 
 type ScanEffect = {
@@ -243,17 +244,7 @@ export function AdminScansSection({
           )}
         </div>
 
-        {totalPages > 1 && (
-          <div className="flex items-center justify-center gap-4 pt-4 mt-4 border-t border-admin-border">
-            <Button variant="ghost" size="sm" disabled={page === 1} onClick={() => onPageChange(Math.max(1, page - 1))}>
-              <ChevronLeft className="h-4 w-4 mr-1" /> Prev
-            </Button>
-            <span className="text-xs font-semibold text-admin-ink">Page {page} of {totalPages}</span>
-            <Button variant="ghost" size="sm" disabled={page === totalPages} onClick={() => onPageChange(Math.min(totalPages, page + 1))}>
-              Next <ChevronRight className="h-4 w-4 ml-1" />
-            </Button>
-          </div>
-        )}
+        <AdminPagination page={page} totalPages={totalPages} onPageChange={onPageChange} />
       </Card>
 
       {/* Detail modal */}

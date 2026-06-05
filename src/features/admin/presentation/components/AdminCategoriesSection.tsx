@@ -1,7 +1,9 @@
-import { ChevronLeft, ChevronRight, Search, Trash2, X } from 'lucide-react'
+import { Search, Trash2, X } from 'lucide-react'
 import { Button } from '@/shared/components/ui/Button'
-import { Card } from '@/shared/components/ui/Card'
 import { Input } from '@/shared/components/ui/Input'
+import { AdminPagination } from './AdminPagination'
+import { AdminTableCard } from './AdminTableCard'
+import { AdminToolbar } from './AdminToolbar'
 
 type AdminCategoryRecord = {
   id: string
@@ -63,7 +65,7 @@ export function AdminCategoriesSection({
 }: AdminCategoriesSectionProps) {
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-3 rounded-3xl border border-admin-border bg-white p-4">
+      <AdminToolbar>
         <div className="relative min-w-[200px] flex-1">
           <Search className="absolute left-3 top-3 h-4 w-4 text-admin-muted" />
           <input
@@ -75,9 +77,9 @@ export function AdminCategoriesSection({
           />
         </div>
         <Button onClick={onAdd}>+ Add Category</Button>
-      </div>
+      </AdminToolbar>
 
-      <Card className="border border-admin-border bg-white p-6 shadow-sm">
+      <AdminTableCard>
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-admin-accent">Category List</p>
           <h2 className="mt-1 text-2xl font-bold text-admin-ink">Manage Categories</h2>
@@ -124,25 +126,8 @@ export function AdminCategoriesSection({
           ) : null}
         </div>
 
-        {totalPages > 1 ? (
-          <div className="mt-4 flex items-center justify-center gap-4 border-t border-admin-border pt-4">
-            <Button variant="ghost" size="sm" disabled={page === 1} onClick={() => onPageChange(Math.max(1, page - 1))}>
-              <ChevronLeft className="mr-1 h-4 w-4" /> Prev
-            </Button>
-            <span className="text-xs font-semibold text-admin-ink">
-              Page {page} of {totalPages}
-            </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              disabled={page === totalPages}
-              onClick={() => onPageChange(Math.min(totalPages, page + 1))}
-            >
-              Next <ChevronRight className="ml-1 h-4 w-4" />
-            </Button>
-          </div>
-        ) : null}
-      </Card>
+        <AdminPagination page={page} totalPages={totalPages} onPageChange={onPageChange} />
+      </AdminTableCard>
 
       {modalOpen ? (
         <div
