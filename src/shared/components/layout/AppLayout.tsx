@@ -1,9 +1,7 @@
 import { useEffect } from 'react'
-import { motion } from 'framer-motion'
 import { Outlet, useLocation } from 'react-router-dom'
 import { AnimatedNavbar } from '@/shared/components/layout/AnimatedNavbar'
 import DarkFooter from '@/features/landing/presentation/components/DarkFooter'
-import { pageTransition } from '@/animations/motion'
 
 export function AppLayout() {
   const location = useLocation()
@@ -18,13 +16,12 @@ export function AppLayout() {
   return (
     <div className="relative min-h-screen overflow-x-hidden bg-white flex flex-col">
       <AnimatedNavbar />
-      <motion.main
+      <main
         className="flex-grow"
         style={{ paddingTop: isLanding ? 0 : 'var(--app-header-height)' }}
-        {...pageTransition}
       >
         <Outlet />
-      </motion.main>
+      </main>
       <DarkFooter />
     </div>
   )

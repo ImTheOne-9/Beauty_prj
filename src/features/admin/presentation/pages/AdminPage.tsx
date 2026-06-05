@@ -21,6 +21,20 @@ export default function AdminPage() {
     return <Loader fullScreen label="Loading admin dashboard" />
   }
 
+  if (admin.tabs.length === 0) {
+    return (
+      <section className="admin-shell section-shell min-h-screen bg-admin-surface pb-12 pt-4">
+        <div className="rounded-lg border border-admin-border bg-white p-6 text-admin-ink shadow-sm">
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-admin-accent">Admin access</p>
+          <h1 className="mt-2 font-admin text-2xl font-semibold">No admin sections available</h1>
+          <p className="mt-2 text-sm text-admin-muted">
+            Your session loaded, but the current role is not allowed to view admin sections. Refresh your profile or sign in with an admin account.
+          </p>
+        </div>
+      </section>
+    )
+  }
+
   return (
     <section className="admin-shell section-shell min-h-screen bg-admin-surface pb-12 pt-4">
       <div className="grid gap-6 lg:grid-cols-[280px_minmax(0,1fr)]">
