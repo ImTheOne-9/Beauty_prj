@@ -12,3 +12,4 @@ export { type MakeupTexture, type MakeupVtoTaskStatus } from './Scan';
 export type { ApiKey, CreateApiKeyInput, UpdateApiKeyInput } from './ApiKey';
 export type { AdminRole, AdminSection, AdminAuthUser } from './Admin';
 export { adminSections, getAdminRole, isAdminUser, getAdminSections, canAccessAdminSection, getAdminRoleLabel } from './Admin';
+export type { BlogPost, BlogStatus, CreateBlogPostInput, UpdateBlogPostInput } from './Blog';

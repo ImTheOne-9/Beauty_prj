@@ -1,6 +1,7 @@
 import { Loader } from '@/shared/components/ui/Loader'
 import { AdminAccessSection } from '../components/AdminAccessSection'
 import { AdminApiKeysSection } from '../components/AdminApiKeysSection'
+import { AdminBlogSection } from '../components/AdminBlogSection'
 import { AdminCategoriesSection } from '../components/AdminCategoriesSection'
 import { AdminOverviewSection } from '../components/AdminOverviewSection'
 import { AdminPlansSection } from '../components/AdminPlansSection'
@@ -174,6 +175,27 @@ export default function AdminPage() {
           ) : null}
 
           {admin.activeSection === 'settings' ? <AdminSettingsSection /> : null}
+
+          {admin.activeSection === 'blog' ? (
+            <AdminBlogSection
+              posts={admin.filteredBlogPosts}
+              search={admin.blogSearch}
+              statusFilter={admin.blogStatusFilter}
+              modalOpen={admin.blogModalOpen}
+              form={admin.blogForm}
+              isSaving={admin.saveBlogPostMutation.isPending}
+              isDeleting={admin.deleteBlogPostMutation.isPending}
+              saveError={admin.saveBlogPostMutation.error?.message}
+              onSearchChange={admin.updateBlogSearch}
+              onStatusFilterChange={admin.updateBlogStatusFilter}
+              onAdd={admin.openBlogPostModal}
+              onEdit={admin.editBlogPost}
+              onDelete={admin.deleteBlogPost}
+              onModalClose={admin.closeBlogPostModal}
+              onFormChange={admin.updateBlogForm}
+              onSave={admin.saveBlogPost}
+            />
+          ) : null}
 
           {admin.activeSection === 'revenue' ? (
             <AdminRevenueSection

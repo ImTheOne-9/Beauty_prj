@@ -3,6 +3,7 @@ import {
   Camera,
   CreditCard,
   DollarSign,
+  FileText,
   Key,
   LayoutGrid,
   ListChecks,
@@ -30,6 +31,7 @@ export const adminNavigationSections: AdminNavigationSection[] = [
   { id: 'plans', label: 'Plans', description: 'Manage subscription plans', icon: CreditCard },
   { id: 'subscriptions', label: 'Subscriptions', description: 'Manage user subscriptions', icon: BadgeCheck },
   { id: 'api-keys', label: 'API Keys', description: 'Manage API Keys', icon: Key },
+  { id: 'blog', label: 'Blog', description: 'Manage articles and publishing', icon: FileText },
   { id: 'settings', label: 'Settings', description: 'Platform and environment', icon: Wrench },
   { id: 'revenue', label: 'Revenue', description: 'Orders and sales', icon: DollarSign },
 ]

@@ -8,6 +8,7 @@ import type { AdminProductRecord, AdminScanRecord } from '@/application/dtos/adm
 import { adminNavigationSections } from '../config/admin-navigation'
 import { useAdminAccess } from './useAdminAccess'
 import { useAdminApiKeys } from './useAdminApiKeys'
+import { useAdminBlog } from './useAdminBlog'
 import { useAdminCatalog } from './useAdminCatalog'
 import { useAdminHealth } from './useAdminHealth'
 import { useAdminPlans } from './useAdminPlans'
@@ -40,6 +41,7 @@ export function useAdminPageController() {
   const apiKeys = useAdminApiKeys(adminUseCases)
   const access = useAdminAccess(adminUseCases)
   const plans = useAdminPlans(adminUseCases)
+  const blog = useAdminBlog(useCases.blogs)
 
   const tabs = useMemo(
     () => adminNavigationSections.filter((section) => canAccessAdminSection(adminRole, section.id)),
@@ -150,6 +152,7 @@ export function useAdminPageController() {
     categoriesQuery: catalog.categoriesQuery,
     usersQuery: access.usersQuery,
     plansQuery: plans.plansQuery,
+    blogPostsQuery: blog.postsQuery,
     productConfigsQuery: catalog.productConfigsQuery,
     existingConfigs: catalog.existingConfigs,
     productSearch: catalog.productSearch,
@@ -182,6 +185,11 @@ export function useAdminPageController() {
     orderSearch: revenue.orderSearch,
     orderStatusFilter: revenue.orderStatusFilter,
     filteredOrders: revenue.filteredOrders,
+    filteredBlogPosts: blog.filteredPosts,
+    blogSearch: blog.search,
+    blogStatusFilter: blog.statusFilter,
+    blogModalOpen: blog.modalOpen,
+    blogForm: blog.form,
     revenueStats: revenue.revenueStats,
     overviewCards,
     systemActivityLog,
@@ -200,6 +208,8 @@ export function useAdminPageController() {
     updateOrderStatusMutation: revenue.updateOrderStatusMutation,
     deleteOrderMutation: revenue.deleteOrderMutation,
     simulateOrderMutation: revenue.simulateOrderMutation,
+    saveBlogPostMutation: blog.savePostMutation,
+    deleteBlogPostMutation: blog.deletePostMutation,
     refreshAdmin,
     changeSection,
     updateProductSearch: catalog.updateProductSearch,
@@ -239,6 +249,14 @@ export function useAdminPageController() {
     simulateOrder: revenue.simulateOrder,
     updateOrderStatus: revenue.updateOrderStatus,
     deleteOrder: revenue.deleteOrder,
+    updateBlogSearch: blog.setSearch,
+    updateBlogStatusFilter: blog.setStatusFilter,
+    openBlogPostModal: blog.openCreate,
+    editBlogPost: blog.openEdit,
+    closeBlogPostModal: blog.closeModal,
+    updateBlogForm: blog.updateForm,
+    saveBlogPost: blog.savePost,
+    deleteBlogPost: blog.deletePost,
     shouldShowLoader,
   }
 }

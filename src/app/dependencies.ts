@@ -1,4 +1,4 @@
-import { createAdminUseCases, createAuthUseCases, createCatalogUseCases, createPlanUseCases, createProductUseCases, createScanUseCases } from '@/application/use-cases';
+import { createAdminUseCases, createAuthUseCases, createBlogUseCases, createCatalogUseCases, createPlanUseCases, createProductUseCases, createScanUseCases } from '@/application/use-cases';
 import { FaceApiDetector } from '@/infrastructure/supabase/FaceApiDetector';
 import { LocalStorageOrderRepository } from '@/infrastructure/local-storage/LocalStorageOrderRepository';
 import { MakeupArApiService } from '@/infrastructure/supabase/MakeupArApiService';
@@ -16,6 +16,7 @@ import { SupabaseScanRepository } from '@/infrastructure/supabase/SupabaseScanRe
 import { SupabaseStorageService } from '@/infrastructure/supabase/SupabaseStorageService';
 import { SupabaseSubscriptionRepository } from '@/infrastructure/supabase/SupabaseSubscriptionRepository';
 import { SupabaseUserRepository } from '@/infrastructure/supabase/SupabaseUserRepository';
+import { SupabaseBlogRepository } from '@/infrastructure/supabase/SupabaseBlogRepository';
 
 function createDependencies() {
   const storageService = new SupabaseStorageService();
@@ -38,6 +39,7 @@ function createDependencies() {
     storageService,
     makeupVtoService: new MakeupArApiService(),
     faceDetector: new FaceApiDetector(),
+    blogRepo: new SupabaseBlogRepository(),
   };
 
   return {
@@ -48,6 +50,7 @@ function createDependencies() {
       products: createProductUseCases(repositories.productRepo, repositories.productVariantRepo),
       catalog: createCatalogUseCases(repositories.categoryRepo, repositories.makeupCatalogRepo),
       plans: createPlanUseCases(repositories.planRepo, repositories.subscriptionRepo, repositories.authRepo),
+      blogs: createBlogUseCases(repositories.blogRepo),
       scans: createScanUseCases(
         repositories.scanRepo,
         repositories.recommendationRepo,

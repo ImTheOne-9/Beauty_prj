@@ -12,6 +12,8 @@ const VirtualMakeupTryOnPage = lazy(() => import('@/features/virtual-makeup-tryo
 const AIScanPage = lazy(() => import('@/features/ai-scan/presentation/pages/AIScanPage'))
 const RecommendationsPage = lazy(() => import('@/features/recommendations/presentation/pages/RecommendationsPage'))
 const ProductsPage = lazy(() => import('@/features/products/presentation/pages/ProductsPage'))
+const BlogListPage = lazy(() => import('@/features/blog/presentation/pages/BlogListPage'))
+const BlogDetailPage = lazy(() => import('@/features/blog/presentation/pages/BlogDetailPage'))
 const AuthPage = lazy(() => import('@/features/auth/presentation/pages/AuthPage'))
 const DashboardPage = lazy(() => import('@/features/dashboard/presentation/pages/DashboardPage'))
 const AdminPage = lazy(() => import('@/features/admin/presentation/pages/AdminPage'))
@@ -63,6 +65,8 @@ const router = createBrowserRouter([
       { path: '/scan', element: <AIScanPage /> },
       { path: '/recommendations', element: <RecommendationsPage /> },
       { path: '/products', element: <ProductsPage /> },
+      { path: '/blog', element: <BlogListPage /> },
+      { path: '/blog/:slug', element: <BlogDetailPage /> },
       { path: '/plans', element: <PlanPage /> },
       { path: '/checkout', element: <CheckoutPage /> },
       { path: '/profile', element: <ProfilePage /> },

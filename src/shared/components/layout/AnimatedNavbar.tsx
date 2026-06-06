@@ -82,7 +82,7 @@ const topNavItems = [
   { label: 'Product', hasMenu: 'simple', to: '/products' },
   { label: 'Technologies', hasMenu: 'simple' },
   { label: 'Pricing', to: '/plans', requireAuth: true },
-  { label: 'Blog', to: '/scan' },
+  { label: 'Blog', to: '/blog' },
 ]
 
 export function AnimatedNavbar() {

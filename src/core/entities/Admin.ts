@@ -10,6 +10,7 @@ export type AdminSection =
   | 'subscriptions'
   | 'access'
   | 'api-keys'
+  | 'blog'
   | 'settings'
   | 'revenue';
 
@@ -28,6 +29,7 @@ export const adminSections: AdminSection[] = [
   'subscriptions',
   'access',
   'api-keys',
+  'blog',
   'settings',
   'revenue',
 ];
